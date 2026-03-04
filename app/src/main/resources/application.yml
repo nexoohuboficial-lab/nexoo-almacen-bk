@@ -1,0 +1,58 @@
+spring:
+  datasource:
+    # Opción A: Variable completa (Recomendado para AWS)
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres}
+    # Opción B: Si prefieres desglosar (útil para ver fallos específicos)
+    # url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}
+    username: ${DB_USER:user}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      # 'update' creará las tablas si no existen según tus clases Java
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Exponemos salud, info y métricas
+        include: "health,info,metrics"
+  endpoint:
+    health:
+      # Muestra detalles de la DB y disco (muy útil en AWS)
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+# Información básica de NexooHub
+info:
+  app:
+    name: "NexooHub Almacén"
+    description: "Microservicio de gestión de inventarios para refaccionarias"
+    version: "1.0.0-SNAPSHOT"
+
+logging:
+  level:
+    root: INFO # Por defecto, solo errores e info importante
+    com.nexoohub.almacen: INFO # En TU código queremos ver hasta el mínimo detalle
+    org.hibernate.SQL: INFO # Ver las consultas SQL que hace el sistema (muy útil)
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO # Ver los valores exactos que se insertan
+  logging:
+    pattern:
+      # [%X{traceId}] es la clave mágica aquí
+      console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
+
+jwt:
+  # Esta es tu clave secreta. En AWS la pasaremos como variable de entorno.
+  # DEBE ser una cadena larga (mínimo 32 caracteres para HS256)
+  secret: ${JWT_SECRET:NexooHubSuperSecretKeyParaFirmaDeTokens2026!}
+  # Tiempo de vida del token en milisegundos (Ej. 8 horas = 28800000)
+  expiration: 3600000

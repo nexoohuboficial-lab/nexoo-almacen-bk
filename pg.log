@@ -1,0 +1,15 @@
+2026-03-04 00:51:20.844 UTC [2943] LOG:  starting PostgreSQL 16.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 13.2.0, 64-bit
+2026-03-04 00:51:20.846 UTC [2943] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-03-04 00:51:20.856 UTC [2943] LOG:  listening on Unix socket "/tmp/postgres/.s.PGSQL.5432"
+2026-03-04 00:51:20.870 UTC [2946] LOG:  database system was shut down at 2026-03-04 00:50:55 UTC
+2026-03-04 00:51:20.883 UTC [2943] LOG:  database system is ready to accept connections
+2026-03-04 00:51:22.932 UTC [2977] LOG:  invalid length of startup packet
+2026-03-04 00:51:22.941 UTC [2978] LOG:  invalid length of startup packet
+2026-03-04 00:51:32.012 UTC [3052] ERROR:  database "postgres" already exists
+2026-03-04 00:51:32.012 UTC [3052] STATEMENT:  CREATE DATABASE postgres;
+2026-03-04 00:56:20.964 UTC [2944] LOG:  checkpoint starting: time
+2026-03-04 00:56:24.614 UTC [2944] LOG:  checkpoint complete: wrote 39 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.617 s, sync=0.010 s, total=3.650 s; sync files=11, longest=0.006 s, average=0.001 s; distance=199 kB, estimate=199 kB; lsn=0/1579A90, redo lsn=0/1579A58
+2026-03-04 01:01:20.701 UTC [2944] LOG:  checkpoint starting: time
+2026-03-04 01:01:29.275 UTC [2944] LOG:  checkpoint complete: wrote 86 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=8.546 s, sync=0.010 s, total=8.575 s; sync files=59, longest=0.005 s, average=0.001 s; distance=312 kB, estimate=312 kB; lsn=0/15C7BB8, redo lsn=0/15C7B80
+2026-03-04 01:11:20.467 UTC [2944] LOG:  checkpoint starting: time
+2026-03-04 01:11:25.017 UTC [2944] LOG:  checkpoint complete: wrote 46 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.525 s, sync=0.009 s, total=4.551 s; sync files=36, longest=0.006 s, average=0.001 s; distance=200 kB, estimate=301 kB; lsn=0/15F9BF0, redo lsn=0/15F9BB8

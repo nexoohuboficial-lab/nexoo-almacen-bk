@@ -1,0 +1,4 @@
+echo "build/
+.gradle/
+bin/
+out/" > .gitignore

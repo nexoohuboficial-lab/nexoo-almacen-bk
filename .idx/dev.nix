@@ -5,12 +5,22 @@
   channel = "stable-24.05"; # or "unstable"
   # Use https://search.nixos.org/packages to find packages
   packages = [
+    pkgs.jdk
+    pkgs.gradle
+    pkgs.git
+    pkgs.postgresql_16
     # pkgs.go
     # pkgs.python311
     # pkgs.python311Packages.pip
     # pkgs.nodejs_20
     # pkgs.nodePackages.nodemon
   ];
+
+  services.postgres = {
+    enable = true;
+    package = pkgs.postgresql_16;
+  };
+
   # Sets environment variables in the workspace
   env = {};
   idx = {
@@ -18,6 +28,8 @@
     extensions = [
       # "vscodevim.vim"
       "google.gemini-cli-vscode-ide-companion"
+      "vscjava.vscode-java-pack"
+      "vscjava.vscode-gradle"
     ];
     # Enable previews
     previews = {
