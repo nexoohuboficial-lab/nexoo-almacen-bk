@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: API de Precios Especiales
+  description: API para la gestión de precios especiales para clientes y productos.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /precios-especiales:
+    post:
+      summary: Asignar un precio especial
+      description: Asigna un precio especial a un cliente para un producto específico.
+      operationId: crearPrecioEspecial
+      tags:
+        - Precios Especiales
+      requestBody:
+        description: Datos del precio especial a asignar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrecioEspecialInput'
+      responses:
+        '211':
+          description: Precio especial asignado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Precio especial asignado correctamente
+                  id:
+                    type: integer
+                    format: int64
+                    example: 1
+
+  /precios-especiales/{id}:
+    delete:
+      summary: Eliminar un precio especial
+      description: Elimina un precio especial por su ID.
+      operationId: eliminarPrecioEspecial
+      tags:
+        - Precios Especiales
+      parameters:
+        - name: id
+          in: path
+          description: ID del precio especial a eliminar.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Precio especial eliminado correctamente.
+
+components:
+  schemas:
+    PrecioEspecial:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        clienteId:
+          type: integer
+        skuInterno:
+          type: string
+        precio:
+          type: number
+          format: double
+      required:
+        - clienteId
+        - skuInterno
+        - precio
+    PrecioEspecialInput:
+      type: object
+      properties:
+        clienteId:
+          type: integer
+        skuInterno:
+          type: string
+        precio:
+          type: number
+          format: double
+      required:
+        - clienteId
+        - skuInterno
+        - precio

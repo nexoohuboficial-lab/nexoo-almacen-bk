@@ -1,0 +1,136 @@
+openapi: 3.0.0
+info:
+  title: API de Clientes
+  description: API para la gestión de clientes.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /clientes:
+    get:
+      summary: Listar todos los clientes
+      description: Devuelve una lista de todos los clientes registrados.
+      operationId: listarClientes
+      tags:
+        - Clientes
+      responses:
+        '200':
+          description: Lista de clientes obtenida con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cliente'
+    post:
+      summary: Registrar un nuevo cliente
+      description: Crea un nuevo cliente (Taller, Mayorista, etc.).
+      operationId: crearCliente
+      tags:
+        - Clientes
+      requestBody:
+        description: Datos del cliente a crear.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteInput'
+      responses:
+        '211':
+          description: Cliente registrado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Cliente registrado correctamente
+                  id:
+                    type: integer
+                    format: int64
+                    example: 1
+  /clientes/{id}:
+    put:
+      summary: Actualizar datos de un cliente
+      description: Actualiza los datos de un cliente existente (teléfono, dirección, RFC, etc.) por su ID.
+      operationId: actualizarCliente
+      tags:
+        - Clientes
+      parameters:
+        - name: id
+          in: path
+          description: ID del cliente a actualizar.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Datos del cliente a actualizar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteInput'
+      responses:
+        '200':
+          description: Datos del cliente actualizados correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Datos del cliente actualizados correctamente
+        '404':
+          description: El cliente no fue encontrado.
+
+components:
+  schemas:
+    Cliente:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        nombre:
+          type: string
+        tipoClienteId:
+          type: integer
+        rfc:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        direccionFiscal:
+          type: string
+      required:
+        - nombre
+        - tipoClienteId
+    ClienteInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+        tipoClienteId:
+          type: integer
+        rfc:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        direccionFiscal:
+          type: string
+      required:
+        - nombre
+        - tipoClienteId

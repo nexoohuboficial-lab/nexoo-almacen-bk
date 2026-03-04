@@ -84,7 +84,7 @@ public class TraspasoService {
             salida.setTipoMovimiento("SALIDA_TRASPASO");
             salida.setCantidad(item.getCantidad());
             salida.setRastreoId(rastreoId);
-            salida.setUsuarioId(usuario.getId());
+            salida.setUsuarioId(usuario.getId().intValue());
             salida.setComentarios(request.getComentarios());
             movimientoRepository.save(salida);
 
@@ -95,7 +95,7 @@ public class TraspasoService {
             entrada.setTipoMovimiento("ENTRADA_TRASPASO");
             entrada.setCantidad(item.getCantidad());
             entrada.setRastreoId(rastreoId);
-            entrada.setUsuarioId(usuario.getId());
+            salida.setUsuarioId(usuario.getId().intValue());
             entrada.setComentarios(request.getComentarios());
             movimientoRepository.save(entrada);
         }

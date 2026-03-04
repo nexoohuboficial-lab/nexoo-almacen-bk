@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  title: API de Proveedores
+  description: API para la gestión de proveedores.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /proveedores:
+    get:
+      summary: Listar todos los proveedores
+      description: Devuelve una lista de todos los proveedores registrados.
+      operationId: listarProveedores
+      tags:
+        - Proveedores
+      responses:
+        '200':
+          description: Lista de proveedores obtenida con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Proveedor'
+    post:
+      summary: Registrar un nuevo proveedor
+      description: Crea un nuevo registro de proveedor.
+      operationId: crearProveedor
+      tags:
+        - Proveedores
+      requestBody:
+        description: Datos del proveedor a registrar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProveedorInput'
+      responses:
+        '211':
+          description: Proveedor registrado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Proveedor registrado correctamente
+                  id:
+                    type: integer
+                    format: int64
+                    example: 1
+  /proveedores/{id}:
+    put:
+      summary: Actualizar un proveedor existente
+      description: Actualiza los datos de un proveedor existente por su ID.
+      operationId: actualizarProveedor
+      tags:
+        - Proveedores
+      parameters:
+        - name: id
+          in: path
+          description: ID del proveedor a actualizar.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Datos del proveedor a actualizar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProveedorInput'
+      responses:
+        '200':
+          description: Proveedor actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Proveedor actualizado correctamente
+        '404':
+          description: El proveedor no fue encontrado.
+
+components:
+  schemas:
+    Proveedor:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        nombreEmpresa:
+          type: string
+        rfc:
+          type: string
+        nombreContacto:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        direccion:
+          type: string
+      required:
+        - nombreEmpresa
+    ProveedorInput:
+      type: object
+      properties:
+        nombreEmpresa:
+          type: string
+        rfc:
+          type: string
+        nombreContacto:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        direccion:
+          type: string
+      required:
+        - nombreEmpresa

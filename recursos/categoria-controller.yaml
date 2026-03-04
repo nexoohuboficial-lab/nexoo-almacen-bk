@@ -1,0 +1,118 @@
+openapi: 3.0.0
+info:
+  title: API de Categorías
+  description: API para la gestión de categorías de productos.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /categorias:
+    get:
+      summary: Listar todas las categorías
+      description: Devuelve una lista de todas las categorías existentes.
+      operationId: listarCategorias
+      tags:
+        - Categorías
+      responses:
+        '200':
+          description: Lista de categorías obtenida con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Categoria'
+    post:
+      summary: Crear una nueva categoría
+      description: Crea una nueva categoría de producto.
+      operationId: crearCategoria
+      tags:
+        - Categorías
+      requestBody:
+        description: Datos de la categoría a crear.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaInput'
+      responses:
+        '211':
+          description: Categoría creada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Categoría creada correctamente
+                  id:
+                    type: integer
+                    format: int64
+                    example: 1
+  /categorias/{id}:
+    put:
+      summary: Actualizar una categoría existente
+      description: Actualiza los datos de una categoría existente por su ID.
+      operationId: actualizarCategoria
+      tags:
+        - Categorías
+      parameters:
+        - name: id
+          in: path
+          description: ID de la categoría a actualizar.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Datos de la categoría a actualizar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaInput'
+      responses:
+        '200':
+          description: Categoría actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Categoría actualizada correctamente
+        '404':
+          description: La categoría no fue encontrada.
+
+components:
+  schemas:
+    Categoria:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        nombre:
+          type: string
+        descripcion:
+          type: string
+      required:
+        - nombre
+    CategoriaInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+        descripcion:
+          type: string
+      required:
+        - nombre

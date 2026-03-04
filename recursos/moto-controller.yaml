@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  title: API de Motos
+  description: API para la gestión de motos.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /motos:
+    get:
+      summary: Listar todas las motos
+      description: Devuelve una lista de todas las motos registradas.
+      operationId: listarMotos
+      tags:
+        - Motos
+      responses:
+        '200':
+          description: Lista de motos obtenida con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Moto'
+    post:
+      summary: Registrar una nueva moto
+      description: Crea un nuevo registro de moto.
+      operationId: crearMoto
+      tags:
+        - Motos
+      requestBody:
+        description: Datos de la moto a registrar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotoInput'
+      responses:
+        '211':
+          description: Moto registrada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Moto registrada correctamente
+                  id:
+                    type: integer
+                    format: int64
+                    example: 1
+  /motos/{id}:
+    put:
+      summary: Actualizar una moto existente
+      description: Actualiza los datos de una moto existente por su ID.
+      operationId: actualizarMoto
+      tags:
+        - Motos
+      parameters:
+        - name: id
+          in: path
+          description: ID de la moto a actualizar.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Datos de la moto a actualizar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotoInput'
+      responses:
+        '200':
+          description: Moto actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Moto actualizada correctamente
+        '404':
+          description: La moto no fue encontrada.
+
+components:
+  schemas:
+    Moto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        marca:
+          type: string
+        modelo:
+          type: string
+        cilindrada:
+          type: integer
+      required:
+        - marca
+        - modelo
+    MotoInput:
+      type: object
+      properties:
+        marca:
+          type: string
+        modelo:
+          type: string
+        cilindrada:
+          type: integer
+      required:
+        - marca
+        - modelo

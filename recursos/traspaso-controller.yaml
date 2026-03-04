@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: API de Traspasos de Inventario
+  description: API para la gestión de traspasos de productos entre sucursales.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /inventario/traspasos:
+    post:
+      summary: Realizar un traspaso de inventario
+      description: Ejecuta un traspaso de stock de un producto desde una sucursal de origen a una de destino.
+      operationId: realizarTraspaso
+      tags:
+        - Traspasos
+      requestBody:
+        description: Datos del traspaso a realizar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraspasoRequestDTO'
+      responses:
+        '200':
+          description: Traspaso completado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Traspaso completado correctamente
+                  rastreoId:
+                    type: string
+                    example: TR-20240523-123456-ABC
+
+components:
+  schemas:
+    TraspasoRequestDTO:
+      type: object
+      properties:
+        sucursalOrigenId:
+          type: integer
+        sucursalDestinoId:
+          type: integer
+        skuInterno:
+          type: string
+        cantidad:
+          type: integer
+      required:
+        - sucursalOrigenId
+        - sucursalDestinoId
+        - skuInterno
+        - cantidad

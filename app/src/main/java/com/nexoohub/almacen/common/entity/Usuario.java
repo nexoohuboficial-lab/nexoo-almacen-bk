@@ -2,34 +2,45 @@ package com.nexoohub.almacen.common.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 
 @Entity
-@Table(name = "usuario")
-public class Usuario {
+@Table(name = "usuarios")
+public class Usuario extends AuditableEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @NotBlank
-    @Column(unique = true)
+    @NotBlank(message = "El nombre de usuario es obligatorio")
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @NotBlank
-    private String password; // Aquí guardaremos el Hash de BCrypt
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Column(nullable = false)
+    private String password;
 
-    @NotBlank
-    private String rol; // Ejemplo: 'ADMIN', 'VENDEDOR'
+    @Column(nullable = false)
+    private String role = "ROLE_USER"; 
 
-    private Boolean activo = true;
+    // ¡NUEVO!: El enlace con la persona física
+    @Column(name = "empleado_id")
+    private Integer empleadoId;
 
-    // Getters y Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    // ==========================================
+    // GETTERS Y SETTERS
+    // ==========================================
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-    public String getRol() { return rol; }
-    public void setRol(String rol) { this.rol = rol; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public Integer getEmpleadoId() { return empleadoId; }
+    public void setEmpleadoId(Integer empleadoId) { this.empleadoId = empleadoId; }
 }

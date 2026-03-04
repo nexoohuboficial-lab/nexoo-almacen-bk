@@ -1,0 +1,96 @@
+openapi: 3.0.0
+info:
+  title: API de Inventario
+  description: API para la gestión del inventario en las sucursales.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /inventario/sucursales/{sucursalId}:
+    get:
+      summary: Consultar inventario de una sucursal
+      description: Devuelve una fotografía completa del inventario para una sucursal específica.
+      operationId: obtenerInventarioPorSucursal
+      tags:
+        - Inventario
+      parameters:
+        - name: sucursalId
+          in: path
+          description: ID de la sucursal a consultar.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Inventario de la sucursal obtenido con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventarioSucursalDTO'
+
+  /inventario:
+    post:
+      summary: Registrar o actualizar existencias
+      description: Registra un nuevo producto en el inventario de una sucursal o actualiza el stock si ya existe.
+      operationId: registrarStock
+      tags:
+        - Inventario
+      requestBody:
+        description: Datos del inventario a registrar o actualizar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventarioSucursalInput'
+      responses:
+        '211':
+          description: Inventario registrado/actualizado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Inventario registrado/actualizado correctamente
+                  fechaRegistro:
+                    type: string
+                    format: date-time
+
+components:
+  schemas:
+    InventarioSucursalDTO:
+      type: object
+      description: Representa la fotografía del inventario de un producto en una sucursal.
+      properties:
+        skuInterno:
+          type: string
+        nombreProducto:
+          type: string
+        stock:
+          type: integer
+        ubicacion:
+          type: string
+        sucursal:
+          type: string
+    InventarioSucursalInput:
+      type: object
+      properties:
+        sucursalId:
+          type: integer
+        skuInterno:
+          type: string
+        stock:
+          type: integer
+        ubicacion:
+          type: string
+      required:
+        - sucursalId
+        - skuInterno
+        - stock

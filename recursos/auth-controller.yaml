@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  title: API de Autenticación
+  description: API para la autenticación de usuarios y generación de tokens JWT.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /auth/login:
+    post:
+      summary: Autenticación de usuario
+      description: Autentica a un usuario y devuelve un token JWT si las credenciales son correctas.
+      operationId: login
+      tags:
+        - Autenticación
+      requestBody:
+        description: Credenciales del usuario.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticación exitosa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuthResponse'
+        '401':
+          description: Credenciales inválidas.
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+      required:
+        - username
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    ApiResponseAuthResponse:
+      type: object
+      properties:
+        mensaje:
+          type: string
+        datos:
+          $ref: '#/components/schemas/AuthResponse'

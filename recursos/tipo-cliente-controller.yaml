@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  title: API de Tipos de Cliente
+  description: API para la gestión de los tipos de cliente.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /tipos-cliente:
+    get:
+      summary: Listar todos los tipos de cliente
+      description: >
+        Devuelve una lista de todos los tipos de cliente disponibles,
+        como por ejemplo: [1: Público General, 2: Taller Mecánico, etc.]
+      operationId: listarTiposCliente
+      tags:
+        - Tipos de Cliente
+      responses:
+        '200':
+          description: Lista de tipos de cliente obtenida con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TipoCliente'
+
+components:
+  schemas:
+    TipoCliente:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        nombre:
+          type: string
+        descripcion:
+          type: string
