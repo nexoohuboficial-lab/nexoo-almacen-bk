@@ -9,10 +9,10 @@ paths:
   /proveedores:
     get:
       summary: Listar todos los proveedores
-      description: Devuelve una lista de todos los proveedores registrados.
+      description: Devuelve una lista de todos los proveedores.
       operationId: listarProveedores
       tags:
-        - Proveedores
+        - Catálogo
       responses:
         '200':
           description: Lista de proveedores obtenida con éxito.
@@ -22,21 +22,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Proveedor'
+
     post:
       summary: Registrar un nuevo proveedor
-      description: Crea un nuevo registro de proveedor.
+      description: Registra un nuevo proveedor en el sistema.
       operationId: crearProveedor
       tags:
-        - Proveedores
+        - Catálogo
       requestBody:
-        description: Datos del proveedor a registrar.
+        description: Datos del proveedor a crear.
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ProveedorInput'
       responses:
-        '211':
+        '201':
           description: Proveedor registrado correctamente.
           content:
             application/json:
@@ -51,15 +52,14 @@ paths:
                     example: Proveedor registrado correctamente
                   id:
                     type: integer
-                    format: int64
-                    example: 1
+
   /proveedores/{id}:
     put:
-      summary: Actualizar un proveedor existente
-      description: Actualiza los datos de un proveedor existente por su ID.
+      summary: Actualizar un proveedor
+      description: Actualiza los datos de un proveedor existente.
       operationId: actualizarProveedor
       tags:
-        - Proveedores
+        - Catálogo
       parameters:
         - name: id
           in: path
@@ -67,7 +67,6 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64
       requestBody:
         description: Datos del proveedor a actualizar.
         required: true
@@ -99,8 +98,6 @@ components:
       properties:
         id:
           type: integer
-          format: int64
-          readOnly: true
         nombreEmpresa:
           type: string
         rfc:
@@ -113,8 +110,7 @@ components:
           type: string
         direccion:
           type: string
-      required:
-        - nombreEmpresa
+
     ProveedorInput:
       type: object
       properties:

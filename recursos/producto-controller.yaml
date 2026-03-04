@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: API de Producto Maestro
+  title: API de Productos Maestro
   description: API para la gestión del catálogo maestro de productos.
   version: 1.0.0
 servers:
@@ -8,39 +8,39 @@ servers:
 paths:
   /productos/search:
     get:
-      summary: Motor de búsqueda omnicanal de productos
-      description: Búsqueda dinámica de productos con filtros por texto, categoría, moto y año, con paginación.
+      summary: Búsqueda omnicanal de productos
+      description: Motor de búsqueda avanzado para localizar productos por múltiples criterios con paginación.
       operationId: buscarProductos
       tags:
-        - Productos
+        - Inventario
       parameters:
         - name: q
           in: query
-          description: Término de búsqueda general (nombre, SKU, etc.)
+          description: Término de búsqueda general (nombre, SKU, etc.).
           required: false
           schema:
             type: string
         - name: categoriaId
           in: query
-          description: ID de la categoría del producto.
+          description: ID de la categoría para filtrar.
           required: false
           schema:
             type: integer
         - name: motoId
           in: query
-          description: ID de la moto para la que es compatible el producto.
+          description: ID de la moto para filtrar por compatibilidad.
           required: false
           schema:
             type: integer
         - name: anio
           in: query
-          description: Año de la moto.
+          description: Año de la moto para filtrar por compatibilidad.
           required: false
           schema:
             type: integer
         - name: page
           in: query
-          description: Número de la página a obtener.
+          description: Número de página.
           schema:
             type: integer
             default: 0
@@ -64,16 +64,15 @@ paths:
       description: Registra un nuevo producto en el catálogo maestro.
       operationId: crearProducto
       tags:
-        - Productos
+        - Inventario
       requestBody:
-        description: Datos del producto a crear.
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ProductoMaestroInput'
       responses:
-        '211':
+        '201':
           description: Producto creado correctamente.
           content:
             application/json:
@@ -82,25 +81,21 @@ paths:
                 properties:
                   exitoso:
                     type: boolean
-                    example: true
                   mensaje:
                     type: string
-                    example: Producto creado correctamente
                   skuInterno:
                     type: string
-                    example: NEX-001
 
   /productos/{sku}:
     get:
       summary: Obtener un producto por SKU
-      description: Devuelve los detalles completos de un producto maestro por su SKU.
+      description: Devuelve los detalles completos de un producto a partir de su SKU interno.
       operationId: obtenerPorSku
       tags:
-        - Productos
+        - Inventario
       parameters:
         - name: sku
           in: path
-          description: SKU interno del producto.
           required: true
           schema:
             type: string
@@ -110,25 +105,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponseProducto'
+                $ref: '#/components/schemas/ApiResponseProductoMaestro'
         '404':
-          description: El producto no fue encontrado.
+          description: Producto no encontrado.
 
     put:
-      summary: Actualizar un producto existente
-      description: Actualiza los datos de un producto maestro por su SKU.
+      summary: Actualizar un producto
+      description: Actualiza la información de un producto existente.
       operationId: actualizar
       tags:
-        - Productos
+        - Inventario
       parameters:
         - name: sku
           in: path
-          description: SKU interno del producto a actualizar.
           required: true
           schema:
             type: string
       requestBody:
-        description: Datos del producto a actualizar.
         required: true
         content:
           application/json:
@@ -140,20 +133,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponseProducto'
+                $ref: '#/components/schemas/ApiResponseProductoMaestro'
         '404':
-          description: El producto no fue encontrado.
+          description: Producto no encontrado.
 
     delete:
       summary: Eliminar un producto
-      description: Elimina un producto maestro del catálogo por su SKU.
+      description: Elimina un producto del catálogo maestro.
       operationId: eliminar
       tags:
-        - Productos
+        - Inventario
       parameters:
         - name: sku
           in: path
-          description: SKU interno del producto a eliminar.
           required: true
           schema:
             type: string
@@ -165,19 +157,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiResponseVoid'
         '404':
-          description: El producto no fue encontrado.
+          description: Producto no encontrado.
 
   /productos/mostrador:
     get:
       summary: Buscar productos para mostrador
-      description: Búsqueda optimizada para el punto de venta, devolviendo un resumen de productos y su stock en una sucursal.
+      description: Búsqueda optimizada para el punto de venta en una sucursal específica.
       operationId: buscarParaMostrador
       tags:
-        - Productos
+        - Inventario
       parameters:
         - name: q
           in: query
-          description: Término de búsqueda (nombre, SKU, etc.)
+          description: Término de búsqueda.
           required: true
           schema:
             type: string
@@ -210,9 +202,7 @@ components:
           type: string
         stockMinimoGlobal:
           type: integer
-      required:
-        - skuInterno
-        - nombreComercial
+        # ... otros campos del producto maestro
 
     ProductoMaestroInput:
       type: object
@@ -225,22 +215,17 @@ components:
           type: string
         stockMinimoGlobal:
           type: integer
-      required:
-        - skuInterno
-        - nombreComercial
 
     ProductoResumenDTO:
       type: object
-      description: Resumen de un producto para el punto de venta.
       properties:
+        # ... campos del DTO de resumen
         skuInterno:
           type: string
-        nombreProducto:
+        nombreComercial:
           type: string
-        stock:
+        stockEnSucursal:
           type: integer
-        ubicacion:
-          type: string
 
     PageProductoMaestro:
       type: object
@@ -249,21 +234,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ProductoMaestro'
+        pageable:
+          type: object # O un ref a una definición de Pageable si es compleja
         totalPages:
           type: integer
         totalElements:
           type: integer
+        last:
+          type: boolean
         size:
           type: integer
         number:
           type: integer
+        numberOfElements:
+          type: integer
+        first:
+          type: boolean
+        empty:
+          type: boolean
 
-    ApiResponseProducto:
+    ApiResponseProductoMaestro:
       type: object
       properties:
         mensaje:
           type: string
-        datos:
+        data:
           $ref: '#/components/schemas/ProductoMaestro'
 
     ApiResponseVoid:
@@ -271,6 +266,6 @@ components:
       properties:
         mensaje:
           type: string
-        datos:
+        data:
           type: object
           nullable: true

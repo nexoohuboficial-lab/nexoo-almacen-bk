@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: API de Usuarios
+  description: API para la creación de credenciales de usuario.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /usuarios:
+    post:
+      summary: Crear credenciales de usuario
+      description: Crea un nuevo usuario con sus credenciales y lo vincula a un empleado existente.
+      operationId: crearUsuarioCredenciales
+      tags:
+        - Seguridad
+      requestBody:
+        description: Datos del usuario a crear.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioInput'
+      responses:
+        '201':
+          description: Usuario creado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Usuario admin creado y vinculado al Empleado ID: 1
+
+components:
+  schemas:
+    UsuarioInput:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Nombre de usuario para el login.
+        password:
+          type: string
+          description: Contraseña del usuario (se almacenará encriptada).
+        empleadoId:
+          type: integer
+          description: ID del empleado al que se le asignarán estas credenciales.
+      required:
+        - username
+        - password
+        - empleadoId

@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: API de Parámetros Financieros
+  description: API para gestionar los parámetros financieros globales del sistema.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /finanzas/parametros:
+    get:
+      summary: Obtener parámetros financieros
+      description: Devuelve los parámetros financieros actuales, como el IVA, margen de ganancia, etc.
+      operationId: obtenerParametros
+      tags:
+        - Finanzas
+      responses:
+        '200':
+          description: Parámetros obtenidos con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfiguracionFinanciera'
+        '404':
+          description: No se encontraron parámetros de configuración.
+
+    put:
+      summary: Actualizar parámetros financieros
+      description: Modifica los parámetros financieros globales. Esto afectará a los futuros cálculos de precios.
+      operationId: actualizarParametros
+      tags:
+        - Finanzas
+      requestBody:
+        description: Nuevos valores para los parámetros financieros.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfiguracionFinancieraInput'
+      responses:
+        '200':
+          description: Parámetros actualizados correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Parámetros financieros actualizados correctamente. Los nuevos precios se calcularán en la próxima compra.
+        '404':
+          description: No se encontraron parámetros de configuración para actualizar.
+
+components:
+  schemas:
+    ConfiguracionFinanciera:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        iva:
+          type: number
+          format: double
+          description: Porcentaje de IVA (ej. 0.16 para 16%).
+        margenGananciaBase:
+          type: number
+          format: double
+          description: Margen de ganancia estándar (ej. 0.30 para 30%).
+        gastosFijosMensuales:
+          type: number
+          format: double
+          description: Suma total de los gastos operativos fijos del mes.
+        metaVentasMensual:
+          type: number
+          format: double
+          description: Objetivo de ventas mensual.
+        comisionTarjeta:
+          type: number
+          format: double
+          description: Comisión por pago con tarjeta (ej. 0.05 para 5%).
+
+    ConfiguracionFinancieraInput:
+      type: object
+      description: Campos para actualizar los parámetros financieros.
+      properties:
+        iva:
+          type: number
+          format: double
+        margenGananciaBase:
+          type: number
+          format: double
+        gastosFijosMensuales:
+          type: number
+          format: double
+        metaVentasMensual:
+          type: number
+          format: double
+        comisionTarjeta:
+          type: number
+          format: double

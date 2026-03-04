@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: API de Traspasos de Inventario
-  description: API para la gestión de traspasos de productos entre sucursales.
+  description: API para gestionar traspasos de productos entre sucursales.
   version: 1.0.0
 servers:
   - url: /api/v1
@@ -9,10 +9,10 @@ paths:
   /inventario/traspasos:
     post:
       summary: Realizar un traspaso de inventario
-      description: Ejecuta un traspaso de stock de un producto desde una sucursal de origen a una de destino.
+      description: Ejecuta un traspaso de productos de una sucursal de origen a una de destino.
       operationId: realizarTraspaso
       tags:
-        - Traspasos
+        - Inventario
       requestBody:
         description: Datos del traspaso a realizar.
         required: true
@@ -36,7 +36,8 @@ paths:
                     example: Traspaso completado correctamente
                   rastreoId:
                     type: string
-                    example: TR-20240523-123456-ABC
+                    description: ID único para el seguimiento del traspaso.
+                    example: TR-20240521-12345
 
 components:
   schemas:
@@ -45,14 +46,28 @@ components:
       properties:
         sucursalOrigenId:
           type: integer
+          description: ID de la sucursal de origen.
         sucursalDestinoId:
           type: integer
-        skuInterno:
-          type: string
-        cantidad:
-          type: integer
+          description: ID de la sucursal de destino.
+        productos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductoTraspasoDTO'
       required:
         - sucursalOrigenId
         - sucursalDestinoId
-        - skuInterno
+        - productos
+
+    ProductoTraspasoDTO:
+      type: object
+      properties:
+        productoId:
+          type: string
+          description: SKU del producto a traspasar.
+        cantidad:
+          type: integer
+          description: Cantidad del producto a traspasar.
+      required:
+        - productoId
         - cantidad

@@ -9,10 +9,10 @@ paths:
   /motos:
     get:
       summary: Listar todas las motos
-      description: Devuelve una lista de todas las motos registradas.
+      description: Devuelve una lista de todas las motos.
       operationId: listarMotos
       tags:
-        - Motos
+        - Catálogo
       responses:
         '200':
           description: Lista de motos obtenida con éxito.
@@ -22,21 +22,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Moto'
+
     post:
       summary: Registrar una nueva moto
-      description: Crea un nuevo registro de moto.
+      description: Registra una nueva moto en el sistema.
       operationId: crearMoto
       tags:
-        - Motos
+        - Catálogo
       requestBody:
-        description: Datos de la moto a registrar.
+        description: Datos de la moto a crear.
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/MotoInput'
       responses:
-        '211':
+        '201':
           description: Moto registrada correctamente.
           content:
             application/json:
@@ -51,15 +52,14 @@ paths:
                     example: Moto registrada correctamente
                   id:
                     type: integer
-                    format: int64
-                    example: 1
+
   /motos/{id}:
     put:
-      summary: Actualizar una moto existente
-      description: Actualiza los datos de una moto existente por su ID.
+      summary: Actualizar una moto
+      description: Actualiza los datos de una moto existente.
       operationId: actualizarMoto
       tags:
-        - Motos
+        - Catálogo
       parameters:
         - name: id
           in: path
@@ -67,7 +67,6 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64
       requestBody:
         description: Datos de la moto a actualizar.
         required: true
@@ -99,17 +98,13 @@ components:
       properties:
         id:
           type: integer
-          format: int64
-          readOnly: true
         marca:
           type: string
         modelo:
           type: string
         cilindrada:
-          type: integer
-      required:
-        - marca
-        - modelo
+          type: string
+
     MotoInput:
       type: object
       properties:
@@ -118,7 +113,7 @@ components:
         modelo:
           type: string
         cilindrada:
-          type: integer
+          type: string
       required:
         - marca
         - modelo

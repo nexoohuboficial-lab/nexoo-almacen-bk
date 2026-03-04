@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: API de Compras
+  description: API para registrar la compra de mercancía a proveedores.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /compras/ingreso:
+    post:
+      summary: Registrar ingreso de mercancía
+      description: Procesa la recepción de productos de un proveedor, actualizando el inventario y los costos.
+      operationId: registrarIngreso
+      tags:
+        - Compras
+      requestBody:
+        description: Datos de la factura de compra.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompraRequestDTO'
+      responses:
+        '201':
+          description: Ingreso de mercancía procesado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Ingreso de mercancía procesado y precios actualizados
+                  folioInterno:
+                    type: integer
+                    description: ID único de la compra registrada en el sistema.
+                  totalFacturaConIva:
+                    type: number
+                    format: double
+                    description: El monto total de la factura, incluyendo IVA.
+                  fechaRegistro:
+                    type: string
+                    format: date-time
+                    description: Fecha y hora en que se registró la compra.
+
+components:
+  schemas:
+    CompraRequestDTO:
+      type: object
+      properties:
+        proveedorId:
+          type: integer
+          description: ID del proveedor.
+        sucursalId:
+          type: integer
+          description: ID de la sucursal que recibe la mercancía.
+        numeroFactura:
+          type: string
+          description: Número de folio o factura del proveedor.
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleCompraDTO'
+      required:
+        - proveedorId
+        - sucursalId
+        - detalles
+
+    DetalleCompraDTO:
+      type: object
+      properties:
+        sku:
+          type: string
+          description: SKU del producto comprado.
+        cantidad:
+          type: integer
+          description: Cantidad de unidades del producto.
+        costoUnitarioSinIva:
+          type: number
+          format: double
+          description: Costo de una sola unidad del producto antes de IVA.
+      required:
+        - sku
+        - cantidad
+        - costoUnitarioSinIva

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: API de Inventario
-  description: API para la gestión del inventario en las sucursales.
+  description: API para la gestión de inventario en sucursales.
   version: 1.0.0
 servers:
   - url: /api/v1
@@ -9,18 +9,17 @@ paths:
   /inventario/sucursales/{sucursalId}:
     get:
       summary: Consultar inventario de una sucursal
-      description: Devuelve una fotografía completa del inventario para una sucursal específica.
+      description: Devuelve el inventario de una sucursal específica.
       operationId: obtenerInventarioPorSucursal
       tags:
         - Inventario
       parameters:
         - name: sucursalId
           in: path
-          description: ID de la sucursal a consultar.
+          description: ID de la sucursal.
           required: true
           schema:
             type: integer
-            format: int64
       responses:
         '200':
           description: Inventario de la sucursal obtenido con éxito.
@@ -34,7 +33,7 @@ paths:
   /inventario:
     post:
       summary: Registrar o actualizar existencias
-      description: Registra un nuevo producto en el inventario de una sucursal o actualiza el stock si ya existe.
+      description: Registra o actualiza las existencias de un producto en una sucursal.
       operationId: registrarStock
       tags:
         - Inventario
@@ -46,7 +45,7 @@ paths:
             schema:
               $ref: '#/components/schemas/InventarioSucursalInput'
       responses:
-        '211':
+        '201':
           description: Inventario registrado/actualizado correctamente.
           content:
             application/json:
@@ -67,30 +66,28 @@ components:
   schemas:
     InventarioSucursalDTO:
       type: object
-      description: Representa la fotografía del inventario de un producto en una sucursal.
       properties:
-        skuInterno:
+        sucursalId:
+          type: integer
+        nombreSucursal:
           type: string
+        productoId:
+          type: integer
         nombreProducto:
           type: string
         stock:
           type: integer
-        ubicacion:
-          type: string
-        sucursal:
-          type: string
+
     InventarioSucursalInput:
       type: object
       properties:
         sucursalId:
           type: integer
-        skuInterno:
-          type: string
+        productoId:
+          type: integer
         stock:
           type: integer
-        ubicacion:
-          type: string
       required:
         - sucursalId
-        - skuInterno
+        - productoId
         - stock

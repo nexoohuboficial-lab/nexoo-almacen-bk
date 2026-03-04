@@ -1,0 +1,107 @@
+openapi: 3.0.0
+info:
+  title: API de Ventas
+  description: API para el procesamiento de ventas en el punto de venta.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /ventas:
+    post:
+      summary: Realizar una venta
+      description: Procesa una venta, actualizando el inventario y registrando la transacción.
+      operationId: realizarVenta
+      tags:
+        - Ventas
+      requestBody:
+        description: Datos de la venta a realizar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VentaRequestDTO'
+      responses:
+        '201':
+          description: Venta realizada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Venta'
+
+components:
+  schemas:
+    VentaRequestDTO:
+      type: object
+      properties:
+        clienteId:
+          type: integer
+          nullable: true
+        sucursalId:
+          type: integer
+        metodoPago:
+          type: string
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleVentaDTO'
+      required:
+        - sucursalId
+        - metodoPago
+        - detalles
+
+    DetalleVentaDTO:
+      type: object
+      properties:
+        productoId:
+          type: integer
+        cantidad:
+          type: integer
+        precioUnitario:
+          type: number
+          format: double
+      required:
+        - productoId
+        - cantidad
+        - precioUnitario
+
+    Venta:
+      type: object
+      properties:
+        id:
+          type: integer
+        clienteId:
+          type: integer
+        empleadoId:
+          type: integer
+        sucursalId:
+          type: integer
+        fechaVenta:
+          type: string
+          format: date-time
+        totalVenta:
+          type: number
+          format: double
+        metodoPago:
+          type: string
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleVenta'
+
+    DetalleVenta:
+      type: object
+      properties:
+        id:
+          type: integer
+        ventaId:
+          type: integer
+        productoId:
+          type: integer
+        cantidad:
+          type: integer
+        precioUnitario:
+          type: number
+          format: double
+        subtotal:
+          type: number
+          format: double

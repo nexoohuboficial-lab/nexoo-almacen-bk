@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: API de Empleados
+  description: API para la gestión de empleados dentro de las sucursales.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /empleados:
+    post:
+      summary: Registrar un nuevo empleado
+      description: Da de alta un nuevo empleado en el sistema y lo asigna a una sucursal.
+      operationId: registrarEmpleado
+      tags:
+        - Empleados
+      requestBody:
+        description: Datos del nuevo empleado.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpleadoInput'
+      responses:
+        '201':
+          description: Empleado registrado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Empleado registrado correctamente
+                  id:
+                    type: integer
+                    description: ID del empleado recién creado.
+
+  /empleados/sucursal/{sucursalId}:
+    get:
+      summary: Obtener empleados por sucursal
+      description: Devuelve una lista de todos los empleados activos de una sucursal específica.
+      operationId: obtenerEmpleadosPorSucursal
+      tags:
+        - Empleados
+      parameters:
+        - name: sucursalId
+          in: path
+          required: true
+          description: ID de la sucursal para la que se desean obtener los empleados.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de empleados obtenida con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Empleado'
+
+  /empleados/{id}:
+    delete:
+      summary: Dar de baja a un empleado
+      description: Realiza un borrado lógico de un empleado, marcándolo como inactivo.
+      operationId: darDeBajaEmpleado
+      tags:
+        - Empleados
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del empleado a dar de baja.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Empleado dado de baja correctamente.
+        '404':
+          description: Empleado no encontrado.
+
+components:
+  schemas:
+    EmpleadoInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+        puesto:
+          type: string
+        sucursalId:
+          type: integer
+      required:
+        - nombre
+        - puesto
+        - sucursalId
+
+    Empleado:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        puesto:
+          type: string
+        sucursalId:
+          type: integer
+        activo:
+          type: boolean

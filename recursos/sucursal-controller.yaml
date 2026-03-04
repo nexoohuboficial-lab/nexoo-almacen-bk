@@ -1,0 +1,147 @@
+openapi: 3.0.0
+info:
+  title: API de Sucursales
+  description: API para la gestión de sucursales de la empresa.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /sucursales:
+    get:
+      summary: Listar sucursales activas
+      description: Devuelve una lista de todas las sucursales que se encuentran activas en el sistema.
+      operationId: listarSucursales
+      tags:
+        - Sucursales
+      responses:
+        '200':
+          description: Lista de sucursales obtenida con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sucursal'
+    post:
+      summary: Crear una nueva sucursal
+      description: Registra una nueva sucursal en la base de datos.
+      operationId: crearSucursal
+      tags:
+        - Sucursales
+      requestBody:
+        description: Datos de la nueva sucursal.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SucursalInput'
+      responses:
+        '201':
+          description: Sucursal creada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Sucursal creada correctamente
+                  fechaCreacion:
+                    type: string
+                    format: date-time
+                    description: Fecha y hora de la creación.
+
+  /sucursales/{id}:
+    put:
+      summary: Actualizar una sucursal
+      description: Modifica el nombre y/o la dirección de una sucursal existente.
+      operationId: actualizarSucursal
+      tags:
+        - Sucursales
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la sucursal a actualizar.
+          schema:
+            type: integer
+      requestBody:
+        description: Nuevos datos para la sucursal.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SucursalInput'
+      responses:
+        '200':
+          description: Sucursal actualizada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: Sucursal actualizada correctamente
+                  fechaActualizacion:
+                    type: string
+                    format: date-time
+                    description: Fecha y hora de la última actualización.
+        '404':
+          description: Sucursal no encontrada.
+
+    delete:
+      summary: Desactivar una sucursal
+      description: Realiza un borrado lógico de una sucursal, marcándola como inactiva.
+      operationId: desactivarSucursal
+      tags:
+        - Sucursales
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la sucursal a desactivar.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Sucursal desactivada correctamente.
+        '404':
+          description: Sucursal no encontrada.
+
+components:
+  schemas:
+    Sucursal:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        direccion:
+          type: string
+        activo:
+          type: boolean
+        fechaCreacion:
+          type: string
+          format: date-time
+        fechaActualizacion:
+          type: string
+          format: date-time
+
+    SucursalInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+        direccion:
+          type: string
+      required:
+        - nombre
+        - direccion

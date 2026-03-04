@@ -8,11 +8,11 @@ servers:
 paths:
   /auth/login:
     post:
-      summary: Autenticación de usuario
-      description: Autentica a un usuario y devuelve un token JWT si las credenciales son correctas.
+      summary: Autenticar usuario y obtener token
+      description: Proporciona un nombre de usuario y contraseña para recibir un token JWT de autenticación.
       operationId: login
       tags:
-        - Autenticación
+        - Seguridad
       requestBody:
         description: Credenciales del usuario.
         required: true
@@ -37,9 +37,10 @@ components:
       properties:
         username:
           type: string
+          description: Nombre de usuario.
         password:
           type: string
-          format: password
+          description: Contraseña del usuario.
       required:
         - username
         - password
@@ -49,11 +50,13 @@ components:
       properties:
         token:
           type: string
+          description: Token JWT.
 
     ApiResponseAuthResponse:
       type: object
       properties:
         mensaje:
           type: string
-        datos:
+          example: Autenticación exitosa
+        data:
           $ref: '#/components/schemas/AuthResponse'
