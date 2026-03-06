@@ -1,16 +1,18 @@
 package com.nexoohub.almacen.inventario.controller;
 
-import com.nexoohub.almacen.inventario.dto.InventarioSucursalDTO;
+import com.nexoohub.almacen.inventario.dto.InventarioSucursalProjection;
 import com.nexoohub.almacen.inventario.entity.InventarioSucursal;
 import com.nexoohub.almacen.inventario.repository.InventarioSucursalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/inventario")
@@ -21,9 +23,11 @@ public class InventarioController {
 
     // 1. CONSULTAR INVENTARIO DE UNA SUCURSAL
     @GetMapping("/sucursales/{sucursalId}")
-    public ResponseEntity<List<InventarioSucursalDTO>> obtenerInventarioPorSucursal(@PathVariable Integer sucursalId) {
-        // Llamamos a la consulta mágica que creaste en el repositorio
-        List<InventarioSucursalDTO> inventario = inventarioRepository.obtenerFotografiaInventario(sucursalId);
+    public ResponseEntity<Page<InventarioSucursalProjection>> obtenerInventarioPorSucursal(
+            @PathVariable Integer sucursalId,
+            @PageableDefault(size = 50, sort = "nombreComercial") Pageable pageable) {
+        // Llamamos a la consulta con proyección de interfaz
+        Page<InventarioSucursalProjection> inventario = inventarioRepository.obtenerFotografiaInventarioPaginado(sucursalId, pageable);
         return ResponseEntity.ok(inventario);
     }
 

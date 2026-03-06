@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Proveedor - Tests de Entidad" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:51" hostname="GS1727958D01LP" time="0.004">
+  <properties/>
+  <testcase name="Debe establecer y obtener nombreContacto" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener RFC" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener email" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener telefono" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.0"/>
+  <testcase name="Debe permitir valores null en campos opcionales" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.0"/>
+  <testcase name="Debe crear proveedor con ID" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener direccion" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener nombreEmpresa" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.0"/>
+  <testcase name="Debe crear proveedor completo con todos los campos" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.0"/>
+  <testcase name="Debe crear instancia sin valores por defecto" classname="com.nexoohub.almacen.catalogo.entity.ProveedorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

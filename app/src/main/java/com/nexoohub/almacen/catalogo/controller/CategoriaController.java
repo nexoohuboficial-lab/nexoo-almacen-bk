@@ -1,15 +1,17 @@
 package com.nexoohub.almacen.catalogo.controller;
 
 import com.nexoohub.almacen.catalogo.entity.Categoria;
-import com.nexoohub.almacen.catalogo.repository.CategoriaRepository;
+import com.nexoohub.almacen.catalogo.service.CategoriaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -17,16 +19,17 @@ import java.util.Map;
 public class CategoriaController {
     
     @Autowired
-    private CategoriaRepository categoriaRepository;
+    private CategoriaService categoriaService;
 
     @GetMapping
-    public ResponseEntity<List<Categoria>> listarCategorias() {
-        return ResponseEntity.ok(categoriaRepository.findAll());
+    public ResponseEntity<Page<Categoria>> listarCategorias(
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        return ResponseEntity.ok(categoriaService.listarCategorias(pageable));
     }
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> crearCategoria(@Valid @RequestBody Categoria categoria) {
-        Categoria guardada = categoriaRepository.save(categoria);
+        Categoria guardada = categoriaService.crear(categoria);
         
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("exitoso", true);
@@ -38,11 +41,11 @@ public class CategoriaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> actualizarCategoria(@PathVariable Integer id, @Valid @RequestBody Categoria detalles) {
-        return categoriaRepository.findById(id)
+        return categoriaService.buscarPorId(id)
                 .map(categoriaExistente -> {
                     categoriaExistente.setNombre(detalles.getNombre());
                     categoriaExistente.setDescripcion(detalles.getDescripcion());
-                    categoriaRepository.save(categoriaExistente);
+                    categoriaService.actualizar(categoriaExistente);
                     
                     Map<String, Object> respuesta = new HashMap<>();
                     respuesta.put("exitoso", true);

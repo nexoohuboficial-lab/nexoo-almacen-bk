@@ -1,0 +1,102 @@
+# application-prod.yml
+# Perfil de producción para NexooHub Almacén con PostgreSQL
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/nexoohub_almacen}
+    username: ${DB_USER:nexoohub_user}
+    password: ${DB_PASSWORD:nexoohub_password_2026}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # Configuración optimizada del pool de conexiones
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+  
+  jpa:
+    hibernate:
+      # En producción, Flyway maneja el esquema - solo validamos
+      ddl-auto: validate
+    # No mostrar SQL en producción (mejor performance)
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Optimizaciones de producción
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  # Flyway activo en producción
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    # Schemas
+    schemas: public
+    # Placeholders para scripts SQL
+    placeholders-enabled: false
+  
+  # Phase 3.3: Redis Cache activado en producción
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      # Connection pool (Lettuce por defecto)
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 2000ms
+  
+  cache:
+    type: redis
+    redis:
+      # TTL por defecto: 1 hora (lo configuramos específicamente en RedisConfig)
+      time-to-live: 3600000
+      # No cachear valores null
+      cache-null-values: false
+      # Prefijo para las keys en Redis
+      key-prefix: "nexoohub:almacen:"
+      # Usar cache statistics para métricas
+      enable-statistics: true
+
+# Logging en producción
+logging:
+  level:
+    root: INFO
+    com.nexoohub.almacen: INFO
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    org.flywaydb: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/nexoohub-almacen.log
+    max-size: 10MB
+    max-history: 30
+
+# Actuator endpoints (limitados en producción)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      # Configurar si usas Prometheus/Grafana
+      prometheus:
+        enabled: false

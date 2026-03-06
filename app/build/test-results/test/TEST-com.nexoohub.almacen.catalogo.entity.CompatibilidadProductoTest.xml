@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="CompatibilidadProducto - Tests de Entidad" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:51" hostname="GS1727958D01LP" time="0.005">
+  <properties/>
+  <testcase name="Debe validar rango de años correcto" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener anioFin" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <testcase name="Debe calcular años de aplicación" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <testcase name="Debe manejar compatibilidad sin fecha fin" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener skuInterno" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <testcase name="Debe permitir valores null" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.001"/>
+  <testcase name="Debe crear compatibilidad con ID" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <testcase name="Debe crear compatibilidad completa" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <testcase name="Debe validar año dentro del rango" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.001"/>
+  <testcase name="Debe manejar múltiples motos para mismo SKU" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener anioInicio" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener motoId" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.001"/>
+  <testcase name="Debe crear instancia sin valores por defecto" classname="com.nexoohub.almacen.catalogo.entity.CompatibilidadProductoTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

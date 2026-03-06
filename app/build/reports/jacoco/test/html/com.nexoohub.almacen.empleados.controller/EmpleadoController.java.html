@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmpleadoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.empleados.controller</a> &gt; <span class="el_source">EmpleadoController.java</span></div><h1>EmpleadoController.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.empleados.controller;
+
+import com.nexoohub.almacen.empleados.entity.Empleado;
+import com.nexoohub.almacen.empleados.repository.EmpleadoRepository;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/v1/empleados&quot;)
+<span class="fc" id="L19">public class EmpleadoController {</span>
+
+    @Autowired
+    private EmpleadoRepository empleadoRepository;
+
+    // Dar de alta a un empleado nuevo
+    @PostMapping
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; registrarEmpleado(@Valid @RequestBody Empleado empleado) {
+<span class="fc" id="L27">        Empleado guardado = empleadoRepository.save(empleado);</span>
+        
+<span class="fc" id="L29">        Map&lt;String, Object&gt; respuesta = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L30">        respuesta.put(&quot;exitoso&quot;, true);</span>
+<span class="fc" id="L31">        respuesta.put(&quot;mensaje&quot;, &quot;Empleado registrado correctamente&quot;);</span>
+<span class="fc" id="L32">        respuesta.put(&quot;id&quot;, guardado.getId());</span>
+        
+<span class="fc" id="L34">        return new ResponseEntity&lt;&gt;(respuesta, HttpStatus.CREATED);</span>
+    }
+
+    // Ver a todos los empleados de una sucursal
+    @GetMapping(&quot;/sucursal/{sucursalId}&quot;)
+    public ResponseEntity&lt;Page&lt;Empleado&gt;&gt; obtenerEmpleadosPorSucursal(
+            @PathVariable Integer sucursalId,
+            @PageableDefault(size = 20, sort = &quot;nombre&quot;) Pageable pageable) {
+<span class="fc" id="L42">        return ResponseEntity.ok(empleadoRepository.findBySucursalIdAndActivoTrue(sucursalId, pageable));</span>
+    }
+
+    // Dar de baja (borrado lógico)
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; darDeBajaEmpleado(@PathVariable Integer id) {
+<span class="fc" id="L48">        return empleadoRepository.findById(id).map(empleado -&gt; {</span>
+<span class="fc" id="L49">            empleado.setActivo(false); // No lo borramos de la BD para no perder el historial de ventas, solo lo desactivamos</span>
+<span class="fc" id="L50">            empleadoRepository.save(empleado);</span>
+<span class="fc" id="L51">            return ResponseEntity.noContent().&lt;Void&gt;build();</span>
+<span class="fc" id="L52">        }).orElse(ResponseEntity.notFound().build());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

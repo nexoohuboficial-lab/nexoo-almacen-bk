@@ -1,10 +1,9 @@
 package com.nexoohub.almacen.inventario.entity;
 
+import com.nexoohub.almacen.catalogo.entity.Categoria;
+import com.nexoohub.almacen.catalogo.entity.Proveedor;
 import com.nexoohub.almacen.common.entity.AuditableEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -25,11 +24,19 @@ public class ProductoMaestro extends AuditableEntity {
 
     private String descripcion;
 
-    @Column(name = "categoria_id")
-    private Integer categoriaId; 
+    @Column(name = "categoria_id", insertable = false, updatable = false)
+    private Integer categoriaId;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
 
-    @Column(name = "proveedor_id")
-    private Integer proveedorId; 
+    @Column(name = "proveedor_id", insertable = false, updatable = false)
+    private Integer proveedorId;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proveedor_id")
+    private Proveedor proveedor;
 
     @Pattern(regexp = "^[0-9]{8}$", message = "La clave SAT debe tener exactamente 8 números")
     private String claveSat;
@@ -64,9 +71,13 @@ public class ProductoMaestro extends AuditableEntity {
 
     public Integer getCategoriaId() { return categoriaId; }
     public void setCategoriaId(Integer categoriaId) { this.categoriaId = categoriaId; }
+    public Categoria getCategoria() { return categoria; }
+    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
 
     public Integer getProveedorId() { return proveedorId; }
     public void setProveedorId(Integer proveedorId) { this.proveedorId = proveedorId; }
+    public Proveedor getProveedor() { return proveedor; }
+    public void setProveedor(Proveedor proveedor) { this.proveedor = proveedor; }
 
     public String getClaveSat() { return claveSat; }
     public void setClaveSat(String claveSat) { this.claveSat = claveSat; }

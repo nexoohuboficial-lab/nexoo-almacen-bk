@@ -1,5 +1,6 @@
 package com.nexoohub.almacen.inventario.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -14,6 +15,7 @@ public class TraspasoRequestDTO {
 
     private String comentarios;
 
+    @Valid
     @NotEmpty(message = "Debes enviar al menos un producto para traspasar")
     private List<ItemTraspasoDTO> items;
 

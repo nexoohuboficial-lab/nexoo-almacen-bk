@@ -1,5 +1,6 @@
 package com.nexoohub.almacen.compras.service;
 
+import com.nexoohub.almacen.common.exception.ResourceNotFoundException;
 import com.nexoohub.almacen.compras.dto.CompraRequestDTO;
 import com.nexoohub.almacen.compras.entity.Compra;
 import com.nexoohub.almacen.compras.entity.DetalleCompra;
@@ -14,23 +15,79 @@ import com.nexoohub.almacen.inventario.entity.InventarioSucursalId;
 import com.nexoohub.almacen.inventario.entity.ProductoMaestro;
 import com.nexoohub.almacen.inventario.repository.InventarioSucursalRepository;
 import com.nexoohub.almacen.inventario.repository.ProductoMaestroRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * Servicio para procesamiento de compras a proveedores.
+ * 
+ * <p>Gestiona la lógica de negocio completa para ingreso de mercancía:</p>
+ * <ul>
+ *   <li>Recálculo automático de Costo Promedio Ponderado (CPP)</li>
+ *   <li>Limpieza de IVA en costos (si vienen incluidos en facturas)</li>
+ *   <li>Cálculo inteligente de precios de venta con estrategias de sensibilidad</li>
+ *   <li>Actualización automática de inventario y historial de precios</li>
+ * </ul>
+ * 
+ * @author NexooHub Development Team
+ * @since 1.0
+ */
 @Service
 public class CompraService {
 
-    @Autowired private CompraRepository compraRepository;
-    @Autowired private DetalleCompraRepository detalleCompraRepository;
-    @Autowired private InventarioSucursalRepository inventarioRepository;
-    @Autowired private ProductoMaestroRepository productoRepository;
-    @Autowired private ConfiguracionFinancieraRepository finanzasRepository;
-    @Autowired private HistorialPrecioRepository historialPrecioRepository;
+    private final CompraRepository compraRepository;
+    private final DetalleCompraRepository detalleCompraRepository;
+    private final InventarioSucursalRepository inventarioRepository;
+    private final ProductoMaestroRepository productoRepository;
+    private final ConfiguracionFinancieraRepository finanzasRepository;
+    private final HistorialPrecioRepository historialPrecioRepository;
 
+    /**
+     * Constructor con inyección de dependencias.
+     * 
+     * @param compraRepository Repositorio de compras
+     * @param detalleCompraRepository Repositorio de detalles de compra
+     * @param inventarioRepository Repositorio de inventario por sucursal
+     * @param productoRepository Repositorio de productos maestros
+     * @param finanzasRepository Repositorio de configuración financiera
+     * @param historialPrecioRepository Repositorio de historial de precios
+     */
+    public CompraService(
+            CompraRepository compraRepository,
+            DetalleCompraRepository detalleCompraRepository,
+            InventarioSucursalRepository inventarioRepository,
+            ProductoMaestroRepository productoRepository,
+            ConfiguracionFinancieraRepository finanzasRepository,
+            HistorialPrecioRepository historialPrecioRepository) {
+        this.compraRepository = compraRepository;
+        this.detalleCompraRepository = detalleCompraRepository;
+        this.inventarioRepository = inventarioRepository;
+        this.productoRepository = productoRepository;
+        this.finanzasRepository = finanzasRepository;
+        this.historialPrecioRepository = historialPrecioRepository;
+    }
+
+    /**
+     * Procesa el ingreso de mercancía desde una compra a proveedor.
+     * 
+     * <p>Ejecuta en una transacción atómica:</p>
+     * <ol>
+     *   <li>Limpia IVA de costos (si aplica)</li>
+     *   <li>Actualiza inventario con nuevo stock</li>
+     *   <li>Recalcula Costo Promedio Ponderado (CPP)</li>
+     *   <li>Calcula precios de venta con estrategias de sensibilidad</li>
+     *   <li>Guarda historial de precios</li>
+     *   <li>Registra detalles de la compra</li>
+     * </ol>
+     * 
+     * @param request DTO con datos de la compra (proveedor, folio, detalles)
+     * @param usuarioActual Username del usuario que registra la compra
+     * @return Compra procesada con folio y total calculado
+     * @throws ResourceNotFoundException si no existe configuración financiera o SKU
+     */
     // TODO ESTO OCURRE EN UNA SOLA TRANSACCIÓN (O se guarda todo, o no se guarda nada)
     @Transactional
     public Compra procesarIngresoMercancia(CompraRequestDTO request, String usuarioActual) {
@@ -38,7 +95,7 @@ public class CompraService {
         // 1. Obtenemos las reglas de negocio financieras (IVA y Margen)
         // Asumimos que el ID 1 es la configuración vigente (la metimos en el script)
         ConfiguracionFinanciera config = finanzasRepository.findById(1)
-                .orElseThrow(() -> new RuntimeException("No hay configuración financiera activa"));
+                .orElseThrow(() -> new ResourceNotFoundException("ConfiguracionFinanciera", 1));
 
         BigDecimal tasaIva = config.getIva(); // 0.16
         BigDecimal margenBase = config.getMargenGananciaBase(); // 0.30
@@ -97,7 +154,7 @@ public class CompraService {
 
             // --- C) CÁLCULO DE PRECIOS E INTELIGENCIA DE NEGOCIO ---
             ProductoMaestro producto = productoRepository.findById(item.getSkuInterno())
-                    .orElseThrow(() -> new RuntimeException("SKU no encontrado: " + item.getSkuInterno()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Producto", item.getSkuInterno()));
 
             // Fórmula del Precio Técnico: CPP / (1 - Margen) * (1 + IVA)
             BigDecimal divisorMargen = BigDecimal.ONE.subtract(margenBase);

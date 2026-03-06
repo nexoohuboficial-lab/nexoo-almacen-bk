@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CompraRequestDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.compras.dto</a> &gt; <span class="el_source">CompraRequestDTO.java</span></div><h1>CompraRequestDTO.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.compras.dto;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.List;
+
+<span class="fc" id="L8">public class CompraRequestDTO {</span>
+
+    @NotNull(message = &quot;El ID del proveedor es obligatorio&quot;)
+    private Integer proveedorId;
+
+    private String folioFactura;
+
+    @NotNull(message = &quot;Debes indicar si los precios incluyen IVA&quot;)
+    private Boolean preciosIncluyenIva;
+
+    @NotNull(message = &quot;El ID de la sucursal destino es obligatorio&quot;)
+    private Integer sucursalDestinoId;
+
+    @NotEmpty(message = &quot;La compra debe tener al menos un producto&quot;)
+    private List&lt;DetalleItemDTO&gt; detalles;
+
+    // ==========================================
+    // CLASE INTERNA PARA LOS RENGLONES
+    // ==========================================
+<span class="fc" id="L27">    public static class DetalleItemDTO {</span>
+        @NotNull(message = &quot;El SKU es obligatorio&quot;)
+        private String skuInterno;
+
+        @NotNull(message = &quot;La cantidad es obligatoria&quot;)
+        private Integer cantidad;
+
+        @NotNull(message = &quot;El costo unitario es obligatorio&quot;)
+        private BigDecimal costoUnitario;
+
+        // Este campo es opcional, por si el vendedor capturó en cuánto lo vende el proveedor
+        private BigDecimal precioPublicoProveedor;
+
+        // Getters y Setters del Detalle
+<span class="fc" id="L41">        public String getSkuInterno() { return skuInterno; }</span>
+<span class="fc" id="L42">        public void setSkuInterno(String skuInterno) { this.skuInterno = skuInterno; }</span>
+
+<span class="fc" id="L44">        public Integer getCantidad() { return cantidad; }</span>
+<span class="fc" id="L45">        public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }</span>
+
+<span class="fc" id="L47">        public BigDecimal getCostoUnitario() { return costoUnitario; }</span>
+<span class="fc" id="L48">        public void setCostoUnitario(BigDecimal costoUnitario) { this.costoUnitario = costoUnitario; }</span>
+
+<span class="fc" id="L50">        public BigDecimal getPrecioPublicoProveedor() { return precioPublicoProveedor; }</span>
+<span class="fc" id="L51">        public void setPrecioPublicoProveedor(BigDecimal precioPublicoProveedor) { this.precioPublicoProveedor = precioPublicoProveedor; }</span>
+    }
+
+    // ==========================================
+    // GETTERS Y SETTERS DEL ENCABEZADO
+    // ==========================================
+<span class="fc" id="L57">    public Integer getProveedorId() { return proveedorId; }</span>
+<span class="fc" id="L58">    public void setProveedorId(Integer proveedorId) { this.proveedorId = proveedorId; }</span>
+
+<span class="fc" id="L60">    public String getFolioFactura() { return folioFactura; }</span>
+<span class="fc" id="L61">    public void setFolioFactura(String folioFactura) { this.folioFactura = folioFactura; }</span>
+
+<span class="fc" id="L63">    public Boolean getPreciosIncluyenIva() { return preciosIncluyenIva; }</span>
+<span class="fc" id="L64">    public void setPreciosIncluyenIva(Boolean preciosIncluyenIva) { this.preciosIncluyenIva = preciosIncluyenIva; }</span>
+
+<span class="fc" id="L66">    public Integer getSucursalDestinoId() { return sucursalDestinoId; }</span>
+<span class="fc" id="L67">    public void setSucursalDestinoId(Integer sucursalDestinoId) { this.sucursalDestinoId = sucursalDestinoId; }</span>
+
+<span class="fc" id="L69">    public List&lt;DetalleItemDTO&gt; getDetalles() { return detalles; }</span>
+<span class="fc" id="L70">    public void setDetalles(List&lt;DetalleItemDTO&gt; detalles) { this.detalles = detalles; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

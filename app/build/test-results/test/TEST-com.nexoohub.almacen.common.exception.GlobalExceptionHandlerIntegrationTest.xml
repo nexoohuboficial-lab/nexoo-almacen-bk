@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.085">
+  <properties/>
+  <testcase name="handleGenericException_Retorna500()" classname="com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest" time="0.023"/>
+  <testcase name="handleMethodArgumentNotValidException_Retorna400()" classname="com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest" time="0.019"/>
+  <testcase name="handleBadCredentialsException_Retorna401()" classname="com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest" time="0.013"/>
+  <testcase name="handleResourceNotFoundException_Retorna404()" classname="com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest" time="0.012"/>
+  <testcase name="handleDataIntegrityViolationException_Retorna409()" classname="com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest" time="0.014"/>
+  <system-out><![CDATA[2026-03-05T19:17:54.082-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Creating new transaction with name [com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest.handleGenericException_Retorna500]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2026-03-05T19:17:54.082-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Opened new EntityManager [SessionImpl(350958289<open>)] for JPA transaction
+2026-03-05T19:17:54.082-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@7ed25d4c]
+2026-03-05T19:17:54.083-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(350958289<open>)] for JPA transaction
+2026-03-05T19:17:54.083-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.084-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0
+2026-03-05T19:17:54.084-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.085-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(350958289<open>)] for JPA transaction
+2026-03-05T19:17:54.085-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.085-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        usuarios
+        (empleado_id, fecha_actualizacion, fecha_creacion, password, role, username, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.088-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0 
+    where
+        u1_0.username=?
+2026-03-05T19:17:54.089-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0 where u1_0.username=?, time: 0ms, rows: 1
+2026-03-05T19:17:54.090-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : >> Iniciando petición: GET /api/test-exceptions/generic
+2026-03-05T19:17:54.091-06:00 ERROR 216068 --- [    Test worker] c.n.a.c.e.GlobalExceptionHandler         : ERROR NO CONTROLADO EN NEXOOHUB: 
+
+java.lang.RuntimeException: Error inesperado de prueba
+	at com.nexoohub.almacen.common.exception.TestExceptionController.throwGeneric(GlobalExceptionHandlerIntegrationTest.java:155) ~[test/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:259) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:192) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:920) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:830) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.19.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.test.web.servlet.TestDispatcherServlet.service(TestDispatcherServlet.java:72) ~[spring-test-6.1.4.jar:6.1.4]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.19.jar:6.0]
+	at org.springframework.mock.web.MockFilterChain$ServletFilterProxy.doFilter(MockFilterChain.java:165) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132) ~[spring-test-6.1.4.jar:6.1.4]
+	at com.nexoohub.almacen.common.config.LogFilter.doFilter(LogFilter.java:29) ~[main/:na]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at com.nexoohub.almacen.common.config.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:78) ~[main/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.2.2.jar:6.2.2]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.2.2.jar:6.2.2]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+	at org.springframework.test.web.servlet.setup.MockMvcFilterDecorator.doFilter(MockMvcFilterDecorator.java:151) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:132) ~[spring-test-6.1.4.jar:6.1.4]
+	at org.springframework.test.web.servlet.MockMvc.perform(MockMvc.java:201) ~[spring-test-6.1.4.jar:6.1.4]
+	at com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest.handleGenericException_Retorna500(GlobalExceptionHandlerIntegrationTest.java:115) ~[test/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728) ~[junit-platform-commons-1.10.2.jar:1.10.2]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.10.2.jar:5.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.10.2.jar:1.10.2]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses(JUnitPlatformTestClassProcessor.java:119) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000(JUnitPlatformTestClassProcessor.java:94) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop(JUnitPlatformTestClassProcessor.java:89) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop(SuiteTestClassProcessor.java:62) ~[na:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36) ~[na:na]
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24) ~[na:na]
+	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33) ~[na:na]
+	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:94) ~[na:na]
+	at jdk.proxy2/jdk.proxy2.$Proxy5.stop(Unknown Source) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run(TestWorker.java:193) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:129) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:100) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:60) ~[na:na]
+	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56) ~[na:na]
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:113) ~[na:na]
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:65) ~[na:na]
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69) ~[gradle-worker.jar:na]
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74) ~[gradle-worker.jar:na]
+
+2026-03-05T19:17:54.101-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : << Petición finalizada en 11 ms
+2026-03-05T19:17:54.104-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Initiating transaction rollback
+2026-03-05T19:17:54.104-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Rolling back JPA transaction on EntityManager [SessionImpl(350958289<open>)]
+2026-03-05T19:17:54.104-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Closing JPA EntityManager [SessionImpl(350958289<open>)] after transaction
+2026-03-05T19:17:54.106-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Creating new transaction with name [com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest.handleMethodArgumentNotValidException_Retorna400]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2026-03-05T19:17:54.106-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Opened new EntityManager [SessionImpl(1521822072<open>)] for JPA transaction
+2026-03-05T19:17:54.106-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@2c1c026f]
+2026-03-05T19:17:54.107-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1521822072<open>)] for JPA transaction
+2026-03-05T19:17:54.107-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.108-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0
+2026-03-05T19:17:54.108-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.109-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1521822072<open>)] for JPA transaction
+2026-03-05T19:17:54.109-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.109-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        usuarios
+        (empleado_id, fecha_actualizacion, fecha_creacion, password, role, username, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.114-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0 
+    where
+        u1_0.username=?
+2026-03-05T19:17:54.115-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0 where u1_0.username=?, time: 0ms, rows: 1
+2026-03-05T19:17:54.116-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : >> Iniciando petición: POST /api/test-exceptions/validation
+2026-03-05T19:17:54.120-06:00  WARN 216068 --- [    Test worker] c.n.a.c.e.GlobalExceptionHandler         : Fallo en validación de datos: [campo: Campo requerido]
+2026-03-05T19:17:54.121-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : << Petición finalizada en 5 ms
+2026-03-05T19:17:54.124-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Initiating transaction rollback
+2026-03-05T19:17:54.124-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Rolling back JPA transaction on EntityManager [SessionImpl(1521822072<open>)]
+2026-03-05T19:17:54.124-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Closing JPA EntityManager [SessionImpl(1521822072<open>)] after transaction
+2026-03-05T19:17:54.126-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Creating new transaction with name [com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest.handleBadCredentialsException_Retorna401]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2026-03-05T19:17:54.126-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Opened new EntityManager [SessionImpl(1260914584<open>)] for JPA transaction
+2026-03-05T19:17:54.126-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@732fd38e]
+2026-03-05T19:17:54.127-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1260914584<open>)] for JPA transaction
+2026-03-05T19:17:54.127-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.128-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0
+2026-03-05T19:17:54.128-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.128-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1260914584<open>)] for JPA transaction
+2026-03-05T19:17:54.128-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.129-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        usuarios
+        (empleado_id, fecha_actualizacion, fecha_creacion, password, role, username, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.133-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0 
+    where
+        u1_0.username=?
+2026-03-05T19:17:54.133-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0 where u1_0.username=?, time: 0ms, rows: 1
+2026-03-05T19:17:54.135-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : >> Iniciando petición: POST /api/test-exceptions/bad-credentials
+2026-03-05T19:17:54.135-06:00  WARN 216068 --- [    Test worker] c.n.a.c.e.GlobalExceptionHandler         : Intento de login fallido: Credenciales incorrectas
+2026-03-05T19:17:54.136-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : << Petición finalizada en 1 ms
+2026-03-05T19:17:54.138-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Initiating transaction rollback
+2026-03-05T19:17:54.138-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Rolling back JPA transaction on EntityManager [SessionImpl(1260914584<open>)]
+2026-03-05T19:17:54.138-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Closing JPA EntityManager [SessionImpl(1260914584<open>)] after transaction
+2026-03-05T19:17:54.140-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Creating new transaction with name [com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest.handleResourceNotFoundException_Retorna404]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2026-03-05T19:17:54.140-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Opened new EntityManager [SessionImpl(725336323<open>)] for JPA transaction
+2026-03-05T19:17:54.140-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@376be33b]
+2026-03-05T19:17:54.141-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(725336323<open>)] for JPA transaction
+2026-03-05T19:17:54.141-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.141-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0
+2026-03-05T19:17:54.142-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.142-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(725336323<open>)] for JPA transaction
+2026-03-05T19:17:54.142-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.142-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        usuarios
+        (empleado_id, fecha_actualizacion, fecha_creacion, password, role, username, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.146-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0 
+    where
+        u1_0.username=?
+2026-03-05T19:17:54.147-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0 where u1_0.username=?, time: 0ms, rows: 1
+2026-03-05T19:17:54.148-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : >> Iniciando petición: GET /api/test-exceptions/not-found
+2026-03-05T19:17:54.149-06:00  WARN 216068 --- [    Test worker] c.n.a.c.e.GlobalExceptionHandler         : Recurso no encontrado: Recurso de prueba no encontrado
+2026-03-05T19:17:54.149-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : << Petición finalizada en 1 ms
+2026-03-05T19:17:54.151-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Initiating transaction rollback
+2026-03-05T19:17:54.151-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Rolling back JPA transaction on EntityManager [SessionImpl(725336323<open>)]
+2026-03-05T19:17:54.151-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Closing JPA EntityManager [SessionImpl(725336323<open>)] after transaction
+2026-03-05T19:17:54.153-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Creating new transaction with name [com.nexoohub.almacen.common.exception.GlobalExceptionHandlerIntegrationTest.handleDataIntegrityViolationException_Retorna409]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2026-03-05T19:17:54.153-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Opened new EntityManager [SessionImpl(591390989<open>)] for JPA transaction
+2026-03-05T19:17:54.153-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@7d486b9b]
+2026-03-05T19:17:54.154-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(591390989<open>)] for JPA transaction
+2026-03-05T19:17:54.154-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.155-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0
+2026-03-05T19:17:54.156-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.156-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(591390989<open>)] for JPA transaction
+2026-03-05T19:17:54.156-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.157-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        usuarios
+        (empleado_id, fecha_actualizacion, fecha_creacion, password, role, username, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.161-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0 
+    where
+        u1_0.username=?
+2026-03-05T19:17:54.161-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0 where u1_0.username=?, time: 0ms, rows: 1
+2026-03-05T19:17:54.162-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : >> Iniciando petición: POST /api/test-exceptions/data-integrity
+2026-03-05T19:17:54.164-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : << Petición finalizada en 2 ms
+2026-03-05T19:17:54.166-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Initiating transaction rollback
+2026-03-05T19:17:54.166-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Rolling back JPA transaction on EntityManager [SessionImpl(591390989<open>)]
+2026-03-05T19:17:54.166-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Closing JPA EntityManager [SessionImpl(591390989<open>)] after transaction
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

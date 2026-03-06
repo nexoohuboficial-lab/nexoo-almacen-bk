@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ProductoResumenDTO - Tests de DTO" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:55" hostname="GS1727958D01LP" time="0.004">
+  <properties/>
+  <testcase name="Debe representar producto con stock alto" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe acceder a sensibilidad" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe acceder a stockActual" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe acceder a categoriaNombre" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe manejar valores null en constructor" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe crear múltiples productos resumen" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe acceder a skuInterno" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe crear ProductoResumenDTO con todos los campos" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe acceder a precioVenta" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe acceder a nombreComercial" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe crear DTO con diferentes sensibilidades" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe manejar precios con decimales" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.0"/>
+  <testcase name="Debe manejar stock cero" classname="com.nexoohub.almacen.inventario.dto.ProductoResumenDTOTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

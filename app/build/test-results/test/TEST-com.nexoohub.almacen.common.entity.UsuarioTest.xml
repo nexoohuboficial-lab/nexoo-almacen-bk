@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Usuario - Tests de Entidad" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.003">
+  <properties/>
+  <testcase name="Debe establecer y obtener role correctamente" classname="com.nexoohub.almacen.common.entity.UsuarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener empleado ID correctamente" classname="com.nexoohub.almacen.common.entity.UsuarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener ID correctamente" classname="com.nexoohub.almacen.common.entity.UsuarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener username correctamente" classname="com.nexoohub.almacen.common.entity.UsuarioTest" time="0.0"/>
+  <testcase name="Debe crear usuario con role por defecto" classname="com.nexoohub.almacen.common.entity.UsuarioTest" time="0.0"/>
+  <testcase name="Debe crear usuario completo con todos los campos" classname="com.nexoohub.almacen.common.entity.UsuarioTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener password correctamente" classname="com.nexoohub.almacen.common.entity.UsuarioTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

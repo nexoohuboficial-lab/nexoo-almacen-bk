@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.common.dto</a> &gt; <span class="el_source">UsuarioDTO.java</span></div><h1>UsuarioDTO.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.common.dto;
+
+/**
+ * DTO para respuestas de Usuario (sin exponer el password)
+ */
+public class UsuarioDTO {
+
+    private Long id;
+    private String username;
+    private String role;
+    private Integer empleadoId;
+    private String usuarioCreacion;
+    private String usuarioActualizacion;
+
+    // Constructores
+<span class="nc" id="L16">    public UsuarioDTO() {}</span>
+
+<span class="fc" id="L18">    public UsuarioDTO(Long id, String username, String role, Integer empleadoId, String usuarioCreacion, String usuarioActualizacion) {</span>
+<span class="fc" id="L19">        this.id = id;</span>
+<span class="fc" id="L20">        this.username = username;</span>
+<span class="fc" id="L21">        this.role = role;</span>
+<span class="fc" id="L22">        this.empleadoId = empleadoId;</span>
+<span class="fc" id="L23">        this.usuarioCreacion = usuarioCreacion;</span>
+<span class="fc" id="L24">        this.usuarioActualizacion = usuarioActualizacion;</span>
+<span class="fc" id="L25">    }</span>
+
+    // Getters y Setters
+    public Long getId() {
+<span class="fc" id="L29">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L33">        this.id = id;</span>
+<span class="nc" id="L34">    }</span>
+
+    public String getUsername() {
+<span class="fc" id="L37">        return username;</span>
+    }
+
+    public void setUsername(String username) {
+<span class="nc" id="L41">        this.username = username;</span>
+<span class="nc" id="L42">    }</span>
+
+    public String getRole() {
+<span class="fc" id="L45">        return role;</span>
+    }
+
+    public void setRole(String role) {
+<span class="nc" id="L49">        this.role = role;</span>
+<span class="nc" id="L50">    }</span>
+
+    public Integer getEmpleadoId() {
+<span class="fc" id="L53">        return empleadoId;</span>
+    }
+
+    public void setEmpleadoId(Integer empleadoId) {
+<span class="nc" id="L57">        this.empleadoId = empleadoId;</span>
+<span class="nc" id="L58">    }</span>
+
+    public String getUsuarioCreacion() {
+<span class="fc" id="L61">        return usuarioCreacion;</span>
+    }
+
+    public void setUsuarioCreacion(String usuarioCreacion) {
+<span class="nc" id="L65">        this.usuarioCreacion = usuarioCreacion;</span>
+<span class="nc" id="L66">    }</span>
+
+    public String getUsuarioActualizacion() {
+<span class="fc" id="L69">        return usuarioActualizacion;</span>
+    }
+
+    public void setUsuarioActualizacion(String usuarioActualizacion) {
+<span class="nc" id="L73">        this.usuarioActualizacion = usuarioActualizacion;</span>
+<span class="nc" id="L74">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

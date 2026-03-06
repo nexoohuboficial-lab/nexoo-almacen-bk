@@ -10,13 +10,28 @@ spring:
   
   jpa:
     hibernate:
-      # 'update' creará las tablas si no existen según tus clases Java
-      ddl-auto: update
-    show-sql: true
+      # 'validate' solo valida que el esquema coincida (Flyway maneja las migraciones)
+      ddl-auto: validate
+    show-sql: false  # Cambiar a false en producción para mejor performance
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Habilitar estadísticas de Hibernate para detectar N+1
+        generate_statistics: true
+        # Configuración de batch para mejorar performance en inserts/updates múltiples
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  # Configuración de Flyway para migraciones de BD
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+    validate-on-migrate: true
 
 management:
   endpoints:
@@ -43,8 +58,10 @@ logging:
   level:
     root: INFO # Por defecto, solo errores e info importante
     com.nexoohub.almacen: INFO # En TU código queremos ver hasta el mínimo detalle
-    org.hibernate.SQL: INFO # Ver las consultas SQL que hace el sistema (muy útil)
-    org.hibernate.type.descriptor.sql.BasicBinder: INFO # Ver los valores exactos que se insertan
+    org.hibernate.SQL: DEBUG # Ver las consultas SQL completas
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE # Ver los valores bindeados
+    org.hibernate.stat: DEBUG # Estadísticas de Hibernate (detecta N+1)
+    org.springframework.orm.jpa: DEBUG # Log de transacciones JPA
   logging:
     pattern:
       # [%X{traceId}] es la clave mágica aquí

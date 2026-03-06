@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="HistorialPrecio - Tests de Entidad" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.005">
+  <properties/>
+  <testcase name="Debe crear historial con ID" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener precioPublicoProveedor" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener usuarioCreacion" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener precioPonderado" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.001"/>
+  <testcase name="Debe obtener fechaCalculo" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener precioFinalPublico" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe manejar precios con múltiples decimales" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener skuInterno" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe validar que precioFinal sea mayor que costo" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe establecer fechaCalculo con prePersist" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener costoBase" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe manejar diferentes SKUs" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe crear historial completo" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.0"/>
+  <testcase name="Debe crear instancia sin valores por defecto" classname="com.nexoohub.almacen.finanzas.entity.HistorialPrecioTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

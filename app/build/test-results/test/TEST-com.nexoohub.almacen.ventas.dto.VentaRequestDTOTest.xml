@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="VentaRequestDTO - Tests de DTO" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:55" hostname="GS1727958D01LP" time="0.003">
+  <properties/>
+  <testcase name="Debe manejar lista de items vacía" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe manejar diferentes métodos de pago" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener clienteId" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener lista de items" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener metodoPago" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe crear VentaRequestDTO vacío" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe agregar múltiples items a la venta" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe crear venta request completa" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe crear item completo" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener skuInterno en item" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener cantidad en item" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener sucursalId" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <testcase name="Debe crear ItemVentaDTO vacío" classname="com.nexoohub.almacen.ventas.dto.VentaRequestDTOTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.nexoohub.almacen.common.exception.ResourceNotFoundException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -263,10 +264,10 @@ class CompraServiceTest {
         when(finanzasRepository.findById(anyInt())).thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, 
                 () -> compraService.procesarIngresoMercancia(request, "admin"));
         
-        assertEquals("No hay configuración financiera activa", exception.getMessage());
+        assertTrue(exception.getMessage().contains("ConfiguracionFinanciera"));
         verify(compraRepository, never()).save(any());
     }
 
@@ -285,10 +286,10 @@ class CompraServiceTest {
         when(productoRepository.findById("SKU001")).thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> compraService.procesarIngresoMercancia(request, "admin"));
         
-        assertTrue(exception.getMessage().contains("SKU no encontrado"));
+        assertTrue(exception.getMessage().contains("Producto"));
     }
 
     @Test

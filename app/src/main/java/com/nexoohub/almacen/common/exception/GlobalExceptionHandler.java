@@ -100,4 +100,70 @@ public class GlobalExceptionHandler {
         );
     }
 
+    /**
+     * Maneja excepciones de stock insuficiente.
+     * HTTP 409 CONFLICT - El cliente intenta realizar una operación que no puede completarse.
+     */
+    @ExceptionHandler(StockInsuficienteException.class)
+    public ResponseEntity<ApiErrorResponse> handleStockInsuficiente(StockInsuficienteException ex) {
+        log.warn("Stock insuficiente: {} (SKU: {}, Disponible: {}, Solicitado: {})", 
+                 ex.getMessage(), ex.getSkuInterno(), ex.getStockDisponible(), ex.getCantidadSolicitada());
+        
+        return buildErrorResponse(
+            HttpStatus.CONFLICT, 
+            ex.getErrorCode(), 
+            ex.getMessage(), 
+            null
+        );
+    }
+
+    /**
+     * Maneja excepciones de recursos duplicados.
+     * HTTP 409 CONFLICT - El recurso que se intenta crear ya existe.
+     */
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateResource(DuplicateResourceException ex) {
+        log.warn("Recurso duplicado: {} (Tipo: {}, Campo: {}, Valor: {})", 
+                 ex.getMessage(), ex.getResourceType(), ex.getFieldName(), ex.getFieldValue());
+        
+        return buildErrorResponse(
+            HttpStatus.CONFLICT, 
+            ex.getErrorCode(), 
+            ex.getMessage(), 
+            null
+        );
+    }
+
+    /**
+     * Maneja excepciones de operaciones inválidas.
+     * HTTP 400 BAD REQUEST - La operación solicitada no es válida.
+     */
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidOperation(InvalidOperationException ex) {
+        log.warn("Operación inválida: {} (Operación: {}, Razón: {})", 
+                 ex.getMessage(), ex.getOperation(), ex.getReason());
+        
+        return buildErrorResponse(
+            HttpStatus.BAD_REQUEST, 
+            ex.getErrorCode(), 
+            ex.getMessage(), 
+            null
+        );
+    }
+
+    /**
+     * Maneja cualquier BusinessException no capturada específicamente.
+     * HTTP 500 INTERNAL SERVER ERROR - Error de lógica de negocio genérico.
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiErrorResponse> handleBusinessException(BusinessException ex) {
+        log.error("Error de negocio: {} (Código: {})", ex.getMessage(), ex.getErrorCode(), ex);
+        
+        return buildErrorResponse(
+            HttpStatus.INTERNAL_SERVER_ERROR, 
+            ex.getErrorCode(), 
+            ex.getMessage(), 
+            null
+        );
+    }
 }

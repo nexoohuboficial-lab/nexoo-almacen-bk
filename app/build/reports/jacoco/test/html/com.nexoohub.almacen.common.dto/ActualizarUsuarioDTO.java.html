@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActualizarUsuarioDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.common.dto</a> &gt; <span class="el_source">ActualizarUsuarioDTO.java</span></div><h1>ActualizarUsuarioDTO.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.common.dto;
+
+import jakarta.validation.constraints.NotBlank;
+
+/**
+ * DTO para actualizar datos de un usuario (excepto password)
+ */
+public class ActualizarUsuarioDTO {
+
+    @NotBlank(message = &quot;El nombre de usuario es obligatorio&quot;)
+    private String username;
+
+    private String role;
+    private Integer empleadoId;
+
+    // Constructores
+<span class="nc" id="L17">    public ActualizarUsuarioDTO() {}</span>
+
+<span class="nc" id="L19">    public ActualizarUsuarioDTO(String username, String role, Integer empleadoId) {</span>
+<span class="nc" id="L20">        this.username = username;</span>
+<span class="nc" id="L21">        this.role = role;</span>
+<span class="nc" id="L22">        this.empleadoId = empleadoId;</span>
+<span class="nc" id="L23">    }</span>
+
+    // Getters y Setters
+    public String getUsername() {
+<span class="nc" id="L27">        return username;</span>
+    }
+
+    public void setUsername(String username) {
+<span class="nc" id="L31">        this.username = username;</span>
+<span class="nc" id="L32">    }</span>
+
+    public String getRole() {
+<span class="nc" id="L35">        return role;</span>
+    }
+
+    public void setRole(String role) {
+<span class="nc" id="L39">        this.role = role;</span>
+<span class="nc" id="L40">    }</span>
+
+    public Integer getEmpleadoId() {
+<span class="nc" id="L43">        return empleadoId;</span>
+    }
+
+    public void setEmpleadoId(Integer empleadoId) {
+<span class="nc" id="L47">        this.empleadoId = empleadoId;</span>
+<span class="nc" id="L48">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

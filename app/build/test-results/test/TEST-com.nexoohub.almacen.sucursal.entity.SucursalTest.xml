@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Sucursal - Tests de Entidad" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:55" hostname="GS1727958D01LP" time="0.005">
+  <properties/>
+  <testcase name="Debe establecer y obtener ID correctamente" classname="com.nexoohub.almacen.sucursal.entity.SucursalTest" time="0.001"/>
+  <testcase name="Debe crear sucursal con estado activo por defecto" classname="com.nexoohub.almacen.sucursal.entity.SucursalTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener estado activo correctamente" classname="com.nexoohub.almacen.sucursal.entity.SucursalTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener nombre correctamente" classname="com.nexoohub.almacen.sucursal.entity.SucursalTest" time="0.0"/>
+  <testcase name="Debe crear sucursal completa con todos los campos" classname="com.nexoohub.almacen.sucursal.entity.SucursalTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener dirección correctamente" classname="com.nexoohub.almacen.sucursal.entity.SucursalTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

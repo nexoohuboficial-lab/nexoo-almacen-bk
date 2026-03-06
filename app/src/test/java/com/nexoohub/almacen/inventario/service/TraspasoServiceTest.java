@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.nexoohub.almacen.common.exception.InvalidOperationException;
+import com.nexoohub.almacen.common.exception.ResourceNotFoundException;
+import com.nexoohub.almacen.common.exception.StockInsuficienteException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -254,10 +257,10 @@ class TraspasoServiceTest {
         TraspasoRequestDTO request = crearRequestTraspaso(1, 1, 5);
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        InvalidOperationException exception = assertThrows(InvalidOperationException.class,
                 () -> traspasoService.ejecutarTraspaso(request, "encargado1"));
         
-        assertTrue(exception.getMessage().contains("no pueden ser la misma"));
+        assertTrue(exception.getMessage().contains("misma"));
         verify(inventarioRepository, never()).save(any());
         verify(movimientoRepository, never()).save(any());
     }
@@ -270,10 +273,10 @@ class TraspasoServiceTest {
         when(usuarioRepository.findByUsername("encargado1")).thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> traspasoService.ejecutarTraspaso(request, "encargado1"));
         
-        assertEquals("Usuario no encontrado", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Usuario"));
         verify(inventarioRepository, never()).save(any());
         verify(movimientoRepository, never()).save(any());
     }
@@ -289,10 +292,10 @@ class TraspasoServiceTest {
                 .thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> traspasoService.ejecutarTraspaso(request, "encargado1"));
         
-        assertTrue(exception.getMessage().contains("no existe en la sucursal de origen"));
+        assertTrue(exception.getMessage().contains("Producto"));
         verify(movimientoRepository, never()).save(any());
     }
 
@@ -307,10 +310,10 @@ class TraspasoServiceTest {
                 .thenReturn(Optional.of(inventarioOrigen));
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        StockInsuficienteException exception = assertThrows(StockInsuficienteException.class,
                 () -> traspasoService.ejecutarTraspaso(request, "encargado1"));
         
-        assertTrue(exception.getMessage().contains("Stock insuficiente en origen"));
+        assertTrue(exception.getMessage().contains("Stock insuficiente"));
         verify(inventarioRepository, never()).save(any());
         verify(movimientoRepository, never()).save(any());
     }

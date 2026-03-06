@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="TraspasoService - Tests de Traspasos entre Sucursales" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:36" hostname="GS1727958D01LP" time="0.246">
+  <properties/>
+  <testcase name="Debe incluir comentarios en movimientos de auditoría" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.178"/>
+  <testcase name="Debe lanzar excepción cuando origen y destino son iguales" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.005"/>
+  <testcase name="Debe crear inventario en destino si no existe" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.006"/>
+  <testcase name="Debe incrementar stock en sucursal destino" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.006"/>
+  <testcase name="Debe manejar traspaso con múltiples items" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.006"/>
+  <testcase name="Debe lanzar excepción cuando producto no existe en origen" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.004"/>
+  <testcase name="Debe ejecutar traspaso exitosamente entre sucursales" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.004"/>
+  <testcase name="Debe registrar movimientos de auditoría (SALIDA y ENTRADA)" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.005"/>
+  <testcase name="Debe calcular CPP correctamente en destino" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.004"/>
+  <testcase name="Debe lanzar excepción cuando el usuario no existe" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.004"/>
+  <testcase name="Debe lanzar excepción cuando hay stock insuficiente en origen" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.006"/>
+  <testcase name="Debe decrementar stock en sucursal origen" classname="com.nexoohub.almacen.inventario.service.TraspasoServiceTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

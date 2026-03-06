@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TipoClienteService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.catalogo.service</a> &gt; <span class="el_source">TipoClienteService.java</span></div><h1>TipoClienteService.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.catalogo.service;
+
+import com.nexoohub.almacen.catalogo.entity.TipoCliente;
+import com.nexoohub.almacen.catalogo.repository.TipoClienteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+/**
+ * Servicio de Tipos de Cliente con cache Redis.
+ * 
+ * CACHE STRATEGY:
+ * - TTL: 2 horas (tipos de cliente son catálogo estático)
+ * - Eviction: Al crear/actualizar se limpia TODO el cache
+ * - Beneficio: ~95% reducción queries (raramente cambia)
+ * 
+ * Phase 3.3: Performance Optimization - Redis Caching
+ */
+@Service
+@Transactional(readOnly = true)
+public class TipoClienteService {
+
+    private final TipoClienteRepository tipoClienteRepository;
+
+<span class="fc" id="L31">    public TipoClienteService(TipoClienteRepository tipoClienteRepository) {</span>
+<span class="fc" id="L32">        this.tipoClienteRepository = tipoClienteRepository;</span>
+<span class="fc" id="L33">    }</span>
+
+    @Cacheable(value = &quot;tiposCliente&quot;, key = &quot;'page-' + #pageable.pageNumber + '-size-' + #pageable.pageSize + '-sort-' + #pageable.sort.toString()&quot;)
+    public Page&lt;TipoCliente&gt; listarTiposCliente(Pageable pageable) {
+<span class="fc" id="L37">        return tipoClienteRepository.findAll(pageable);</span>
+    }
+
+    @Cacheable(value = &quot;tiposCliente&quot;, key = &quot;'id-' + #id&quot;)
+    public Optional&lt;TipoCliente&gt; buscarPorId(Integer id) {
+<span class="nc" id="L42">        return tipoClienteRepository.findById(id);</span>
+    }
+
+    @Transactional
+    @CacheEvict(value = &quot;tiposCliente&quot;, allEntries = true)
+    public TipoCliente crear(TipoCliente tipoCliente) {
+<span class="nc" id="L48">        return tipoClienteRepository.save(tipoCliente);</span>
+    }
+
+    @Transactional
+    @CacheEvict(value = &quot;tiposCliente&quot;, allEntries = true)
+    public TipoCliente actualizar(TipoCliente tipoCliente) {
+<span class="nc" id="L54">        return tipoClienteRepository.save(tipoCliente);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

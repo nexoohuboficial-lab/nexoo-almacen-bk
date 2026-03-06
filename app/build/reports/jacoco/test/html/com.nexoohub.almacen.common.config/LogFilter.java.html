@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.common.config</a> &gt; <span class="el_source">LogFilter.java</span></div><h1>LogFilter.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.common.config;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+import java.io.IOException;
+import java.util.UUID;
+
+@Component
+<span class="fc" id="L13">public class LogFilter implements Filter {</span>
+<span class="fc" id="L14">    private static final Logger log = LoggerFactory.getLogger(LogFilter.class);</span>
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
+            throws IOException, ServletException {
+        
+<span class="fc" id="L20">        long startTime = System.currentTimeMillis();</span>
+        // Generamos un ID corto de 8 caracteres para el rastreo
+<span class="fc" id="L22">        String traceId = UUID.randomUUID().toString().substring(0, 8);</span>
+<span class="fc" id="L23">        MDC.put(&quot;traceId&quot;, traceId);</span>
+
+        try {
+<span class="fc" id="L26">            HttpServletRequest req = (HttpServletRequest) request;</span>
+<span class="fc" id="L27">            log.info(&quot;&gt;&gt; Iniciando petición: {} {}&quot;, req.getMethod(), req.getRequestURI());</span>
+            
+<span class="fc" id="L29">            chain.doFilter(request, response);</span>
+        } finally {
+<span class="fc" id="L31">            long duration = System.currentTimeMillis() - startTime;</span>
+<span class="fc" id="L32">            log.info(&quot;&lt;&lt; Petición finalizada en {} ms&quot;, duration);</span>
+            
+            // Si tarda más de 500ms, lanzamos una alerta en el log
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">            if (duration &gt; 500) {</span>
+<span class="nc" id="L36">                log.warn(&quot;ALERTA DE RENDIMIENTO: La petición tardó más de lo esperado ({} ms)&quot;, duration);</span>
+            }
+<span class="fc" id="L38">            MDC.remove(&quot;traceId&quot;);</span>
+        }
+<span class="fc" id="L40">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

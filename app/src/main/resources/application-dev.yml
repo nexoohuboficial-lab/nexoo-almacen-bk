@@ -1,0 +1,56 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:devdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # Desactivar Flyway en desarrollo (H2 usa create-drop de JPA)
+  flyway:
+    enabled: false
+  
+  # Phase 3.3: Cache desactivado en desarrollo
+  # La aplicación funciona normalmente sin Redis, solo más lenta
+  cache:
+    type: none
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: "NexooHub Almacén - DEV"
+    description: "Microservicio de gestión de inventarios para refaccionarias (Desarrollo con H2)"
+    version: "1.0.0-SNAPSHOT"
+    environment: "development"
+
+logging:
+  level:
+    root: INFO
+    com.nexoohub.almacen: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+jwt:
+  secret: ${JWT_SECRET:NexooHubDevSecretKeyParaFirmaDeTokens2026!}
+  expiration: 28800000  # 8 horas para desarrollo

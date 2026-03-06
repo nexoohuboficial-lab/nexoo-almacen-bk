@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="TraspasoRequestDTO - Tests de Validación" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:55" hostname="GS1727958D01LP" time="0.156">
+  <properties/>
+  <testcase name="Debe fallar cuando items está vacío" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.021"/>
+  <testcase name="ItemTraspasoDTO - Debe validar correctamente getters y setters" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.003"/>
+  <testcase name="Debe fallar cuando items es null" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.004"/>
+  <testcase name="Debe permitir comentarios null (campo opcional)" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.02"/>
+  <testcase name="Debe validar correctamente un DTO completo y válido" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.016"/>
+  <testcase name="Debe validar correctamente múltiples items" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.016"/>
+  <testcase name="ItemTraspasoDTO - Debe fallar cuando cantidad es null" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.025"/>
+  <testcase name="Debe fallar cuando sucursalOrigenId es null" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.015"/>
+  <testcase name="ItemTraspasoDTO - Debe fallar cuando skuInterno es null" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.017"/>
+  <testcase name="Debe fallar cuando sucursalDestinoId es null" classname="com.nexoohub.almacen.inventario.dto.TraspasoRequestDTOValidationTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

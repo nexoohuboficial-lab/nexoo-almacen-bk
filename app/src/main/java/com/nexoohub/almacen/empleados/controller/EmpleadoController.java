@@ -4,12 +4,14 @@ import com.nexoohub.almacen.empleados.entity.Empleado;
 import com.nexoohub.almacen.empleados.repository.EmpleadoRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,8 +36,10 @@ public class EmpleadoController {
 
     // Ver a todos los empleados de una sucursal
     @GetMapping("/sucursal/{sucursalId}")
-    public ResponseEntity<List<Empleado>> obtenerEmpleadosPorSucursal(@PathVariable Integer sucursalId) {
-        return ResponseEntity.ok(empleadoRepository.findBySucursalIdAndActivoTrue(sucursalId));
+    public ResponseEntity<Page<Empleado>> obtenerEmpleadosPorSucursal(
+            @PathVariable Integer sucursalId,
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        return ResponseEntity.ok(empleadoRepository.findBySucursalIdAndActivoTrue(sucursalId, pageable));
     }
 
     // Dar de baja (borrado lógico)

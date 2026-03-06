@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CompraController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.compras.controller</a> &gt; <span class="el_source">CompraController.java</span></div><h1>CompraController.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.compras.controller;
+
+import com.nexoohub.almacen.compras.dto.CompraRequestDTO;
+import com.nexoohub.almacen.compras.entity.Compra;
+import com.nexoohub.almacen.compras.service.CompraService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/v1/compras&quot;)
+<span class="fc" id="L18">public class CompraController {</span>
+
+    @Autowired
+    private CompraService compraService;
+
+    @PostMapping(&quot;/ingreso&quot;)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; registrarIngreso(@Valid @RequestBody CompraRequestDTO request) {
+        // Obtenemos el username de quien está logueado (el admin o el empleado)
+<span class="nc" id="L26">        String username = SecurityContextHolder.getContext().getAuthentication().getName();</span>
+
+        // Ejecutamos la magia financiera
+<span class="nc" id="L29">        Compra compraProcesada = compraService.procesarIngresoMercancia(request, username);</span>
+
+        // Respuesta limpia y profesional
+<span class="nc" id="L32">        Map&lt;String, Object&gt; respuesta = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L33">        respuesta.put(&quot;exitoso&quot;, true);</span>
+<span class="nc" id="L34">        respuesta.put(&quot;mensaje&quot;, &quot;Ingreso de mercancía procesado y precios actualizados&quot;);</span>
+<span class="nc" id="L35">        respuesta.put(&quot;folioInterno&quot;, compraProcesada.getId());</span>
+<span class="nc" id="L36">        respuesta.put(&quot;totalFacturaConIva&quot;, compraProcesada.getTotalCompra());</span>
+<span class="nc" id="L37">        respuesta.put(&quot;fechaRegistro&quot;, compraProcesada.getFechaCompra());</span>
+
+<span class="nc" id="L39">        return new ResponseEntity&lt;&gt;(respuesta, HttpStatus.CREATED);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

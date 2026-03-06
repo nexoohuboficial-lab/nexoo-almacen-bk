@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="VentaService - Tests de Procesamiento de Ventas" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:36" hostname="GS1727958D01LP" time="0.436">
+  <properties/>
+  <testcase name="Debe calcular total de venta correctamente" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.359"/>
+  <testcase name="Debe lanzar excepción cuando el vendedor no existe" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.005"/>
+  <testcase name="Debe manejar lista vacía de items sin errores" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.005"/>
+  <testcase name="Debe manejar venta con múltiples items correctamente" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.009"/>
+  <testcase name="Debe aplicar precio especial para cliente taller" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.009"/>
+  <testcase name="Debe procesar venta exitosamente con precio público" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.008"/>
+  <testcase name="Debe lanzar excepción cuando el producto no tiene precio configurado" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.005"/>
+  <testcase name="Debe lanzar excepción cuando el cliente no existe" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.005"/>
+  <testcase name="Debe decrementar stock correctamente al procesar venta" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.005"/>
+  <testcase name="Debe lanzar excepción cuando el producto no existe en sucursal" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.005"/>
+  <testcase name="Debe lanzar excepción cuando hay stock insuficiente" classname="com.nexoohub.almacen.ventas.service.VentaServiceTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -8,7 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.crypto.SecretKey;
@@ -21,13 +23,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("JwtUtil - Tests de Generación y Validación de JWT")
 class JwtUtilTest {
 
+    @Mock
+    private Environment environment;
+
     private JwtUtil jwtUtil;
     private final String SECRET_KEY = "MySecretKeyForTestingMustBeLongEnoughForHS256Algorithm";
     private final long EXPIRATION_TIME = 86400000; // 24 horas en milisegundos
 
     @BeforeEach
     void setUp() {
-        jwtUtil = new JwtUtil();
+        jwtUtil = new JwtUtil(environment);
         ReflectionTestUtils.setField(jwtUtil, "secret", SECRET_KEY);
         ReflectionTestUtils.setField(jwtUtil, "expirationTime", EXPIRATION_TIME);
     }
@@ -205,7 +210,7 @@ class JwtUtilTest {
     @DisplayName("Debe detectar token expirado correctamente")
     void testDetectarTokenExpirado() {
         // Given
-        JwtUtil jwtUtilExpired = new JwtUtil();
+        JwtUtil jwtUtilExpired = new JwtUtil(environment);
         ReflectionTestUtils.setField(jwtUtilExpired, "secret", SECRET_KEY);
         ReflectionTestUtils.setField(jwtUtilExpired, "expirationTime", -1000L); // Token expirado inmediatamente
 

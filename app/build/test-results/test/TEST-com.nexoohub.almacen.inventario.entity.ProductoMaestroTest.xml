@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ProductoMaestro - Tests de Entidad" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:55" hostname="GS1727958D01LP" time="0.006">
+  <properties/>
+  <testcase name="Debe establecer y obtener proveedor ID correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener SKU interno correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener sensibilidad de precio correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener SKU proveedor correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe crear producto con valores por defecto" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener nombre comercial correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener stock mínimo global correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe crear producto completo con todos los campos" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.003"/>
+  <testcase name="Debe establecer y obtener clave SAT correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener categoría ID correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener estado activo correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener descripción correctamente" classname="com.nexoohub.almacen.inventario.entity.ProductoMaestroTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

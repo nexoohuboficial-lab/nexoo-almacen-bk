@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ResourceNotFoundException - Tests de Excepción" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.003">
+  <properties/>
+  <testcase name="Debe ser una RuntimeException" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.001"/>
+  <testcase name="Debe manejar mensajes null" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.0"/>
+  <testcase name="Debe manejar mensajes vacíos" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.0"/>
+  <testcase name="Debe capturar mensaje al lanzar excepción" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.001"/>
+  <testcase name="Debe crear excepciones para diferentes recursos" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.0"/>
+  <testcase name="Debe poder ser lanzada y capturada" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.0"/>
+  <testcase name="Debe manejar mensajes con IDs" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.0"/>
+  <testcase name="Debe incluir mensaje en toString" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.0"/>
+  <testcase name="Debe crear excepción con mensaje" classname="com.nexoohub.almacen.common.exception.ResourceNotFoundExceptionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

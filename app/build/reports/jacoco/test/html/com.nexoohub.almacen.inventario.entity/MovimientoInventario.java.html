@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MovimientoInventario.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.inventario.entity</a> &gt; <span class="el_source">MovimientoInventario.java</span></div><h1>MovimientoInventario.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.inventario.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;movimiento_inventario&quot;)
+<span class="fc" id="L8">public class MovimientoInventario {</span>
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = &quot;sku_interno&quot;)
+    private String skuInterno;
+
+    @Column(name = &quot;sucursal_id&quot;)
+    private Integer sucursalId;
+
+    @Column(name = &quot;tipo_movimiento&quot;)
+    private String tipoMovimiento; // ENTRADA_COMPRA, SALIDA_VENTA, SALIDA_TRASPASO, ENTRADA_TRASPASO
+
+    private Integer cantidad;
+    private String comentarios;
+
+    @Column(name = &quot;rastreo_id&quot;)
+    private String rastreoId; // Para agrupar movimientos de un mismo traspaso
+
+    @Column(name = &quot;fecha_movimiento&quot;, updatable = false)
+    private LocalDateTime fechaMovimiento;
+
+    @Column(name = &quot;usuario_id&quot;)
+    private Integer usuarioId;
+
+    @PrePersist
+<span class="fc" id="L36">    public void prePersist() { this.fechaMovimiento = LocalDateTime.now(); }</span>
+
+    // Getters y Setters
+<span class="fc" id="L39">    public Integer getId() { return id; }</span>
+<span class="fc" id="L40">    public void setId(Integer id) { this.id = id; }</span>
+<span class="fc" id="L41">    public String getSkuInterno() { return skuInterno; }</span>
+<span class="fc" id="L42">    public void setSkuInterno(String skuInterno) { this.skuInterno = skuInterno; }</span>
+<span class="fc" id="L43">    public Integer getSucursalId() { return sucursalId; }</span>
+<span class="fc" id="L44">    public void setSucursalId(Integer sucursalId) { this.sucursalId = sucursalId; }</span>
+<span class="fc" id="L45">    public String getTipoMovimiento() { return tipoMovimiento; }</span>
+<span class="fc" id="L46">    public void setTipoMovimiento(String tipoMovimiento) { this.tipoMovimiento = tipoMovimiento; }</span>
+<span class="fc" id="L47">    public Integer getCantidad() { return cantidad; }</span>
+<span class="fc" id="L48">    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }</span>
+<span class="fc" id="L49">    public String getComentarios() { return comentarios; }</span>
+<span class="fc" id="L50">    public void setComentarios(String comentarios) { this.comentarios = comentarios; }</span>
+<span class="fc" id="L51">    public String getRastreoId() { return rastreoId; }</span>
+<span class="fc" id="L52">    public void setRastreoId(String rastreoId) { this.rastreoId = rastreoId; }</span>
+<span class="fc" id="L53">    public LocalDateTime getFechaMovimiento() { return fechaMovimiento; }</span>
+<span class="fc" id="L54">    public Integer getUsuarioId() { return usuarioId; }</span>
+<span class="fc" id="L55">    public void setUsuarioId(Integer usuarioId) { this.usuarioId = usuarioId; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

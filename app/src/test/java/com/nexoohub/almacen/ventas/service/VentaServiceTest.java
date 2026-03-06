@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.nexoohub.almacen.common.exception.ResourceNotFoundException;
+import com.nexoohub.almacen.common.exception.StockInsuficienteException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -226,10 +228,10 @@ class VentaServiceTest {
         when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> ventaService.procesarVenta(request, "vendedor1"));
         
-        assertEquals("Vendedor no encontrado", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Usuario"));
         verify(ventaRepository, never()).save(any());
     }
 
@@ -242,10 +244,10 @@ class VentaServiceTest {
         when(clienteRepository.findById(99)).thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> ventaService.procesarVenta(request, "vendedor1"));
         
-        assertTrue(exception.getMessage().contains("no existe"));
+        assertTrue(exception.getMessage().contains("Cliente"));
         verify(ventaRepository, never()).save(any());
     }
 
@@ -264,10 +266,10 @@ class VentaServiceTest {
                 .thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> ventaService.procesarVenta(request, "vendedor1"));
         
-        assertTrue(exception.getMessage().contains("no existe en esta sucursal"));
+        assertTrue(exception.getMessage().contains("Producto"));
         verify(detalleVentaRepository, never()).save(any());
     }
 
@@ -286,7 +288,7 @@ class VentaServiceTest {
                 .thenReturn(Optional.of(inventario));
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        StockInsuficienteException exception = assertThrows(StockInsuficienteException.class,
                 () -> ventaService.procesarVenta(request, "vendedor1"));
         
         assertTrue(exception.getMessage().contains("Stock insuficiente"));
@@ -310,10 +312,10 @@ class VentaServiceTest {
                 .thenReturn(Optional.empty());
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> ventaService.procesarVenta(request, "vendedor1"));
         
-        assertTrue(exception.getMessage().contains("no tiene un precio configurado"));
+        assertTrue(exception.getMessage().contains("precio"));
         verify(detalleVentaRepository, never()).save(any());
     }
 

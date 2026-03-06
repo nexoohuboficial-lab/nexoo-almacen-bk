@@ -1,8 +1,11 @@
 package com.nexoohub.almacen.compras.entity;
 
+import com.nexoohub.almacen.catalogo.entity.Proveedor;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "compra")
@@ -12,8 +15,12 @@ public class Compra {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "proveedor_id")
+    @Column(name = "proveedor_id", insertable = false, updatable = false)
     private Integer proveedorId;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proveedor_id")
+    private Proveedor proveedor;
 
     @Column(name = "folio_factura_proveedor")
     private String folioFacturaProveedor;
@@ -26,6 +33,9 @@ public class Compra {
 
     @Column(name = "usuario_creacion")
     private String usuarioCreacion;
+    
+    @OneToMany(mappedBy = "compra", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<DetalleCompra> detalles = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
@@ -40,6 +50,8 @@ public class Compra {
 
     public Integer getProveedorId() { return proveedorId; }
     public void setProveedorId(Integer proveedorId) { this.proveedorId = proveedorId; }
+    public Proveedor getProveedor() { return proveedor; }
+    public void setProveedor(Proveedor proveedor) { this.proveedor = proveedor; }
 
     public String getFolioFacturaProveedor() { return folioFacturaProveedor; }
     public void setFolioFacturaProveedor(String folioFacturaProveedor) { this.folioFacturaProveedor = folioFacturaProveedor; }
@@ -52,4 +64,7 @@ public class Compra {
 
     public String getUsuarioCreacion() { return usuarioCreacion; }
     public void setUsuarioCreacion(String usuarioCreacion) { this.usuarioCreacion = usuarioCreacion; }
+    
+    public List<DetalleCompra> getDetalles() { return detalles; }
+    public void setDetalles(List<DetalleCompra> detalles) { this.detalles = detalles; }
 }

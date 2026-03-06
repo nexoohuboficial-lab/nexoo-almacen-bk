@@ -29,8 +29,17 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.flywaydb:flyway-core")
+    
+    // Redis Cache (Phase 3.3)
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310") // Para LocalDateTime en cache
+    
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("com.h2database:h2") // H2 disponible para desarrollo local
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
     // Lombok para evitar código repetitivo (Getters, Setters, Constructors)
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

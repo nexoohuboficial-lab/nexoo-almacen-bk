@@ -1,7 +1,7 @@
 package com.nexoohub.almacen.catalogo.controller;
 
 import com.nexoohub.almacen.catalogo.entity.PrecioEspecial;
-import com.nexoohub.almacen.catalogo.repository.PrecioEspecialRepository;
+import com.nexoohub.almacen.catalogo.service.PrecioEspecialService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,11 +16,11 @@ import java.util.Map;
 public class PrecioEspecialController {
 
     @Autowired
-    private PrecioEspecialRepository precioEspecialRepository;
+    private PrecioEspecialService precioEspecialService;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> crearPrecioEspecial(@Valid @RequestBody PrecioEspecial precioEspecial) {
-        PrecioEspecial guardado = precioEspecialRepository.save(precioEspecial);
+        PrecioEspecial guardado = precioEspecialService.crear(precioEspecial);
         
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("exitoso", true);
@@ -32,7 +32,7 @@ public class PrecioEspecialController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarPrecioEspecial(@PathVariable Integer id) {
-        precioEspecialRepository.deleteById(id);
+        precioEspecialService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 }

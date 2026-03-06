@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="PrecioEspecial - Tests de Entidad" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:51" hostname="GS1727958D01LP" time="0.01">
+  <properties/>
+  <testcase name="Debe establecer y obtener tipoClienteId" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.006"/>
+  <testcase name="Debe establecer y obtener skuInterno" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.001"/>
+  <testcase name="Debe permitir valores null" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener precioFijo" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <testcase name="Debe manejar múltiples precios para mismo producto" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <testcase name="Debe crear precio especial con ID" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <testcase name="Debe crear precio especial completo" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.001"/>
+  <testcase name="Debe manejar diferentes SKUs con precios especiales" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <testcase name="Debe manejar precios especiales con decimales" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <testcase name="Debe crear instancia sin valores por defecto" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <testcase name="Debe manejar diferentes tipos de cliente" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <testcase name="Debe validar precio especial menor que precio público" classname="com.nexoohub.almacen.catalogo.entity.PrecioEspecialTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

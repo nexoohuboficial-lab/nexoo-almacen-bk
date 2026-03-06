@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="CompraRequestDTO - Tests de DTO" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.019">
+  <properties/>
+  <testcase name="Debe establecer y obtener proveedorId" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener cantidad en detalle" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe manejar preciosIncluyenIva false" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener costoUnitario" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe manejar lista de detalles vacía" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe crear compra request completa" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.014"/>
+  <testcase name="Debe establecer y obtener sucursalDestinoId" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.001"/>
+  <testcase name="Debe crear DetalleItemDTO vacío" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener folioFactura" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe crear CompraRequestDTO vacío" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe calcular total de un detalle" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener precioPublicoProveedor" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe permitir precioPublicoProveedor null" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener preciosIncluyenIva" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.001"/>
+  <testcase name="Debe establecer y obtener skuInterno en detalle" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe crear detalle completo" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener detalles" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.0"/>
+  <testcase name="Debe agregar múltiples detalles a la compra" classname="com.nexoohub.almacen.compras.dto.CompraRequestDTOTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

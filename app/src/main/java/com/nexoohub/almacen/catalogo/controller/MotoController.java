@@ -4,12 +4,14 @@ import com.nexoohub.almacen.catalogo.entity.Moto;
 import com.nexoohub.almacen.catalogo.repository.MotoRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,8 +22,9 @@ public class MotoController {
     private MotoRepository motoRepository;
 
     @GetMapping
-    public ResponseEntity<List<Moto>> listarMotos() {
-        return ResponseEntity.ok(motoRepository.findAll());
+    public ResponseEntity<Page<Moto>> listarMotos(
+            @PageableDefault(size = 50, sort = "marca") Pageable pageable) {
+        return ResponseEntity.ok(motoRepository.findAll(pageable));
     }
 
     @PostMapping

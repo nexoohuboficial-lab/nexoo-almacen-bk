@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="MovimientoInventario - Tests de Entidad" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:55" hostname="GS1727958D01LP" time="0.005">
+  <properties/>
+  <testcase name="Debe manejar cantidades negativas para salidas" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe permitir rastreoId null" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.001"/>
+  <testcase name="Debe permitir comentarios null" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe manejar diferentes tipos de movimiento" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener skuInterno" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.001"/>
+  <testcase name="Debe crear movimiento con ID" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener tipoMovimiento" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe establecer fechaMovimiento con prePersist" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe crear movimiento completo" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener comentarios" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener rastreoId" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener cantidad" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe obtener fechaMovimiento" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe crear instancia sin valores por defecto" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener usuarioId" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.0"/>
+  <testcase name="Debe establecer y obtener sucursalId" classname="com.nexoohub.almacen.inventario.entity.MovimientoInventarioTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

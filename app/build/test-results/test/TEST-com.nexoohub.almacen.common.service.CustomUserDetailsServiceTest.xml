@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="CustomUserDetailsService - Tests de Carga de Usuarios" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.016">
+  <properties/>
+  <testcase name="Debe preservar la contraseña encriptada" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.001"/>
+  <testcase name="Debe lanzar excepción cuando usuario no existe" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.001"/>
+  <testcase name="Debe lanzar excepción con username vacío" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.001"/>
+  <testcase name="Debe cargar usuario con diferentes roles" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.001"/>
+  <testcase name="Debe manejar múltiples llamadas consecutivas" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.001"/>
+  <testcase name="Debe manejar usuario con username en minúsculas" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.0"/>
+  <testcase name="Debe cargar usuario con username con espacios" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.0"/>
+  <testcase name="Debe eliminar prefijo ROLE_ correctamente al construir UserDetails" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.001"/>
+  <testcase name="Debe cargar correctamente los roles del usuario" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.001"/>
+  <testcase name="Debe mantener case-sensitive en username" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.002"/>
+  <testcase name="Debe retornar UserDetails habilitado" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.0"/>
+  <testcase name="Debe construir UserDetails con todos los campos necesarios" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.002"/>
+  <testcase name="Debe cargar usuario correctamente por username" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.001"/>
+  <testcase name="Debe lanzar excepción con username null" classname="com.nexoohub.almacen.common.service.CustomUserDetailsServiceTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

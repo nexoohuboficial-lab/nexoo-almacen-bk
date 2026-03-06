@@ -4,12 +4,14 @@ import com.nexoohub.almacen.catalogo.entity.Cliente;
 import com.nexoohub.almacen.catalogo.repository.ClienteRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -21,8 +23,9 @@ public class ClienteController {
 
     // 1. LISTAR TODOS LOS CLIENTES
     @GetMapping
-    public ResponseEntity<List<Cliente>> listarClientes() {
-        return ResponseEntity.ok(clienteRepository.findAll());
+    public ResponseEntity<Page<Cliente>> listarClientes(
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
+        return ResponseEntity.ok(clienteRepository.findAll(pageable));
     }
 
     // 2. REGISTRAR UN NUEVO CLIENTE (Taller, Mayorista, etc.)

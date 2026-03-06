@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="AuthResponse - Tests de DTO (Record)" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.004">
+  <properties/>
+  <testcase name="Dos AuthResponse con diferentes tokens no deben ser iguales" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <testcase name="Debe generar toString legible" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.001"/>
+  <testcase name="Debe manejar tokens JWT largos" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <testcase name="Debe manejar token vacío" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.001"/>
+  <testcase name="Debe acceder al token" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <testcase name="Debe crear response con token válido formato Bearer" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <testcase name="Debe ser inmutable (characteristic de records)" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <testcase name="Debe permitir token null" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.001"/>
+  <testcase name="Dos AuthResponse con mismo token deben ser iguales" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <testcase name="Debe generar mismo hashCode para mismo token" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <testcase name="Debe crear AuthResponse con token" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <testcase name="Debe manejar diferentes tokens" classname="com.nexoohub.almacen.common.dto.AuthResponseTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

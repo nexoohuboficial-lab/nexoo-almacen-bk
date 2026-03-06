@@ -1,0 +1,824 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nexoohub.almacen.compras.controller.CompraControllerIntegrationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.126">
+  <properties/>
+  <testcase name="sinAutenticacion_RetornaForbidden()" classname="com.nexoohub.almacen.compras.controller.CompraControllerIntegrationTest" time="0.049"/>
+  <testcase name="registrarIngreso_DetallesVacio()" classname="com.nexoohub.almacen.compras.controller.CompraControllerIntegrationTest" time="0.042"/>
+  <testcase name="registrarIngreso_ProveedorNulo()" classname="com.nexoohub.almacen.compras.controller.CompraControllerIntegrationTest" time="0.033"/>
+  <system-out><![CDATA[2026-03-05T19:17:54.214-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Creating new transaction with name [com.nexoohub.almacen.compras.controller.CompraControllerIntegrationTest.sinAutenticacion_RetornaForbidden]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2026-03-05T19:17:54.214-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Opened new EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.214-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@55817beb]
+2026-03-05T19:17:54.215-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.215-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.220-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        c1_0.id,
+        c1_0.fecha_compra,
+        c1_0.folio_factura_proveedor,
+        c1_0.proveedor_id,
+        c1_0.total_compra,
+        c1_0.usuario_creacion 
+    from
+        compra c1_0
+2026-03-05T19:17:54.220-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select c1_0.id,c1_0.fecha_compra,c1_0.folio_factura_proveedor,c1_0.proveedor_id,c1_0.total_compra,c1_0.usuario_creacion from compra c1_0, time: 3ms, rows: 0
+2026-03-05T19:17:54.221-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.221-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.225-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0
+2026-03-05T19:17:54.226-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select is1_0.sku_interno,is1_0.sucursal_id,is1_0.costo_promedio_ponderado,is1_0.fecha_actualizacion,is1_0.fecha_creacion,is1_0.stock_actual,is1_0.stock_minimo_sucursal,is1_0.ubicacion_pasillo,is1_0.usuario_actualizacion,is1_0.usuario_creacion from inventario_sucursal is1_0, time: 3ms, rows: 0
+2026-03-05T19:17:54.226-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.226-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.227-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0
+2026-03-05T19:17:54.227-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select pm1_0.sku_interno,pm1_0.activo,pm1_0.categoria_id,pm1_0.clave_sat,pm1_0.descripcion,pm1_0.fecha_actualizacion,pm1_0.fecha_creacion,pm1_0.nombre_comercial,pm1_0.proveedor_id,pm1_0.sensibilidad_precio,pm1_0.sku_proveedor,pm1_0.stock_minimo_global,pm1_0.usuario_actualizacion,pm1_0.usuario_creacion from producto_maestro pm1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.227-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.227-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.228-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        p1_0.id,
+        p1_0.direccion,
+        p1_0.email,
+        p1_0.fecha_actualizacion,
+        p1_0.fecha_creacion,
+        p1_0.nombre_contacto,
+        p1_0.nombre_empresa,
+        p1_0.rfc,
+        p1_0.telefono,
+        p1_0.usuario_actualizacion,
+        p1_0.usuario_creacion 
+    from
+        proveedor p1_0
+2026-03-05T19:17:54.228-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select p1_0.id,p1_0.direccion,p1_0.email,p1_0.fecha_actualizacion,p1_0.fecha_creacion,p1_0.nombre_contacto,p1_0.nombre_empresa,p1_0.rfc,p1_0.telefono,p1_0.usuario_actualizacion,p1_0.usuario_creacion from proveedor p1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.228-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.228-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.229-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.activo,
+        s1_0.direccion,
+        s1_0.fecha_actualizacion,
+        s1_0.fecha_creacion,
+        s1_0.nombre,
+        s1_0.usuario_actualizacion,
+        s1_0.usuario_creacion 
+    from
+        sucursal s1_0
+2026-03-05T19:17:54.229-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select s1_0.id,s1_0.activo,s1_0.direccion,s1_0.fecha_actualizacion,s1_0.fecha_creacion,s1_0.nombre,s1_0.usuario_actualizacion,s1_0.usuario_creacion from sucursal s1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.229-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.229-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.230-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        cf1_0.id,
+        cf1_0.comision_tarjeta,
+        cf1_0.fecha_actualizacion,
+        cf1_0.fecha_creacion,
+        cf1_0.gastos_fijos_mensuales,
+        cf1_0.iva,
+        cf1_0.margen_ganancia_base,
+        cf1_0.meta_ventas_mensual,
+        cf1_0.usuario_actualizacion,
+        cf1_0.usuario_creacion 
+    from
+        configuracion_financiera cf1_0
+2026-03-05T19:17:54.230-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select cf1_0.id,cf1_0.comision_tarjeta,cf1_0.fecha_actualizacion,cf1_0.fecha_creacion,cf1_0.gastos_fijos_mensuales,cf1_0.iva,cf1_0.margen_ganancia_base,cf1_0.meta_ventas_mensual,cf1_0.usuario_actualizacion,cf1_0.usuario_creacion from configuracion_financiera cf1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.230-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.230-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.231-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0
+2026-03-05T19:17:54.231-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.231-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.231-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.232-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        usuarios
+        (empleado_id, fecha_actualizacion, fecha_creacion, password, role, username, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.233-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.233-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.233-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        cf1_0.id,
+        cf1_0.comision_tarjeta,
+        cf1_0.fecha_actualizacion,
+        cf1_0.fecha_creacion,
+        cf1_0.gastos_fijos_mensuales,
+        cf1_0.iva,
+        cf1_0.margen_ganancia_base,
+        cf1_0.meta_ventas_mensual,
+        cf1_0.usuario_actualizacion,
+        cf1_0.usuario_creacion 
+    from
+        configuracion_financiera cf1_0 
+    where
+        cf1_0.id=?
+2026-03-05T19:17:54.236-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        configuracion_financiera
+        (comision_tarjeta, fecha_actualizacion, fecha_creacion, gastos_fijos_mensuales, iva, margen_ganancia_base, meta_ventas_mensual, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.237-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.237-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.240-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        sucursal
+        (activo, direccion, fecha_actualizacion, fecha_creacion, nombre, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.241-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.241-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.241-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        proveedor
+        (direccion, email, fecha_actualizacion, fecha_creacion, nombre_contacto, nombre_empresa, rfc, telefono, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.242-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.242-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.242-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0 
+    where
+        pm1_0.sku_interno=?
+2026-03-05T19:17:54.243-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.243-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.245-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0 
+    where
+        (
+            is1_0.sku_interno, is1_0.sucursal_id
+        ) in ((?, ?))
+2026-03-05T19:17:54.251-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.251-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.251-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0 
+    where
+        pm1_0.sku_interno=?
+2026-03-05T19:17:54.253-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1970677728<open>)] for JPA transaction
+2026-03-05T19:17:54.253-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.253-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0 
+    where
+        (
+            is1_0.sku_interno, is1_0.sucursal_id
+        ) in ((?, ?))
+2026-03-05T19:17:54.261-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Initiating transaction rollback
+2026-03-05T19:17:54.261-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Rolling back JPA transaction on EntityManager [SessionImpl(1970677728<open>)]
+2026-03-05T19:17:54.262-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Closing JPA EntityManager [SessionImpl(1970677728<open>)] after transaction
+2026-03-05T19:17:54.263-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Creating new transaction with name [com.nexoohub.almacen.compras.controller.CompraControllerIntegrationTest.registrarIngreso_DetallesVacio]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2026-03-05T19:17:54.263-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Opened new EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.263-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@4e91899d]
+2026-03-05T19:17:54.264-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.264-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.265-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        c1_0.id,
+        c1_0.fecha_compra,
+        c1_0.folio_factura_proveedor,
+        c1_0.proveedor_id,
+        c1_0.total_compra,
+        c1_0.usuario_creacion 
+    from
+        compra c1_0
+2026-03-05T19:17:54.265-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select c1_0.id,c1_0.fecha_compra,c1_0.folio_factura_proveedor,c1_0.proveedor_id,c1_0.total_compra,c1_0.usuario_creacion from compra c1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.266-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.266-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.267-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0
+2026-03-05T19:17:54.267-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select is1_0.sku_interno,is1_0.sucursal_id,is1_0.costo_promedio_ponderado,is1_0.fecha_actualizacion,is1_0.fecha_creacion,is1_0.stock_actual,is1_0.stock_minimo_sucursal,is1_0.ubicacion_pasillo,is1_0.usuario_actualizacion,is1_0.usuario_creacion from inventario_sucursal is1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.267-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.267-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.268-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0
+2026-03-05T19:17:54.268-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select pm1_0.sku_interno,pm1_0.activo,pm1_0.categoria_id,pm1_0.clave_sat,pm1_0.descripcion,pm1_0.fecha_actualizacion,pm1_0.fecha_creacion,pm1_0.nombre_comercial,pm1_0.proveedor_id,pm1_0.sensibilidad_precio,pm1_0.sku_proveedor,pm1_0.stock_minimo_global,pm1_0.usuario_actualizacion,pm1_0.usuario_creacion from producto_maestro pm1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.268-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.268-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.270-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        p1_0.id,
+        p1_0.direccion,
+        p1_0.email,
+        p1_0.fecha_actualizacion,
+        p1_0.fecha_creacion,
+        p1_0.nombre_contacto,
+        p1_0.nombre_empresa,
+        p1_0.rfc,
+        p1_0.telefono,
+        p1_0.usuario_actualizacion,
+        p1_0.usuario_creacion 
+    from
+        proveedor p1_0
+2026-03-05T19:17:54.270-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select p1_0.id,p1_0.direccion,p1_0.email,p1_0.fecha_actualizacion,p1_0.fecha_creacion,p1_0.nombre_contacto,p1_0.nombre_empresa,p1_0.rfc,p1_0.telefono,p1_0.usuario_actualizacion,p1_0.usuario_creacion from proveedor p1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.270-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.270-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.271-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.activo,
+        s1_0.direccion,
+        s1_0.fecha_actualizacion,
+        s1_0.fecha_creacion,
+        s1_0.nombre,
+        s1_0.usuario_actualizacion,
+        s1_0.usuario_creacion 
+    from
+        sucursal s1_0
+2026-03-05T19:17:54.272-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select s1_0.id,s1_0.activo,s1_0.direccion,s1_0.fecha_actualizacion,s1_0.fecha_creacion,s1_0.nombre,s1_0.usuario_actualizacion,s1_0.usuario_creacion from sucursal s1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.272-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.272-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.273-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        cf1_0.id,
+        cf1_0.comision_tarjeta,
+        cf1_0.fecha_actualizacion,
+        cf1_0.fecha_creacion,
+        cf1_0.gastos_fijos_mensuales,
+        cf1_0.iva,
+        cf1_0.margen_ganancia_base,
+        cf1_0.meta_ventas_mensual,
+        cf1_0.usuario_actualizacion,
+        cf1_0.usuario_creacion 
+    from
+        configuracion_financiera cf1_0
+2026-03-05T19:17:54.273-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select cf1_0.id,cf1_0.comision_tarjeta,cf1_0.fecha_actualizacion,cf1_0.fecha_creacion,cf1_0.gastos_fijos_mensuales,cf1_0.iva,cf1_0.margen_ganancia_base,cf1_0.meta_ventas_mensual,cf1_0.usuario_actualizacion,cf1_0.usuario_creacion from configuracion_financiera cf1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.274-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.274-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.274-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0
+2026-03-05T19:17:54.275-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.275-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.275-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.276-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        usuarios
+        (empleado_id, fecha_actualizacion, fecha_creacion, password, role, username, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.277-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.277-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.278-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        cf1_0.id,
+        cf1_0.comision_tarjeta,
+        cf1_0.fecha_actualizacion,
+        cf1_0.fecha_creacion,
+        cf1_0.gastos_fijos_mensuales,
+        cf1_0.iva,
+        cf1_0.margen_ganancia_base,
+        cf1_0.meta_ventas_mensual,
+        cf1_0.usuario_actualizacion,
+        cf1_0.usuario_creacion 
+    from
+        configuracion_financiera cf1_0 
+    where
+        cf1_0.id=?
+2026-03-05T19:17:54.279-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        configuracion_financiera
+        (comision_tarjeta, fecha_actualizacion, fecha_creacion, gastos_fijos_mensuales, iva, margen_ganancia_base, meta_ventas_mensual, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.279-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.279-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.280-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        sucursal
+        (activo, direccion, fecha_actualizacion, fecha_creacion, nombre, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.281-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.281-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.281-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        proveedor
+        (direccion, email, fecha_actualizacion, fecha_creacion, nombre_contacto, nombre_empresa, rfc, telefono, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.282-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.282-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.282-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0 
+    where
+        pm1_0.sku_interno=?
+2026-03-05T19:17:54.283-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.283-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.283-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0 
+    where
+        (
+            is1_0.sku_interno, is1_0.sucursal_id
+        ) in ((?, ?))
+2026-03-05T19:17:54.284-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.284-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.284-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0 
+    where
+        pm1_0.sku_interno=?
+2026-03-05T19:17:54.285-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(178709794<open>)] for JPA transaction
+2026-03-05T19:17:54.285-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.286-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0 
+    where
+        (
+            is1_0.sku_interno, is1_0.sucursal_id
+        ) in ((?, ?))
+2026-03-05T19:17:54.291-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0 
+    where
+        u1_0.username=?
+2026-03-05T19:17:54.292-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0 where u1_0.username=?, time: 0ms, rows: 1
+2026-03-05T19:17:54.293-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : >> Iniciando petición: POST /api/v1/compras/ingreso
+2026-03-05T19:17:54.301-06:00  WARN 216068 --- [    Test worker] c.n.a.c.e.GlobalExceptionHandler         : Fallo en validación de datos: [detalles: La compra debe tener al menos un producto]
+2026-03-05T19:17:54.302-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : << Petición finalizada en 9 ms
+2026-03-05T19:17:54.304-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Initiating transaction rollback
+2026-03-05T19:17:54.304-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Rolling back JPA transaction on EntityManager [SessionImpl(178709794<open>)]
+2026-03-05T19:17:54.305-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Closing JPA EntityManager [SessionImpl(178709794<open>)] after transaction
+2026-03-05T19:17:54.306-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Creating new transaction with name [com.nexoohub.almacen.compras.controller.CompraControllerIntegrationTest.registrarIngreso_ProveedorNulo]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2026-03-05T19:17:54.306-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Opened new EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.306-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@158227f]
+2026-03-05T19:17:54.307-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.307-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.309-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        c1_0.id,
+        c1_0.fecha_compra,
+        c1_0.folio_factura_proveedor,
+        c1_0.proveedor_id,
+        c1_0.total_compra,
+        c1_0.usuario_creacion 
+    from
+        compra c1_0
+2026-03-05T19:17:54.309-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select c1_0.id,c1_0.fecha_compra,c1_0.folio_factura_proveedor,c1_0.proveedor_id,c1_0.total_compra,c1_0.usuario_creacion from compra c1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.309-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.309-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.310-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0
+2026-03-05T19:17:54.311-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select is1_0.sku_interno,is1_0.sucursal_id,is1_0.costo_promedio_ponderado,is1_0.fecha_actualizacion,is1_0.fecha_creacion,is1_0.stock_actual,is1_0.stock_minimo_sucursal,is1_0.ubicacion_pasillo,is1_0.usuario_actualizacion,is1_0.usuario_creacion from inventario_sucursal is1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.311-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.311-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.311-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0
+2026-03-05T19:17:54.312-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select pm1_0.sku_interno,pm1_0.activo,pm1_0.categoria_id,pm1_0.clave_sat,pm1_0.descripcion,pm1_0.fecha_actualizacion,pm1_0.fecha_creacion,pm1_0.nombre_comercial,pm1_0.proveedor_id,pm1_0.sensibilidad_precio,pm1_0.sku_proveedor,pm1_0.stock_minimo_global,pm1_0.usuario_actualizacion,pm1_0.usuario_creacion from producto_maestro pm1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.312-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.312-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.312-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        p1_0.id,
+        p1_0.direccion,
+        p1_0.email,
+        p1_0.fecha_actualizacion,
+        p1_0.fecha_creacion,
+        p1_0.nombre_contacto,
+        p1_0.nombre_empresa,
+        p1_0.rfc,
+        p1_0.telefono,
+        p1_0.usuario_actualizacion,
+        p1_0.usuario_creacion 
+    from
+        proveedor p1_0
+2026-03-05T19:17:54.313-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select p1_0.id,p1_0.direccion,p1_0.email,p1_0.fecha_actualizacion,p1_0.fecha_creacion,p1_0.nombre_contacto,p1_0.nombre_empresa,p1_0.rfc,p1_0.telefono,p1_0.usuario_actualizacion,p1_0.usuario_creacion from proveedor p1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.313-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.313-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.314-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.activo,
+        s1_0.direccion,
+        s1_0.fecha_actualizacion,
+        s1_0.fecha_creacion,
+        s1_0.nombre,
+        s1_0.usuario_actualizacion,
+        s1_0.usuario_creacion 
+    from
+        sucursal s1_0
+2026-03-05T19:17:54.314-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select s1_0.id,s1_0.activo,s1_0.direccion,s1_0.fecha_actualizacion,s1_0.fecha_creacion,s1_0.nombre,s1_0.usuario_actualizacion,s1_0.usuario_creacion from sucursal s1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.314-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.314-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.315-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        cf1_0.id,
+        cf1_0.comision_tarjeta,
+        cf1_0.fecha_actualizacion,
+        cf1_0.fecha_creacion,
+        cf1_0.gastos_fijos_mensuales,
+        cf1_0.iva,
+        cf1_0.margen_ganancia_base,
+        cf1_0.meta_ventas_mensual,
+        cf1_0.usuario_actualizacion,
+        cf1_0.usuario_creacion 
+    from
+        configuracion_financiera cf1_0
+2026-03-05T19:17:54.315-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select cf1_0.id,cf1_0.comision_tarjeta,cf1_0.fecha_actualizacion,cf1_0.fecha_creacion,cf1_0.gastos_fijos_mensuales,cf1_0.iva,cf1_0.margen_ganancia_base,cf1_0.meta_ventas_mensual,cf1_0.usuario_actualizacion,cf1_0.usuario_creacion from configuracion_financiera cf1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.315-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.315-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.316-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0
+2026-03-05T19:17:54.316-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0, time: 0ms, rows: 0
+2026-03-05T19:17:54.316-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.316-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.317-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        usuarios
+        (empleado_id, fecha_actualizacion, fecha_creacion, password, role, username, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.317-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.317-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.318-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        cf1_0.id,
+        cf1_0.comision_tarjeta,
+        cf1_0.fecha_actualizacion,
+        cf1_0.fecha_creacion,
+        cf1_0.gastos_fijos_mensuales,
+        cf1_0.iva,
+        cf1_0.margen_ganancia_base,
+        cf1_0.meta_ventas_mensual,
+        cf1_0.usuario_actualizacion,
+        cf1_0.usuario_creacion 
+    from
+        configuracion_financiera cf1_0 
+    where
+        cf1_0.id=?
+2026-03-05T19:17:54.318-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        configuracion_financiera
+        (comision_tarjeta, fecha_actualizacion, fecha_creacion, gastos_fijos_mensuales, iva, margen_ganancia_base, meta_ventas_mensual, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.319-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.319-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.320-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        sucursal
+        (activo, direccion, fecha_actualizacion, fecha_creacion, nombre, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.321-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.321-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.322-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    insert 
+    into
+        proveedor
+        (direccion, email, fecha_actualizacion, fecha_creacion, nombre_contacto, nombre_empresa, rfc, telefono, usuario_actualizacion, usuario_creacion, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2026-03-05T19:17:54.322-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.322-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.323-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0 
+    where
+        pm1_0.sku_interno=?
+2026-03-05T19:17:54.324-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.324-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.324-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0 
+    where
+        (
+            is1_0.sku_interno, is1_0.sucursal_id
+        ) in ((?, ?))
+2026-03-05T19:17:54.325-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.325-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.325-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        pm1_0.sku_interno,
+        pm1_0.activo,
+        pm1_0.categoria_id,
+        pm1_0.clave_sat,
+        pm1_0.descripcion,
+        pm1_0.fecha_actualizacion,
+        pm1_0.fecha_creacion,
+        pm1_0.nombre_comercial,
+        pm1_0.proveedor_id,
+        pm1_0.sensibilidad_precio,
+        pm1_0.sku_proveedor,
+        pm1_0.stock_minimo_global,
+        pm1_0.usuario_actualizacion,
+        pm1_0.usuario_creacion 
+    from
+        producto_maestro pm1_0 
+    where
+        pm1_0.sku_interno=?
+2026-03-05T19:17:54.326-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Found thread-bound EntityManager [SessionImpl(1623572295<open>)] for JPA transaction
+2026-03-05T19:17:54.326-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Participating in existing transaction
+2026-03-05T19:17:54.326-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        is1_0.sku_interno,
+        is1_0.sucursal_id,
+        is1_0.costo_promedio_ponderado,
+        is1_0.fecha_actualizacion,
+        is1_0.fecha_creacion,
+        is1_0.stock_actual,
+        is1_0.stock_minimo_sucursal,
+        is1_0.ubicacion_pasillo,
+        is1_0.usuario_actualizacion,
+        is1_0.usuario_creacion 
+    from
+        inventario_sucursal is1_0 
+    where
+        (
+            is1_0.sku_interno, is1_0.sucursal_id
+        ) in ((?, ?))
+2026-03-05T19:17:54.332-06:00 DEBUG 216068 --- [    Test worker] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.empleado_id,
+        u1_0.fecha_actualizacion,
+        u1_0.fecha_creacion,
+        u1_0.password,
+        u1_0.role,
+        u1_0.username,
+        u1_0.usuario_actualizacion,
+        u1_0.usuario_creacion 
+    from
+        usuarios u1_0 
+    where
+        u1_0.username=?
+2026-03-05T19:17:54.332-06:00 DEBUG 216068 --- [    Test worker] o.h.stat.internal.StatisticsImpl         : HHH000117: HQL: [CRITERIA] select u1_0.id,u1_0.empleado_id,u1_0.fecha_actualizacion,u1_0.fecha_creacion,u1_0.password,u1_0.role,u1_0.username,u1_0.usuario_actualizacion,u1_0.usuario_creacion from usuarios u1_0 where u1_0.username=?, time: 0ms, rows: 1
+2026-03-05T19:17:54.334-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : >> Iniciando petición: POST /api/v1/compras/ingreso
+2026-03-05T19:17:54.336-06:00  WARN 216068 --- [    Test worker] c.n.a.c.e.GlobalExceptionHandler         : Fallo en validación de datos: [proveedorId: El ID del proveedor es obligatorio]
+2026-03-05T19:17:54.337-06:00  INFO 216068 --- [    Test worker] c.n.almacen.common.config.LogFilter      : << Petición finalizada en 3 ms
+2026-03-05T19:17:54.338-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Initiating transaction rollback
+2026-03-05T19:17:54.338-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Rolling back JPA transaction on EntityManager [SessionImpl(1623572295<open>)]
+2026-03-05T19:17:54.339-06:00 DEBUG 216068 --- [    Test worker] o.s.orm.jpa.JpaTransactionManager        : Closing JPA EntityManager [SessionImpl(1623572295<open>)] after transaction
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

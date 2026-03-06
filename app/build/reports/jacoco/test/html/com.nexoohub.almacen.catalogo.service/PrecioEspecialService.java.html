@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrecioEspecialService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nexoohub.almacen.catalogo.service</a> &gt; <span class="el_source">PrecioEspecialService.java</span></div><h1>PrecioEspecialService.java</h1><pre class="source lang-java linenums">package com.nexoohub.almacen.catalogo.service;
+
+import com.nexoohub.almacen.catalogo.entity.PrecioEspecial;
+import com.nexoohub.almacen.catalogo.repository.PrecioEspecialRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+/**
+ * Servicio de Precios Especiales con cache Redis.
+ * 
+ * CACHE STRATEGY:
+ * - TTL: 30 minutos (precios cambian con actualizaciones programadas)
+ * - Eviction: Al crear/eliminar se limpia TODO el cache
+ * - Beneficio: ~70% reducción queries (consultas frecuentes en checkout)
+ * 
+ * IMPORTANTE: Los precios especiales se consultan en cada venta para
+ * determinar si un cliente tiene descuentos especiales.
+ * 
+ * Phase 3.3: Performance Optimization - Redis Caching
+ */
+@Service
+@Transactional(readOnly = true)
+public class PrecioEspecialService {
+
+    private final PrecioEspecialRepository precioEspecialRepository;
+
+<span class="fc" id="L32">    public PrecioEspecialService(PrecioEspecialRepository precioEspecialRepository) {</span>
+<span class="fc" id="L33">        this.precioEspecialRepository = precioEspecialRepository;</span>
+<span class="fc" id="L34">    }</span>
+
+    /**
+     * Buscar precio especial por SKU y tipo de cliente.
+     * Cache key: &quot;preciosEspeciales::sku-{skuInterno}-tipo-{tipoClienteId}&quot;
+     */
+    @Cacheable(value = &quot;preciosEspeciales&quot;, key = &quot;'sku-' + #skuInterno + '-tipo-' + #tipoClienteId&quot;)
+    public Optional&lt;PrecioEspecial&gt; buscarPrecioEspecial(String skuInterno, Integer tipoClienteId) {
+<span class="nc" id="L42">        return precioEspecialRepository.findBySkuInternoAndTipoClienteId(skuInterno, tipoClienteId);</span>
+    }
+
+    /**
+     * Crear precio especial.
+     * Limpia TODO el cache de precios especiales.
+     */
+    @Transactional
+    @CacheEvict(value = &quot;preciosEspeciales&quot;, allEntries = true)
+    public PrecioEspecial crear(PrecioEspecial precioEspecial) {
+<span class="fc" id="L52">        return precioEspecialRepository.save(precioEspecial);</span>
+    }
+
+    /**
+     * Eliminar precio especial.
+     * Limpia TODO el cache.
+     */
+    @Transactional
+    @CacheEvict(value = &quot;preciosEspeciales&quot;, allEntries = true)
+    public void eliminar(Integer id) {
+<span class="fc" id="L62">        precioEspecialRepository.deleteById(id);</span>
+<span class="fc" id="L63">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="LoginRequest - Tests de DTO (Record)" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-03-06T01:17:54" hostname="GS1727958D01LP" time="0.005">
+  <properties/>
+  <testcase name="Debe crear LoginRequest con username y password" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <testcase name="Debe crear request con credenciales válidas" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <testcase name="Debe generar toString legible" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.002"/>
+  <testcase name="Dos LoginRequest con mismos valores deben ser iguales" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <testcase name="Debe permitir valores null" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <testcase name="Dos LoginRequest con diferentes valores no deben ser iguales" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <testcase name="Debe ser inmutable (characteristic de records)" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <testcase name="Debe acceder a username" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <testcase name="Debe generar mismo hashCode para mismos valores" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.001"/>
+  <testcase name="Debe manejar diferentes usuarios" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <testcase name="Debe manejar strings vacíos" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.001"/>
+  <testcase name="Debe acceder a password" classname="com.nexoohub.almacen.common.dto.LoginRequestTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
