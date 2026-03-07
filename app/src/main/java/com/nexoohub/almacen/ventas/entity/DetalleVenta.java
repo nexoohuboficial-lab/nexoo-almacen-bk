@@ -34,6 +34,12 @@ public class DetalleVenta {
     @DecimalMin(value = "0.01", message = "El precio unitario debe ser mayor a cero")
     private BigDecimal precioUnitarioVenta;
 
+    @Column(name = "descuento_especial")
+    private BigDecimal descuentoEspecial = BigDecimal.ZERO;
+
+    @Column(name = "porcentaje_descuento")
+    private BigDecimal porcentajeDescuento = BigDecimal.ZERO;
+
     // Getters y Setters...
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -52,4 +58,9 @@ public class DetalleVenta {
     public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
     public BigDecimal getPrecioUnitarioVenta() { return precioUnitarioVenta; }
     public void setPrecioUnitarioVenta(BigDecimal precioUnitarioVenta) { this.precioUnitarioVenta = precioUnitarioVenta; }
+    
+    public BigDecimal getDescuentoEspecial() { return descuentoEspecial; }
+    public void setDescuentoEspecial(BigDecimal descuentoEspecial) { this.descuentoEspecial = descuentoEspecial; }
+    public BigDecimal getPorcentajeDescuento() { return porcentajeDescuento; }
+    public void setPorcentajeDescuento(BigDecimal porcentajeDescuento) { this.porcentajeDescuento = porcentajeDescuento; }
 }

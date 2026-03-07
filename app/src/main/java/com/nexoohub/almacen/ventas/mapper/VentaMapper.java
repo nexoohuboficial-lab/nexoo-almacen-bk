@@ -64,6 +64,8 @@ public class VentaMapper {
                 : null,
             cantidad,
             precioUnitario,
+            detalle.getDescuentoEspecial() != null ? detalle.getDescuentoEspecial() : java.math.BigDecimal.ZERO,
+            detalle.getPorcentajeDescuento() != null ? detalle.getPorcentajeDescuento() : java.math.BigDecimal.ZERO,
             subtotal
         );
     }

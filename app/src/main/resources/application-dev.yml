@@ -22,11 +22,6 @@ spring:
   # Desactivar Flyway en desarrollo (H2 usa create-drop de JPA)
   flyway:
     enabled: false
-  
-  # Phase 3.3: Cache desactivado en desarrollo
-  # La aplicación funciona normalmente sin Redis, solo más lenta
-  cache:
-    type: none
 
 management:
   endpoints:

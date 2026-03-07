@@ -2,6 +2,7 @@ package com.nexoohub.almacen.ventas.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class VentaRequestDTO {
@@ -21,12 +22,15 @@ public class VentaRequestDTO {
     public static class ItemVentaDTO {
         @NotNull private String skuInterno;
         @NotNull private Integer cantidad;
+        private BigDecimal precioOfertaEspecial; // Opcional: precio con descuento aplicado por el vendedor
 
         // Getters y Setters
         public String getSkuInterno() { return skuInterno; }
         public void setSkuInterno(String skuInterno) { this.skuInterno = skuInterno; }
         public Integer getCantidad() { return cantidad; }
         public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+        public BigDecimal getPrecioOfertaEspecial() { return precioOfertaEspecial; }
+        public void setPrecioOfertaEspecial(BigDecimal precioOfertaEspecial) { this.precioOfertaEspecial = precioOfertaEspecial; }
     }
 
     // Getters y Setters del encabezado...

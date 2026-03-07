@@ -217,7 +217,9 @@ CREATE TABLE detalle_venta (
     venta_id INTEGER REFERENCES venta(id),
     sku_interno VARCHAR(50) REFERENCES producto_maestro(sku_interno),
     cantidad INTEGER NOT NULL,
-    precio_unitario_venta NUMERIC(10, 2) NOT NULL
+    precio_unitario_venta NUMERIC(10, 2) NOT NULL,
+    descuento_especial NUMERIC(10, 2) DEFAULT 0.00,
+    porcentaje_descuento NUMERIC(5, 2) DEFAULT 0.00
 );
 
 -- 5. DEVOLUCIONES

@@ -35,10 +35,8 @@ public class ConfiguracionFinancieraService {
 
     /**
      * Obtener parámetros financieros.
-     * Este método se consulta MUY frecuentemente en cálculos de precio.
-     * Cache key: "configuracionFinanciera::global"
+     * Este método se consulta frecuentemente en cálculos de precio.
      */
-    @Cacheable(value = "configuracionFinanciera", key = "'global'")
     public Optional<ConfiguracionFinanciera> obtenerParametros() {
         // ID 1 = configuración global maestra
         return configuracionRepository.findById(1);
@@ -46,10 +44,8 @@ public class ConfiguracionFinancieraService {
 
     /**
      * Actualizar parámetros financieros.
-     * Limpia el cache para forzar recarga en próximas consultas.
      */
     @Transactional
-    @CacheEvict(value = "configuracionFinanciera", allEntries = true)
     public ConfiguracionFinanciera actualizarParametros(ConfiguracionFinanciera configuracion) {
         return configuracionRepository.save(configuracion);
     }

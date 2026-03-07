@@ -388,6 +388,128 @@ class VentaServiceTest {
         verify(inventarioRepository, never()).save(any());
     }
 
+    @Test
+    @DisplayName("Debe calcular descuento especial correctamente cuando se aplica oferta")
+    void testCalcularDescuentoEspecial() {
+        // Given
+        VentaRequestDTO request = new VentaRequestDTO();
+        request.setClienteId(1);
+        request.setSucursalId(1);
+        request.setMetodoPago("EFECTIVO");
+
+        VentaRequestDTO.ItemVentaDTO item = new VentaRequestDTO.ItemVentaDTO();
+        item.setSkuInterno("SKU001");
+        item.setCantidad(2);
+        item.setPrecioOfertaEspecial(new BigDecimal("100.00")); // Precio normal: 200, oferta: 100
+        request.setItems(List.of(item));
+
+        Venta ventaMock = new Venta();
+        ventaMock.setId(1);
+
+        when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.of(vendedor));
+        when(clienteRepository.findById(1)).thenReturn(Optional.of(clientePublico));
+        when(ventaRepository.save(any(Venta.class))).thenReturn(ventaMock);
+        when(inventarioRepository.findById(any(InventarioSucursalId.class)))
+                .thenReturn(Optional.of(inventario));
+        when(historialPrecioRepository.findTopBySkuInternoOrderByFechaCalculoDesc("SKU001"))
+                .thenReturn(Optional.of(historialPrecio)); // Precio: 200.00
+        when(precioEspecialRepository.findBySkuInternoAndTipoClienteId("SKU001", 1))
+                .thenReturn(Optional.empty());
+        when(detalleVentaRepository.save(any(DetalleVenta.class))).thenReturn(new DetalleVenta());
+
+        // When
+        ventaService.procesarVenta(request, "vendedor1");
+
+        // Then
+        ArgumentCaptor<DetalleVenta> captor = ArgumentCaptor.forClass(DetalleVenta.class);
+        verify(detalleVentaRepository).save(captor.capture());
+        
+        DetalleVenta detalleSaved = captor.getValue();
+        assertEquals(new BigDecimal("100.00"), detalleSaved.getPrecioUnitarioVenta(), 
+            "El precio unitario debe ser el precio de oferta");
+        assertEquals(new BigDecimal("100.00"), detalleSaved.getDescuentoEspecial(),
+            "El descuento especial debe ser 100 (200 - 100)");
+        assertEquals(new BigDecimal("50.00"), detalleSaved.getPorcentajeDescuento(),
+            "El porcentaje de descuento debe ser 50%");
+    }
+
+    @Test
+    @DisplayName("No debe aplicar descuento cuando precioOfertaEspecial es null")
+    void testSinDescuentoEspecial() {
+        // Given
+        VentaRequestDTO request = crearRequestVenta(1, 3);
+        Venta ventaMock = new Venta();
+        ventaMock.setId(1);
+
+        when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.of(vendedor));
+        when(clienteRepository.findById(1)).thenReturn(Optional.of(clientePublico));
+        when(ventaRepository.save(any(Venta.class))).thenReturn(ventaMock);
+        when(inventarioRepository.findById(any(InventarioSucursalId.class)))
+                .thenReturn(Optional.of(inventario));
+        when(historialPrecioRepository.findTopBySkuInternoOrderByFechaCalculoDesc("SKU001"))
+                .thenReturn(Optional.of(historialPrecio));
+        when(precioEspecialRepository.findBySkuInternoAndTipoClienteId("SKU001", 1))
+                .thenReturn(Optional.empty());
+        when(detalleVentaRepository.save(any(DetalleVenta.class))).thenReturn(new DetalleVenta());
+
+        // When
+        ventaService.procesarVenta(request, "vendedor1");
+
+        // Then
+        ArgumentCaptor<DetalleVenta> captor = ArgumentCaptor.forClass(DetalleVenta.class);
+        verify(detalleVentaRepository).save(captor.capture());
+        
+        DetalleVenta detalleSaved = captor.getValue();
+        assertEquals(new BigDecimal("200.00"), detalleSaved.getPrecioUnitarioVenta(),
+            "El precio debe ser el precio público normal");
+        assertEquals(BigDecimal.ZERO, detalleSaved.getDescuentoEspecial(),
+            "No debe haber descuento especial");
+        assertEquals(BigDecimal.ZERO, detalleSaved.getPorcentajeDescuento(),
+            "El porcentaje de descuento debe ser 0%");
+    }
+
+    @Test
+    @DisplayName("No debe aplicar descuento si precioOfertaEspecial >= precio normal")
+    void testDescuentoNoAplicaSiPrecioMayorOIgual() {
+        // Given
+        VentaRequestDTO request = new VentaRequestDTO();
+        request.setClienteId(1);
+        request.setSucursalId(1);
+        request.setMetodoPago("EFECTIVO");
+
+        VentaRequestDTO.ItemVentaDTO item = new VentaRequestDTO.ItemVentaDTO();
+        item.setSkuInterno("SKU001");
+        item.setCantidad(1);
+        item.setPrecioOfertaEspecial(new BigDecimal("250.00")); // Mayor que el precio normal
+        request.setItems(List.of(item));
+
+        Venta ventaMock = new Venta();
+        ventaMock.setId(1);
+
+        when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.of(vendedor));
+        when(clienteRepository.findById(1)).thenReturn(Optional.of(clientePublico));
+        when(ventaRepository.save(any(Venta.class))).thenReturn(ventaMock);
+        when(inventarioRepository.findById(any(InventarioSucursalId.class)))
+                .thenReturn(Optional.of(inventario));
+        when(historialPrecioRepository.findTopBySkuInternoOrderByFechaCalculoDesc("SKU001"))
+                .thenReturn(Optional.of(historialPrecio)); // 200.00
+        when(precioEspecialRepository.findBySkuInternoAndTipoClienteId("SKU001", 1))
+                .thenReturn(Optional.empty());
+        when(detalleVentaRepository.save(any(DetalleVenta.class))).thenReturn(new DetalleVenta());
+
+        // When
+        ventaService.procesarVenta(request, "vendedor1");
+
+        // Then
+        ArgumentCaptor<DetalleVenta> captor = ArgumentCaptor.forClass(DetalleVenta.class);
+        verify(detalleVentaRepository).save(captor.capture());
+        
+        DetalleVenta detalleSaved = captor.getValue();
+        // Si el precio de oferta es mayor, se usa el precio normal
+        assertEquals(new BigDecimal("200.00"), detalleSaved.getPrecioUnitarioVenta());
+        assertEquals(BigDecimal.ZERO, detalleSaved.getDescuentoEspecial());
+    }
+
     // ========== MÉTODOS AUXILIARES ==========
 
     private VentaRequestDTO crearRequestVenta(Integer clienteId, Integer cantidad) {

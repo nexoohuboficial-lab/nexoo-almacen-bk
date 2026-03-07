@@ -152,16 +152,34 @@ public class VentaService {
             inventario.setStockActual(inventario.getStockActual() - item.getCantidad());
             inventarioRepository.save(inventario);
 
-            // E) Registrar detalle de venta con el precio correcto
+            // E) Calcular descuento especial si aplica
+            BigDecimal precioFinal = precioFinalAplicado;
+            BigDecimal descuentoEspecial = BigDecimal.ZERO;
+            BigDecimal porcentajeDescuento = BigDecimal.ZERO;
+            
+            if (item.getPrecioOfertaEspecial() != null && 
+                item.getPrecioOfertaEspecial().compareTo(precioFinalAplicado) < 0) {
+                // El vendedor aplicó un descuento adicional
+                descuentoEspecial = precioFinalAplicado.subtract(item.getPrecioOfertaEspecial());
+                porcentajeDescuento = descuentoEspecial
+                    .divide(precioFinalAplicado, 4, java.math.RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"))
+                    .setScale(2, java.math.RoundingMode.HALF_UP);
+                precioFinal = item.getPrecioOfertaEspecial();
+            }
+
+            // F) Registrar detalle de venta con el precio correcto y descuento
             DetalleVenta detalle = new DetalleVenta();
             detalle.setVentaId(ventaGuardada.getId());
             detalle.setSkuInterno(item.getSkuInterno());
             detalle.setCantidad(item.getCantidad());
-            detalle.setPrecioUnitarioVenta(precioFinalAplicado); // Usamos el precio ya evaluado
+            detalle.setPrecioUnitarioVenta(precioFinal);
+            detalle.setDescuentoEspecial(descuentoEspecial);
+            detalle.setPorcentajeDescuento(porcentajeDescuento);
             detalleVentaRepository.save(detalle);
 
-            // F) Acumular total
-            BigDecimal subtotal = precioFinalAplicado.multiply(new BigDecimal(item.getCantidad()));
+            // G) Acumular total
+            BigDecimal subtotal = precioFinal.multiply(new BigDecimal(item.getCantidad()));
             totalVenta = totalVenta.add(subtotal);
         }
 
