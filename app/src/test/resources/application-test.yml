@@ -17,6 +17,13 @@ spring:
   flyway:
     enabled: false
 
+# Deshabilitar Swagger/OpenAPI en tests
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
 jwt:
   secret: TestSecretKeyForIntegrationTests2026!
   expiration: 3600000

@@ -1,0 +1,244 @@
+openapi: 3.0.1
+info:
+  title: Devolución Controller API
+  description: API REST para gestión de devoluciones de ventas
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /api/v1/devoluciones:
+    post:
+      tags:
+        - Devoluciones
+      summary: Procesar una devolución
+      description: |
+        Procesa una devolución de productos vendidos.
+        El sistema automáticamente:
+        - Valida que la venta exista
+        - Verifica que los productos pertenezcan a la venta
+        - Reingresa el stock al inventario
+        - Registra el reembolso según el método especificado
+      operationId: procesarDevolucion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevolucionRequestDTO'
+            example:
+              ventaId: 123
+              sucursalId: 1
+              motivo: "Producto defectuoso"
+              metodoReembolso: "EFECTIVO"
+              items:
+                - skuInterno: "REPUESTO-001"
+                  cantidad: 2
+                  motivoItem: "Pieza rota"
+                - skuInterno: "LLANTA-MOT-002"
+                  cantidad: 1
+                  motivoItem: "No es la medida correcta"
+      responses:
+        '201':
+          description: Devolución procesada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevolucionResponseDTO'
+        '400':
+          description: Datos inválidos en la solicitud
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '404':
+          description: Venta o producto no encontrado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/devoluciones/{id}:
+    get:
+      tags:
+        - Devoluciones
+      summary: Obtener devolución por ID
+      description: Retorna los detalles completos de una devolución específica
+      operationId: obtenerDevolucionPorId
+      parameters:
+        - name: id
+          in: path
+          description: ID de la devolución
+          required: true
+          schema:
+            type: integer
+          example: 45
+      responses:
+        '200':
+          description: Devolución encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevolucionResponseDTO'
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '404':
+          description: Devolución no encontrada
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/devoluciones/venta/{ventaId}:
+    get:
+      tags:
+        - Devoluciones
+      summary: Obtener devoluciones de una venta
+      description: Retorna todas las devoluciones asociadas a una venta específica
+      operationId: obtenerDevolucionesPorVenta
+      parameters:
+        - name: ventaId
+          in: path
+          description: ID de la venta
+          required: true
+          schema:
+            type: integer
+          example: 123
+      responses:
+        '200':
+          description: Devoluciones encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DevolucionResponseDTO'
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '404':
+          description: Venta no encontrada
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenido del endpoint /api/v1/auth/login
+
+  schemas:
+    DevolucionRequestDTO:
+      type: object
+      required:
+        - ventaId
+        - sucursalId
+        - motivo
+        - metodoReembolso
+        - items
+      properties:
+        ventaId:
+          type: integer
+          description: ID de la venta original
+          example: 123
+        sucursalId:
+          type: integer
+          description: ID de la sucursal donde se procesa la devolución
+          example: 1
+        motivo:
+          type: string
+          description: Motivo general de la devolución
+          example: "Producto defectuoso"
+        metodoReembolso:
+          type: string
+          enum: [EFECTIVO, TARJETA, NOTA_CREDITO]
+          description: Método de reembolso al cliente
+          example: "EFECTIVO"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DevolucionItemRequestDTO'
+
+    DevolucionItemRequestDTO:
+      type: object
+      required:
+        - skuInterno
+        - cantidad
+      properties:
+        skuInterno:
+          type: string
+          description: SKU del producto a devolver
+          example: "REPUESTO-001"
+        cantidad:
+          type: integer
+          minimum: 1
+          description: Cantidad de unidades a devolver
+          example: 2
+        motivoItem:
+          type: string
+          description: Motivo específico del producto
+          example: "Pieza rota"
+
+    DevolucionResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID de la devolución
+          example: 45
+        ventaId:
+          type: integer
+          description: ID de la venta original
+          example: 123
+        sucursalId:
+          type: integer
+          description: ID de la sucursal
+          example: 1
+        motivo:
+          type: string
+          description: Motivo de la devolución
+          example: "Producto defectuoso"
+        metodoReembolso:
+          type: string
+          description: Método de reembolso
+          example: "EFECTIVO"
+        totalReembolsado:
+          type: number
+          format: decimal
+          description: Monto total reembolsado
+          example: 1500.00
+        fechaDevolucion:
+          type: string
+          format: date-time
+          description: Fecha y hora de la devolución
+          example: "2026-03-06T15:30:00"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DevolucionItemResponseDTO'
+
+    DevolucionItemResponseDTO:
+      type: object
+      properties:
+        skuInterno:
+          type: string
+          example: "REPUESTO-001"
+        nombreProducto:
+          type: string
+          example: "Balatas delanteras Honda"
+        cantidad:
+          type: integer
+          example: 2
+        precioUnitario:
+          type: number
+          format: decimal
+          example: 450.00
+        subtotal:
+          type: number
+          format: decimal
+          example: 900.00
+        motivoItem:
+          type: string
+          example: "Pieza rota"

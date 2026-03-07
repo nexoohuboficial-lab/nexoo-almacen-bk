@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -189,6 +190,7 @@ class ProductoControllerIntegrationTest {
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(actualizado)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.mensaje").value("Producto actualizado con éxito"))
                 .andExpect(jsonPath("$.datos.nombreComercial").value("Aceite Actualizado"))

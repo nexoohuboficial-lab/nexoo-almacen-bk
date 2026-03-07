@@ -1,0 +1,166 @@
+openapi: 3.0.1
+info:
+  title: Auditoría Precio Controller API
+  description: API REST para auditoría avanzada de cambios de precio en productos
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /api/v1/auditoria/precios/producto/{skuInterno}:
+    get:
+      tags:
+        - Auditoría de Precios
+      summary: Obtener historial de precios de un producto
+      description: Retorna el historial completo de cambios de precio para un SKU específico
+      operationId: obtenerHistorialProducto
+      parameters:
+        - name: skuInterno
+          in: path
+          description: SKU interno del producto
+          required: true
+          schema:
+            type: string
+          example: "ACE-MOT-001"
+      responses:
+        '200':
+          description: Historial obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditoriaPrecioDTO'
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/auditoria/precios/periodo:
+    get:
+      tags:
+        - Auditoría de Precios
+      summary: Obtener cambios de precio en un rango de fechas
+      description: Retorna todos los cambios de precio que ocurrieron entre las fechas especificadas
+      operationId: obtenerCambiosPorPeriodo
+      parameters:
+        - name: fechaInicio
+          in: query
+          description: Fecha y hora inicial del período (formato ISO 8601)
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2026-01-01T00:00:00"
+        - name: fechaFin
+          in: query
+          description: Fecha y hora final del período (formato ISO 8601)
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2026-03-06T23:59:59"
+      responses:
+        '200':
+          description: Cambios obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditoriaPrecioDTO'
+        '400':
+          description: Parámetros de fecha inválidos
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/auditoria/precios/significativos:
+    get:
+      tags:
+        - Auditoría de Precios
+      summary: Obtener cambios de precio significativos
+      description: Retorna cambios de precio que superan el porcentaje especificado
+      operationId: obtenerCambiosSignificativos
+      parameters:
+        - name: porcentaje
+          in: query
+          description: Porcentaje mínimo de cambio para considerar significativo
+          required: false
+          schema:
+            type: number
+            format: double
+            default: 10.0
+          example: 10.0
+      responses:
+        '200':
+          description: Cambios significativos obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditoriaPrecioDTO'
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenido del endpoint /api/v1/auth/login
+
+  schemas:
+    AuditoriaPrecioDTO:
+      type: object
+      properties:
+        skuInterno:
+          type: string
+          description: SKU del producto
+          example: "ACE-MOT-001"
+        nombreComercial:
+          type: string
+          description: Nombre del producto
+          example: "Aceite Motul 10W40"
+        precioAnterior:
+          type: number
+          format: decimal
+          description: Precio antes del cambio
+          example: 250.00
+        precioNuevo:
+          type: number
+          format: decimal
+          description: Precio después del cambio
+          example: 275.00
+        porcentajeCambio:
+          type: number
+          format: decimal
+          description: Porcentaje de cambio (positivo = incremento, negativo = decremento)
+          example: 10.0
+        fechaCambio:
+          type: string
+          format: date-time
+          description: Fecha y hora del cambio
+          example: "2026-03-05T10:30:00"
+        usuarioResponsable:
+          type: string
+          description: Usuario que realizó el cambio
+          example: "admin"
+        motivo:
+          type: string
+          description: Motivo del cambio de precio
+          example: "Incremento por proveedor"

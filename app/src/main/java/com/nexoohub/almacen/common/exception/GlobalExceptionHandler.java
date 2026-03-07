@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleAll(Exception ex) {
         // 2. ERROR CRÍTICO: Aquí sí mandamos el STACKTRACE completo al log 
         // para que tú puedas ver en qué línea falló, pero el usuario no lo ve.
-        log.error("ERROR NO CONTROLADO EN NEXOOHUB: ", ex); 
+        log.error("ERROR NO CONTROLADO EN NEXOOHUB: ", ex);
         
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error Interno", "Ocurrió un error inesperado", null);
     }

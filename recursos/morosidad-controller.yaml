@@ -1,0 +1,247 @@
+openapi: 3.0.1
+info:
+  title: Morosidad Controller API
+  description: API REST para gestión de bloqueo de clientes por morosidad
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /api/v1/clientes/bloqueados:
+    get:
+      tags:
+        - Morosidad
+      summary: Obtener clientes bloqueados
+      description: Retorna lista de todos los clientes bloqueados por morosidad
+      operationId: obtenerClientesBloqueados
+      responses:
+        '200':
+          description: Lista obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClienteBloqueadoDTO'
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/clientes/morosos:
+    get:
+      tags:
+        - Morosidad
+      summary: Obtener clientes con saldo pendiente
+      description: Retorna lista de clientes que tienen saldo pendiente (morosos)
+      operationId: obtenerClientesMorosos
+      responses:
+        '200':
+          description: Lista obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClienteBloqueadoDTO'
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/clientes/{id}/bloquear:
+    post:
+      tags:
+        - Morosidad
+      summary: Bloquear cliente por morosidad
+      description: Bloquea un cliente especificando el motivo de bloqueo
+      operationId: bloquearCliente
+      parameters:
+        - name: id
+          in: path
+          description: ID del cliente
+          required: true
+          schema:
+            type: integer
+          example: 15
+        - name: motivo
+          in: query
+          description: Motivo del bloqueo
+          required: true
+          schema:
+            type: string
+          example: "Deuda mayor a 30 días"
+      responses:
+        '200':
+          description: Cliente bloqueado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '404':
+          description: Cliente no encontrado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/clientes/{id}/desbloquear:
+    post:
+      tags:
+        - Morosidad
+      summary: Desbloquear cliente
+      description: Desbloquea un cliente previamente bloqueado
+      operationId: desbloquearCliente
+      parameters:
+        - name: id
+          in: path
+          description: ID del cliente
+          required: true
+          schema:
+            type: integer
+          example: 15
+      responses:
+        '200':
+          description: Cliente desbloqueado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '404':
+          description: Cliente no encontrado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/clientes/{id}/registrar-pago:
+    post:
+      tags:
+        - Morosidad
+      summary: Registrar pago de cliente
+      description: |
+        Registra un pago y actualiza el saldo pendiente del cliente.
+        Si el saldo llega a cero, el cliente se desbloquea automáticamente.
+      operationId: registrarPago
+      parameters:
+        - name: id
+          in: path
+          description: ID del cliente
+          required: true
+          schema:
+            type: integer
+          example: 15
+        - name: monto
+          in: query
+          description: Monto del pago
+          required: true
+          schema:
+            type: number
+            format: decimal
+          example: 5000.00
+      responses:
+        '200':
+          description: Pago registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '400':
+          description: Monto inválido
+        '401':
+          description: No autorizado - Token JWT inválido o ausente
+        '404':
+          description: Cliente no encontrado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenido del endpoint /api/v1/auth/login
+
+  schemas:
+    ClienteBloqueadoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID del cliente
+          example: 15
+        nombre:
+          type: string
+          description: Nombre del cliente
+          example: "Taller Mecánico Pérez"
+        rfc:
+          type: string
+          description: RFC del cliente
+          example: "PEPE850101ABC"
+        saldoPendiente:
+          type: number
+          format: decimal
+          description: Saldo pendiente de pago
+          example: 15000.00
+        bloqueado:
+          type: boolean
+          description: Indica si el cliente está bloqueado
+          example: true
+        motivoBloqueo:
+          type: string
+          description: Motivo del bloqueo
+          example: "Deuda mayor a 30 días"
+        diasMora:
+          type: integer
+          description: Días de mora
+          example: 45
+
+    Cliente:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 15
+        nombre:
+          type: string
+          example: "Taller Mecánico Pérez"
+        rfc:
+          type: string
+          example: "PEPE850101ABC"
+        telefono:
+          type: string
+          example: "5512345678"
+        email:
+          type: string
+          example: "taller@example.com"
+        direccionFiscal:
+          type: string
+          example: "Av. Principal 123, Col. Centro"
+        tipoClienteId:
+          type: integer
+          example: 2
+        saldoPendiente:
+          type: number
+          format: decimal
+          example: 10000.00
+        bloqueado:
+          type: boolean
+          example: false
+        motivoBloqueo:
+          type: string
+          nullable: true
+          example: null

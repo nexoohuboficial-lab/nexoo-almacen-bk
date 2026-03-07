@@ -31,6 +31,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.flywaydb:flyway-core")
     
+    // OpenAPI/Swagger Documentation
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+    
+    // Rate Limiting con Caffe cache
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("com.h2database:h2") // H2 disponible para desarrollo local
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -69,6 +75,14 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+// Configuración del compilador Java para preservar nombres de parámetros (CRÍTICO para Spring)
+tasks.named<JavaCompile>("compileJava") {
+    options.compilerArgs.add("-parameters")
+}
+tasks.named<JavaCompile>("compileTestJava") {
+    options.compilerArgs.add("-parameters")
 }
 
 application {
