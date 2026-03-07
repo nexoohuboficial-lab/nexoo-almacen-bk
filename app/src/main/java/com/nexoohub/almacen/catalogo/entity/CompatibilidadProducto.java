@@ -17,9 +17,13 @@ public class CompatibilidadProducto extends AuditableEntity {
     @Column(name = "sku_interno")
     private String skuInterno;
 
-    @NotNull(message = "El ID de la moto es obligatorio")
-    @Column(name = "moto_id")
+    @Column(name = "moto_id", insertable = false, updatable = false)
     private Integer motoId;
+    
+    @NotNull(message = "La moto es obligatoria")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "moto_id")
+    private Moto moto;
 
     @Column(name = "anio_inicio")
     private Integer anioInicio;
@@ -44,4 +48,7 @@ public class CompatibilidadProducto extends AuditableEntity {
 
     public Integer getMotoId() { return motoId; }
     public void setMotoId(Integer motoId) { this.motoId = motoId; }
+    
+    public Moto getMoto() { return moto; }
+    public void setMoto(Moto moto) { this.moto = moto; }
 }

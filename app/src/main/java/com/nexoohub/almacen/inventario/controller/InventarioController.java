@@ -1,6 +1,7 @@
 package com.nexoohub.almacen.inventario.controller;
 
 import com.nexoohub.almacen.inventario.dto.InventarioSucursalProjection;
+import com.nexoohub.almacen.inventario.dto.ProductoStockBajoDTO;
 import com.nexoohub.almacen.inventario.entity.InventarioSucursal;
 import com.nexoohub.almacen.inventario.repository.InventarioSucursalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -42,5 +44,20 @@ public class InventarioController {
         respuesta.put("fechaRegistro", guardado.getFechaActualizacion() != null ? guardado.getFechaActualizacion() : guardado.getFechaCreacion());
         
         return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
+    }
+    
+    // 3. ALERTAS: PRODUCTOS CON STOCK BAJO EN UNA SUCURSAL
+    @GetMapping("/alertas/stock-bajo/sucursales/{sucursalId}")
+    public ResponseEntity<List<ProductoStockBajoDTO>> obtenerStockBajoPorSucursal(
+            @PathVariable Integer sucursalId) {
+        List<ProductoStockBajoDTO> productosStockBajo = inventarioRepository.obtenerProductosStockBajo(sucursalId);
+        return ResponseEntity.ok(productosStockBajo);
+    }
+    
+    // 4. ALERTAS: PRODUCTOS CON STOCK BAJO EN TODAS LAS SUCURSALES
+    @GetMapping("/alertas/stock-bajo")
+    public ResponseEntity<List<ProductoStockBajoDTO>> obtenerTodoStockBajo() {
+        List<ProductoStockBajoDTO> productosStockBajo = inventarioRepository.obtenerTodosProductosStockBajo();
+        return ResponseEntity.ok(productosStockBajo);
     }
 }

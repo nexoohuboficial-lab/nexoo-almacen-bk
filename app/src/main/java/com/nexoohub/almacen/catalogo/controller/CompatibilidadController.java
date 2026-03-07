@@ -1,6 +1,8 @@
 package com.nexoohub.almacen.catalogo.controller;
 
+import com.nexoohub.almacen.catalogo.dto.CompatibilidadResponseDTO;
 import com.nexoohub.almacen.catalogo.entity.CompatibilidadProducto;
+import com.nexoohub.almacen.catalogo.mapper.CompatibilidadMapper;
 import com.nexoohub.almacen.catalogo.repository.CompatibilidadRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class CompatibilidadController {
     
     @Autowired
     private CompatibilidadRepository compatibilidadRepository;
+    
+    @Autowired
+    private CompatibilidadMapper mapper;
 
     // 1. ENLAZAR UN PRODUCTO CON UNA MOTO
     @PostMapping
@@ -36,17 +41,19 @@ public class CompatibilidadController {
 
     // 2. VER A QUÉ MOTOS LE QUEDA UNA PIEZA (Búsqueda por SKU)
     @GetMapping("/producto/{sku}")
-    public ResponseEntity<Page<CompatibilidadProducto>> buscarPorSku(
+    public ResponseEntity<Page<CompatibilidadResponseDTO>> buscarPorSku(
             @PathVariable String sku,
             @PageableDefault(size = 50) Pageable pageable) {
-        return ResponseEntity.ok(compatibilidadRepository.findBySkuInterno(sku, pageable));
+        Page<CompatibilidadProducto> compatibilidades = compatibilidadRepository.findBySkuInterno(sku, pageable);
+        return ResponseEntity.ok(compatibilidades.map(mapper::toResponseDTO));
     }
 
     // 3. VER QUÉ PIEZAS LE QUEDAN A UNA MOTO (Búsqueda por ID de Moto)
     @GetMapping("/moto/{motoId}")
-    public ResponseEntity<Page<CompatibilidadProducto>> buscarPorMoto(
+    public ResponseEntity<Page<CompatibilidadResponseDTO>> buscarPorMoto(
             @PathVariable Integer motoId,
             @PageableDefault(size = 50) Pageable pageable) {
-        return ResponseEntity.ok(compatibilidadRepository.findByMotoId(motoId, pageable));
+        Page<CompatibilidadProducto> compatibilidades = compatibilidadRepository.findByMotoId(motoId, pageable);
+        return ResponseEntity.ok(compatibilidades.map(mapper::toResponseDTO));
     }
 }

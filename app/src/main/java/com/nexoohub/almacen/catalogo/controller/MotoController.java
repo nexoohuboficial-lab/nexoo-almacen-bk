@@ -1,6 +1,8 @@
 package com.nexoohub.almacen.catalogo.controller;
 
+import com.nexoohub.almacen.catalogo.dto.MotoResponseDTO;
 import com.nexoohub.almacen.catalogo.entity.Moto;
+import com.nexoohub.almacen.catalogo.mapper.MotoMapper;
 import com.nexoohub.almacen.catalogo.repository.MotoRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +22,15 @@ public class MotoController {
 
     @Autowired
     private MotoRepository motoRepository;
+    
+    @Autowired
+    private MotoMapper mapper;
 
     @GetMapping
-    public ResponseEntity<Page<Moto>> listarMotos(
+    public ResponseEntity<Page<MotoResponseDTO>> listarMotos(
             @PageableDefault(size = 50, sort = "marca") Pageable pageable) {
-        return ResponseEntity.ok(motoRepository.findAll(pageable));
+        Page<Moto> motos = motoRepository.findAll(pageable);
+        return ResponseEntity.ok(motos.map(mapper::toResponseDTO));
     }
 
     @PostMapping

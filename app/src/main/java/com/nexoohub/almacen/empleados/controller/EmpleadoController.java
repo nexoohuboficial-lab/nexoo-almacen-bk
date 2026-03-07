@@ -1,6 +1,8 @@
 package com.nexoohub.almacen.empleados.controller;
 
+import com.nexoohub.almacen.empleados.dto.EmpleadoResponseDTO;
 import com.nexoohub.almacen.empleados.entity.Empleado;
+import com.nexoohub.almacen.empleados.mapper.EmpleadoMapper;
 import com.nexoohub.almacen.empleados.repository.EmpleadoRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class EmpleadoController {
 
     @Autowired
     private EmpleadoRepository empleadoRepository;
+    
+    @Autowired
+    private EmpleadoMapper mapper;
 
     // Dar de alta a un empleado nuevo
     @PostMapping
@@ -36,10 +41,11 @@ public class EmpleadoController {
 
     // Ver a todos los empleados de una sucursal
     @GetMapping("/sucursal/{sucursalId}")
-    public ResponseEntity<Page<Empleado>> obtenerEmpleadosPorSucursal(
+    public ResponseEntity<Page<EmpleadoResponseDTO>> obtenerEmpleadosPorSucursal(
             @PathVariable Integer sucursalId,
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
-        return ResponseEntity.ok(empleadoRepository.findBySucursalIdAndActivoTrue(sucursalId, pageable));
+        Page<Empleado> empleados = empleadoRepository.findBySucursalIdAndActivoTrue(sucursalId, pageable);
+        return ResponseEntity.ok(empleados.map(mapper::toResponseDTO));
     }
 
     // Dar de baja (borrado lógico)

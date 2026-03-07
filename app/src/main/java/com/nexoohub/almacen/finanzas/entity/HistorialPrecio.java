@@ -26,6 +26,15 @@ public class HistorialPrecio {
     @Column(name = "precio_publico_proveedor")
     private BigDecimal precioPublicoProveedor;
 
+    @Column(name = "precio_anterior")
+    private BigDecimal precioAnterior; // Precio público anterior para calcular cambio
+
+    @Column(name = "porcentaje_cambio")
+    private BigDecimal porcentajeCambio; // % de cambio respecto al precio anterior
+
+    @Column(name = "razon_cambio", length = 500)
+    private String razonCambio; // AJUSTE_MANUAL, CAMBIO_COSTO, ACTUALIZACION_PROVEEDOR, etc.
+
     @Column(name = "fecha_calculo", updatable = false)
     private LocalDateTime fechaCalculo;
 
@@ -63,4 +72,13 @@ public class HistorialPrecio {
 
     public String getUsuarioCreacion() { return usuarioCreacion; }
     public void setUsuarioCreacion(String usuarioCreacion) { this.usuarioCreacion = usuarioCreacion; }
+
+    public BigDecimal getPrecioAnterior() { return precioAnterior; }
+    public void setPrecioAnterior(BigDecimal precioAnterior) { this.precioAnterior = precioAnterior; }
+
+    public BigDecimal getPorcentajeCambio() { return porcentajeCambio; }
+    public void setPorcentajeCambio(BigDecimal porcentajeCambio) { this.porcentajeCambio = porcentajeCambio; }
+
+    public String getRazonCambio() { return razonCambio; }
+    public void setRazonCambio(String razonCambio) { this.razonCambio = razonCambio; }
 }

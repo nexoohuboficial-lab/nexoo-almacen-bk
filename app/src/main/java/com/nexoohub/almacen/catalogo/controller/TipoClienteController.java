@@ -1,6 +1,8 @@
 package com.nexoohub.almacen.catalogo.controller;
 
+import com.nexoohub.almacen.catalogo.dto.TipoClienteResponseDTO;
 import com.nexoohub.almacen.catalogo.entity.TipoCliente;
+import com.nexoohub.almacen.catalogo.mapper.TipoClienteMapper;
 import com.nexoohub.almacen.catalogo.service.TipoClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,11 +17,15 @@ public class TipoClienteController {
 
     @Autowired
     private TipoClienteService tipoClienteService;
+    
+    @Autowired
+    private TipoClienteMapper mapper;
 
     @GetMapping
-    public ResponseEntity<Page<TipoCliente>> listarTiposCliente(
+    public ResponseEntity<Page<TipoClienteResponseDTO>> listarTiposCliente(
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
         // Devuelve la lista completa: [1: Público General, 2: Taller Mecánico, etc.]
-        return ResponseEntity.ok(tipoClienteService.listarTiposCliente(pageable));
+        Page<TipoCliente> tipos = tipoClienteService.listarTiposCliente(pageable);
+        return ResponseEntity.ok(tipos.map(mapper::toResponseDTO));
     }
 }

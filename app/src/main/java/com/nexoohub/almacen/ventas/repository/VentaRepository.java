@@ -49,4 +49,14 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
      * Usa el campo primitivo clienteId para filtrado eficiente
      */
     List<Venta> findByClienteId(Integer clienteId);
+    
+    /**
+     * Buscar ventas en un periodo (para cálculos de dashboard)
+     */
+    List<Venta> findByFechaVentaBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);
+    
+    /**
+     * Cuenta ventas en un periodo (para dashboard)
+     */
+    Long countByFechaVentaBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);
 }

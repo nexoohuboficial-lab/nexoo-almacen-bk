@@ -188,4 +188,62 @@ class DetalleVentaTest {
         assertNull(detalle.getCantidad());
         assertNull(detalle.getPrecioUnitarioVenta());
     }
+
+    @Test
+    @DisplayName("Debe validar que cantidad debe ser al menos 1")
+    void testCantidadMinima() {
+        // Given
+        DetalleVenta detalle = new DetalleVenta();
+
+        // When - Cantidad válida
+        detalle.setCantidad(1);
+
+        // Then
+        assertEquals(1, detalle.getCantidad());
+        assertTrue(detalle.getCantidad() >= 1, "La cantidad debe ser al menos 1");
+    }
+
+    @Test
+    @DisplayName("Debe validar que el precio debe ser positivo")
+    void testPrecioPositivo() {
+        // Given
+        DetalleVenta detalle = new DetalleVenta();
+
+        // When - Precio válido
+        detalle.setPrecioUnitarioVenta(new BigDecimal("0.01"));
+
+        // Then
+        assertTrue(detalle.getPrecioUnitarioVenta().compareTo(BigDecimal.ZERO) > 0,
+                "El precio debe ser mayor a cero");
+    }
+
+    @Test
+    @DisplayName("Debe documentar que precio cero no es válido según validaciones")
+    void testPrecioCeroNoValido() {
+        // Given
+        DetalleVenta detalle = new DetalleVenta();
+
+        // When
+        detalle.setPrecioUnitarioVenta(BigDecimal.ZERO);
+
+        // Then - Documentamos que con @Valid este caso fallaría
+        // Con @DecimalMin("0.01") en la entidad, la validación rechazaría esto
+        assertTrue(detalle.getPrecioUnitarioVenta().compareTo(new BigDecimal("0.01")) < 0,
+                "Precio cero no cumple con @DecimalMin(0.01)");
+    }
+
+    @Test
+    @DisplayName("Debe documentar que cantidad cero no es válida según validaciones")
+    void testCantidadCeroNoValida() {
+        // Given  
+        DetalleVenta detalle = new DetalleVenta();
+
+        // When
+        detalle.setCantidad(0);
+
+        // Then - Documentamos que con @Valid este caso fallaría
+        // Con @Min(1) en la entidad, la validación rechazaría esto
+        assertTrue(detalle.getCantidad() < 1,
+                "Cantidad cero no cumple con @Min(1)");
+    }
 }

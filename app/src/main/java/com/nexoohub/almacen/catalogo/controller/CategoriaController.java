@@ -1,6 +1,8 @@
 package com.nexoohub.almacen.catalogo.controller;
 
+import com.nexoohub.almacen.catalogo.dto.CategoriaResponseDTO;
 import com.nexoohub.almacen.catalogo.entity.Categoria;
+import com.nexoohub.almacen.catalogo.mapper.CategoriaMapper;
 import com.nexoohub.almacen.catalogo.service.CategoriaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +22,15 @@ public class CategoriaController {
     
     @Autowired
     private CategoriaService categoriaService;
+    
+    @Autowired
+    private CategoriaMapper mapper;
 
     @GetMapping
-    public ResponseEntity<Page<Categoria>> listarCategorias(
+    public ResponseEntity<Page<CategoriaResponseDTO>> listarCategorias(
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
-        return ResponseEntity.ok(categoriaService.listarCategorias(pageable));
+        Page<Categoria> categorias = categoriaService.listarCategorias(pageable);
+        return ResponseEntity.ok(categorias.map(mapper::toResponseDTO));
     }
 
     @PostMapping

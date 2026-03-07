@@ -24,17 +24,21 @@ public class ProductoMaestro extends AuditableEntity {
 
     private String descripcion;
 
+    @Size(max = 100, message = "La marca no puede exceder 100 caracteres")
+    @Pattern(regexp = "^[A-Z0-9\\s\\-]+$", message = "La marca solo puede contener letras mayúsculas, números, espacios y guiones")
+    private String marca;
+
     @Column(name = "categoria_id", insertable = false, updatable = false)
     private Integer categoriaId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
     @Column(name = "proveedor_id", insertable = false, updatable = false)
     private Integer proveedorId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "proveedor_id")
     private Proveedor proveedor;
 
@@ -68,6 +72,12 @@ public class ProductoMaestro extends AuditableEntity {
 
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+    public String getMarca() { return marca; }
+    public void setMarca(String marca) { 
+        // Convertir automáticamente a mayúsculas
+        this.marca = (marca != null) ? marca.toUpperCase().trim() : null; 
+    }
 
     public Integer getCategoriaId() { return categoriaId; }
     public void setCategoriaId(Integer categoriaId) { this.categoriaId = categoriaId; }

@@ -27,6 +27,15 @@ public class Cliente extends AuditableEntity {
     @Column(name = "direccion_fiscal")
     private String direccionFiscal;
 
+    @Column(name = "bloqueado")
+    private Boolean bloqueado = false; // Bloqueado por morosidad
+
+    @Column(name = "saldo_pendiente")
+    private java.math.BigDecimal saldoPendiente = java.math.BigDecimal.ZERO;
+
+    @Column(name = "motivo_bloqueo", length = 500)
+    private String motivoBloqueo;
+
     // Getters y Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -42,4 +51,13 @@ public class Cliente extends AuditableEntity {
     public void setEmail(String email) { this.email = email; }
     public String getDireccionFiscal() { return direccionFiscal; }
     public void setDireccionFiscal(String direccionFiscal) { this.direccionFiscal = direccionFiscal; }
+
+    public Boolean getBloqueado() { return bloqueado; }
+    public void setBloqueado(Boolean bloqueado) { this.bloqueado = bloqueado; }
+
+    public java.math.BigDecimal getSaldoPendiente() { return saldoPendiente; }
+    public void setSaldoPendiente(java.math.BigDecimal saldoPendiente) { this.saldoPendiente = saldoPendiente; }
+
+    public String getMotivoBloqueo() { return motivoBloqueo; }
+    public void setMotivoBloqueo(String motivoBloqueo) { this.motivoBloqueo = motivoBloqueo; }
 }

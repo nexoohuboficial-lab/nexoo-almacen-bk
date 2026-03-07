@@ -2,6 +2,8 @@ package com.nexoohub.almacen.ventas.entity;
 
 import com.nexoohub.almacen.inventario.entity.ProductoMaestro;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
 
 @Entity
@@ -25,9 +27,11 @@ public class DetalleVenta {
     @JoinColumn(name = "sku_interno")
     private ProductoMaestro producto;
 
+    @Min(value = 1, message = "La cantidad debe ser al menos 1")
     private Integer cantidad;
 
     @Column(name = "precio_unitario_venta")
+    @DecimalMin(value = "0.01", message = "El precio unitario debe ser mayor a cero")
     private BigDecimal precioUnitarioVenta;
 
     // Getters y Setters...

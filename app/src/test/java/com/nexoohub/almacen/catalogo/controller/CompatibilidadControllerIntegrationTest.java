@@ -87,9 +87,11 @@ class CompatibilidadControllerIntegrationTest {
 
     @Test
     void enlazarProductoConMoto_Exitoso() throws Exception {
+        Moto moto = motoRepository.findById(motoId).orElseThrow();
+        
         CompatibilidadProducto compatibilidad = new CompatibilidadProducto();
         compatibilidad.setSkuInterno(skuProducto);
-        compatibilidad.setMotoId(motoId);
+        compatibilidad.setMoto(moto);
         compatibilidad.setAnioInicio(2013);
         compatibilidad.setAnioFin(2020);
 
@@ -133,9 +135,11 @@ class CompatibilidadControllerIntegrationTest {
 
     @Test
     void buscarPorSku_ConCompatibilidades() throws Exception {
+        Moto moto = motoRepository.findById(motoId).orElseThrow();
+        
         CompatibilidadProducto comp1 = new CompatibilidadProducto();
         comp1.setSkuInterno(skuProducto);
-        comp1.setMotoId(motoId);
+        comp1.setMoto(moto);
         comp1.setAnioInicio(2013);
         comp1.setAnioFin(2020);
         compatibilidadRepository.save(comp1);
@@ -148,7 +152,7 @@ class CompatibilidadControllerIntegrationTest {
 
         CompatibilidadProducto comp2 = new CompatibilidadProducto();
         comp2.setSkuInterno(skuProducto);
-        comp2.setMotoId(moto2Guardada.getId());
+        comp2.setMoto(moto2Guardada);
         comp2.setAnioInicio(2017);
         comp2.setAnioFin(2023);
         compatibilidadRepository.save(comp2);
@@ -173,9 +177,11 @@ class CompatibilidadControllerIntegrationTest {
 
     @Test
     void buscarPorMoto_ConCompatibilidades() throws Exception {
+        Moto moto = motoRepository.findById(motoId).orElseThrow();
+        
         CompatibilidadProducto comp1 = new CompatibilidadProducto();
         comp1.setSkuInterno(skuProducto);
-        comp1.setMotoId(motoId);
+        comp1.setMoto(moto);
         compatibilidadRepository.save(comp1);
 
         ProductoMaestro producto2 = new ProductoMaestro();
@@ -185,7 +191,7 @@ class CompatibilidadControllerIntegrationTest {
 
         CompatibilidadProducto comp2 = new CompatibilidadProducto();
         comp2.setSkuInterno("PASTILLA001");
-        comp2.setMotoId(motoId);
+        comp2.setMoto(moto);
         compatibilidadRepository.save(comp2);
 
         mockMvc.perform(get("/api/v1/compatibilidad/moto/" + motoId)

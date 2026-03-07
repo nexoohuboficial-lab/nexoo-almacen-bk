@@ -1,5 +1,7 @@
 package com.nexoohub.almacen.catalogo.controller;
+import com.nexoohub.almacen.catalogo.dto.ProveedorResponseDTO;
 import com.nexoohub.almacen.catalogo.entity.Proveedor;
+import com.nexoohub.almacen.catalogo.mapper.ProveedorMapper;
 import com.nexoohub.almacen.catalogo.service.ProveedorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +21,15 @@ public class ProveedorController {
 
     @Autowired
     private ProveedorService proveedorService;
+    
+    @Autowired
+    private ProveedorMapper mapper;
 
     @GetMapping
-    public ResponseEntity<Page<Proveedor>> listarProveedores(
+    public ResponseEntity<Page<ProveedorResponseDTO>> listarProveedores(
             @PageableDefault(size = 20, sort = "nombreEmpresa") Pageable pageable) {
-        return ResponseEntity.ok(proveedorService.listarProveedores(pageable));
+        Page<Proveedor> proveedores = proveedorService.listarProveedores(pageable);
+        return ResponseEntity.ok(proveedores.map(mapper::toResponseDTO));
     }
 
     @PostMapping

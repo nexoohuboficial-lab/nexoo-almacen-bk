@@ -201,4 +201,69 @@ class InventarioSucursalTest {
         // Then
         assertNull(inventario.getUbicacionPasillo());
     }
+
+    @Test
+    @DisplayName("Debe lanzar excepción al intentar establecer stock negativo")
+    void testStockNegativoLanzaExcepcion() {
+        // Given
+        InventarioSucursal inventario = new InventarioSucursal();
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class, 
+            () -> inventario.setStockActual(-10)
+        );
+        
+        assertTrue(exception.getMessage().contains("stock actual no puede ser negativo"));
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción con stock negativo de -1")
+    void testStockMenosUno() {
+        // Given
+        InventarioSucursal inventario = new InventarioSucursal();
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> inventario.setStockActual(-1));
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción con stock muy negativo")
+    void testStockMuyNegativo() {
+        // Given
+        InventarioSucursal inventario = new InventarioSucursal();
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> inventario.setStockActual(-999));
+    }
+
+    @Test
+    @DisplayName("Debe permitir establecer stock positivo después de intento negativo")
+    void testRecuperacionDespuesDeErrorStock() {
+        // Given
+        InventarioSucursal inventario = new InventarioSucursal();
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> inventario.setStockActual(-5));
+        
+        // Ahora establecemos un valor válido
+        inventario.setStockActual(50);
+        assertEquals(50, inventario.getStockActual());
+    }
+
+    @Test
+    @DisplayName("Debe prevenir operaciones que resulten en stock negativo")
+    void testOperacionesQueResultanEnStockNegativo() {
+        // Given
+        InventarioSucursal inventario = new InventarioSucursal();
+        inventario.setStockActual(10);
+
+        // Simular una venta de 15 unidades cuando solo hay 10
+        int ventaCantidad = 15;
+        int stockActual = inventario.getStockActual();
+        int nuevoStock = stockActual - ventaCantidad;
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> inventario.setStockActual(nuevoStock));
+    }
 }

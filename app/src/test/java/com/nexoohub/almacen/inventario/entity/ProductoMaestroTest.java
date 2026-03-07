@@ -46,6 +46,16 @@ class ProductoMaestroTest {
     }
 
     @Test
+    @DisplayName("Debe establecer y obtener marca correctamente")
+    void testGetSetMarca() {
+        ProductoMaestro producto = new ProductoMaestro();
+        producto.setMarca("Honda");
+        
+        // El setter convierte automáticamente a mayúsculas
+        assertEquals("HONDA", producto.getMarca());
+    }
+
+    @Test
     @DisplayName("Debe establecer y obtener SKU proveedor correctamente")
     void testGetSetSkuProveedor() {
         ProductoMaestro producto = new ProductoMaestro();
@@ -116,6 +126,7 @@ class ProductoMaestroTest {
         producto.setSkuProveedor("PROV-ABC");
         producto.setNombreComercial("Filtro Premium");
         producto.setDescripcion("Filtro de alta calidad");
+        producto.setMarca("Honda");
         producto.setCategoriaId(5);
         producto.setProveedorId(10);
         producto.setClaveSat("12345678");
@@ -128,6 +139,7 @@ class ProductoMaestroTest {
             () -> assertEquals("PROV-ABC", producto.getSkuProveedor()),
             () -> assertEquals("Filtro Premium", producto.getNombreComercial()),
             () -> assertEquals("Filtro de alta calidad", producto.getDescripcion()),
+            () -> assertEquals("HONDA", producto.getMarca()), // Auto-convertido a mayúsculas
             () -> assertEquals(5, producto.getCategoriaId()),
             () -> assertEquals(10, producto.getProveedorId()),
             () -> assertEquals("12345678", producto.getClaveSat()),

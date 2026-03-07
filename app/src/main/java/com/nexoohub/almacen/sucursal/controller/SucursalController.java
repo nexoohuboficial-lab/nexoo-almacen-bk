@@ -1,6 +1,8 @@
 package com.nexoohub.almacen.sucursal.controller;
 
+import com.nexoohub.almacen.sucursal.dto.SucursalResponseDTO;
 import com.nexoohub.almacen.sucursal.entity.Sucursal;
+import com.nexoohub.almacen.sucursal.mapper.SucursalMapper;
 import com.nexoohub.almacen.sucursal.repository.SucursalRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +22,16 @@ public class SucursalController {
     
     @Autowired
     private SucursalRepository sucursalRepository;
+    
+    @Autowired
+    private SucursalMapper mapper;
 
     // 1. OBTENER TODAS LAS SUCURSALES ACTIVAS
     @GetMapping
-    public ResponseEntity<Page<Sucursal>> listarSucursales(
+    public ResponseEntity<Page<SucursalResponseDTO>> listarSucursales(
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
         Page<Sucursal> sucursales = sucursalRepository.findByActivoTrue(pageable);
-        return ResponseEntity.ok(sucursales);
+        return ResponseEntity.ok(sucursales.map(mapper::toResponseDTO));
     }
 
     // 2. CREAR UNA NUEVA SUCURSAL
