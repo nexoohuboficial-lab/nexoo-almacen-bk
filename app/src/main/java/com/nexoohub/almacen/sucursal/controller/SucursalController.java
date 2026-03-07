@@ -47,7 +47,7 @@ public class SucursalController {
 
     // 3. ACTUALIZAR UNA SUCURSAL EXISTENTE
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> actualizarSucursal(@PathVariable Integer id, @Valid @RequestBody Sucursal detalles) {
+    public ResponseEntity<Map<String, Object>> actualizarSucursal(@PathVariable("id") Integer id, @Valid @RequestBody Sucursal detalles) {
         return sucursalRepository.findById(id)
                 .map(sucursalExistente -> {
                     sucursalExistente.setNombre(detalles.getNombre());
@@ -66,7 +66,7 @@ public class SucursalController {
 
     // 4. BORRADO LÓGICO (Desactivar)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> desactivarSucursal(@PathVariable Integer id) {
+    public ResponseEntity<Void> desactivarSucursal(@PathVariable("id") Integer id) {
         return sucursalRepository.findById(id)
                 .map(sucursal -> {
                     sucursal.setActivo(false);

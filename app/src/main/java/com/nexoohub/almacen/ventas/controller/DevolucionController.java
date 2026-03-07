@@ -69,7 +69,7 @@ public class DevolucionController {
      * @return devolución encontrada
      */
     @GetMapping("/{id}")
-    public ResponseEntity<DevolucionResponseDTO> obtenerDevolucionPorId(@PathVariable Integer id) {
+    public ResponseEntity<DevolucionResponseDTO> obtenerDevolucionPorId(@PathVariable("id") Integer id) {
         DevolucionResponseDTO response = devolucionService.obtenerDevolucionPorId(id);
         return ResponseEntity.ok(response);
     }
@@ -81,7 +81,7 @@ public class DevolucionController {
      * @return lista de devoluciones
      */
     @GetMapping("/venta/{ventaId}")
-    public ResponseEntity<List<DevolucionResponseDTO>> obtenerDevolucionesPorVenta(@PathVariable Integer ventaId) {
+    public ResponseEntity<List<DevolucionResponseDTO>> obtenerDevolucionesPorVenta(@PathVariable("ventaId") Integer ventaId) {
         List<DevolucionResponseDTO> response = devolucionService.obtenerDevolucionesPorVenta(ventaId);
         return ResponseEntity.ok(response);
     }
