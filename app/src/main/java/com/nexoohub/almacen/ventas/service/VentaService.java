@@ -5,9 +5,12 @@ import com.nexoohub.almacen.catalogo.entity.PrecioEspecial;
 import com.nexoohub.almacen.catalogo.repository.ClienteRepository;
 import com.nexoohub.almacen.catalogo.repository.PrecioEspecialRepository;
 import com.nexoohub.almacen.common.entity.Usuario;
+import com.nexoohub.almacen.common.exception.CreditoInsuficienteException;
 import com.nexoohub.almacen.common.exception.ResourceNotFoundException;
 import com.nexoohub.almacen.common.exception.StockInsuficienteException;
 import com.nexoohub.almacen.common.repository.UsuarioRepository;
+import com.nexoohub.almacen.finanzas.dto.ValidacionCreditoDTO;
+import com.nexoohub.almacen.finanzas.service.CreditoService;
 import com.nexoohub.almacen.finanzas.entity.HistorialPrecio;
 import com.nexoohub.almacen.finanzas.repository.HistorialPrecioRepository;
 import com.nexoohub.almacen.inventario.entity.InventarioSucursal;
@@ -48,6 +51,7 @@ public class VentaService {
     private final UsuarioRepository usuarioRepository;
     private final ClienteRepository clienteRepository;
     private final PrecioEspecialRepository precioEspecialRepository;
+    private final CreditoService creditoService;
 
     /**
      * Constructor con inyección de dependencias.
@@ -59,6 +63,7 @@ public class VentaService {
      * @param usuarioRepository Repositorio de usuarios
      * @param clienteRepository Repositorio de clientes
      * @param precioEspecialRepository Repositorio de precios especiales
+     * @param creditoService Servicio de control de crédito
      */
     public VentaService(
             VentaRepository ventaRepository,
@@ -67,7 +72,8 @@ public class VentaService {
             HistorialPrecioRepository historialPrecioRepository,
             UsuarioRepository usuarioRepository,
             ClienteRepository clienteRepository,
-            PrecioEspecialRepository precioEspecialRepository) {
+            PrecioEspecialRepository precioEspecialRepository,
+            CreditoService creditoService) {
         this.ventaRepository = ventaRepository;
         this.detalleVentaRepository = detalleVentaRepository;
         this.inventarioRepository = inventarioRepository;
@@ -75,6 +81,7 @@ public class VentaService {
         this.usuarioRepository = usuarioRepository;
         this.clienteRepository = clienteRepository;
         this.precioEspecialRepository = precioEspecialRepository;
+        this.creditoService = creditoService;
     }
 
     /**
@@ -96,6 +103,28 @@ public class VentaService {
         // 1. OBTENEMOS AL CLIENTE PARA SABER SU TIPO (Público, Taller, Mayorista)
         Cliente cliente = clienteRepository.findById(request.getClienteId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente", request.getClienteId()));
+
+        // 2. VALIDAR CRÉDITO DISPONIBLE SI LA VENTA ES A CRÉDITO
+        if ("CREDITO".equalsIgnoreCase(request.getMetodoPago())) {
+            // Calcular total estimado para validación de crédito
+            BigDecimal totalEstimado = calcularTotalEstimado(request, cliente);
+            
+            ValidacionCreditoDTO validacion = creditoService.validarCreditoDisponible(
+                cliente.getId(), 
+                totalEstimado
+            );
+            
+            if (!validacion.getCreditoDisponible()) {
+                // Lanzar excepción con detalles de la validación
+                throw new CreditoInsuficienteException(
+                    cliente.getId(),
+                    validacion.getMontoDisponible(),
+                    totalEstimado,
+                    validacion.getMensaje(),
+                    validacion.getCodigo()
+                );
+            }
+        }
 
         Venta venta = new Venta();
         venta.setClienteId(cliente.getId());
@@ -184,6 +213,62 @@ public class VentaService {
         }
 
         ventaGuardada.setTotal(totalVenta);
-        return ventaRepository.save(ventaGuardada);
+        Venta ventaFinal = ventaRepository.save(ventaGuardada);
+
+        // 4. REGISTRAR CARGO EN CUENTA DE CRÉDITO SI APLICA
+        if ("CREDITO".equalsIgnoreCase(request.getMetodoPago())) {
+            creditoService.registrarCargo(
+                cliente.getId(),
+                ventaFinal,
+                totalVenta,
+                vendedorUsername
+            );
+        }
+
+        return ventaFinal;
+    }
+
+    /**
+     * Calcula el total estimado de la venta antes de procesarla.
+     * Usado para validación de crédito previo.
+     * 
+     * @param request DTO con los items de la venta
+     * @param cliente Cliente que realiza la compra
+     * @return Total estimado de la venta
+     */
+    private BigDecimal calcularTotalEstimado(VentaRequestDTO request, Cliente cliente) {
+        BigDecimal totalEstimado = BigDecimal.ZERO;
+
+        for (VentaRequestDTO.ItemVentaDTO item : request.getItems()) {
+            // Obtener precio base
+            HistorialPrecio ultimoPrecio = historialPrecioRepository
+                    .findTopBySkuInternoOrderByFechaCalculoDesc(item.getSkuInterno())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Producto '%s' no tiene precio configurado", item.getSkuInterno()),
+                        "HistorialPrecio",
+                        item.getSkuInterno()
+                    ));
+
+            BigDecimal precioFinal = ultimoPrecio.getPrecioFinalPublico();
+
+            // Verificar si hay precio especial para el tipo de cliente
+            Optional<PrecioEspecial> precioEsp = precioEspecialRepository
+                    .findBySkuInternoAndTipoClienteId(item.getSkuInterno(), cliente.getTipoClienteId());
+
+            if (precioEsp.isPresent()) {
+                precioFinal = precioEsp.get().getPrecioFijo();
+            }
+
+            // Aplicar descuento especial si fue proporcionado
+            if (item.getPrecioOfertaEspecial() != null && 
+                item.getPrecioOfertaEspecial().compareTo(precioFinal) < 0) {
+                precioFinal = item.getPrecioOfertaEspecial();
+            }
+
+            BigDecimal subtotal = precioFinal.multiply(new BigDecimal(item.getCantidad()));
+            totalEstimado = totalEstimado.add(subtotal);
+        }
+
+        return totalEstimado;
     }
 }

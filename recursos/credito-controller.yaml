@@ -1,0 +1,747 @@
+openapi: 3.0.3
+info:
+  title: Control de Crédito API
+  description: |
+    API REST para gestión de límites de crédito y cuentas por cobrar de clientes.
+    
+    ## Funcionalidades Principales
+    - ✅ Configurar y modificar límites de crédito
+    - ✅ Validar crédito disponible antes de ventas
+    - ✅ Registro automático de cargos por ventas a crédito
+    - ✅ Procesar abonos/pagos
+    - ✅ Bloqueo/desbloqueo automático de crédito
+    - ✅ Historial completo de movimientos
+    - ✅ Alertas de clientes en riesgo
+    
+    ## Workflow Típico
+    1. **Configuración**: Crear límite de crédito para cliente
+    2. **Validación**: Antes de cada venta a crédito, validar disponibilidad
+    3. **Cargo**: Al crear venta a crédito, registrar cargo automáticamente
+    4. **Pago**: Registrar abonos cuando cliente paga
+    5. **Monitoreo**: Consultar clientes en riesgo o sobregiro
+    
+  version: 1.2.0
+  contact:
+    name: NexooHub Development Team
+    email: dev@nexoohub.com
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo local
+  - url: https://api.nexoohub.com
+    description: Servidor de producción
+
+tags:
+  - name: Límites de Crédito
+    description: Gestión de límites de crédito de clientes
+  - name: Validación
+    description: Validación de crédito disponible
+  - name: Movimientos
+    description: Registro de cargos y abonos
+  - name: Bloqueo/Desbloqueo
+    description: Control de estado del crédito
+  - name: Historial
+    description: Consulta de historial de movimientos
+
+paths:
+  # ==================== LÍMITES DE CRÉDITO ====================
+  /api/credito/limites:
+    post:
+      tags:
+        - Límites de Crédito
+      summary: Crear límite de crédito
+      description: Configura el límite de crédito para un cliente nuevo
+      operationId: crearLimiteCredito
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LimiteCreditoRequest'
+            examples:
+              standard:
+                summary: Límite estándar
+                value:
+                  clienteId: 1
+                  limiteAutorizado: 10000
+                  plazoPagoDias: 30
+                  maxFacturasVencidas: 3
+                  permiteSobregiro: false
+                  montoSobregiro: 0
+              premium:
+                summary: Cliente premium con sobregiro
+                value:
+                  clienteId: 2
+                  limiteAutorizado: 50000
+                  plazoPagoDias: 45
+                  maxFacturasVencidas: 5
+                  permiteSobregiro: true
+                  montoSobregiro: 5000
+      responses:
+        '201':
+          description: Límite creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimiteCreditoResponse'
+        '400':
+          description: Cliente no existe o ya tiene límite configurado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    get:
+      tags:
+        - Límites de Crédito
+      summary: Listar todos los límites
+      description: Obtiene la lista completa de límites de crédito configurados
+      operationId: listarTodosLosLimites
+      responses:
+        '200':
+          description: Lista de límites obtenida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LimiteCreditoResponse'
+
+  /api/credito/limites/cliente/{clienteId}:
+    get:
+      tags:
+        - Límites de Crédito
+      summary: Consultar límite de un cliente
+      description: Obtiene el límite de crédito de un cliente específico
+      operationId: obtenerLimitePorCliente
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          description: ID del cliente
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Límite encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimiteCreditoResponse'
+        '404':
+          description: Cliente no tiene límite configurado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      tags:
+        - Límites de Crédito
+      summary: Actualizar límite de crédito
+      description: Modifica el límite de crédito de un cliente existente
+      operationId: actualizarLimiteCredito
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          description: ID del cliente
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LimiteCreditoRequest'
+      responses:
+        '200':
+          description: Límite actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimiteCreditoResponse'
+        '404':
+          description: Cliente no tiene límite configurado
+
+  /api/credito/limites/estado/{estado}:
+    get:
+      tags:
+        - Límites de Crédito
+      summary: Listar límites por estado
+      description: Filtra límites de crédito por estado específico
+      operationId: listarPorEstado
+      parameters:
+        - name: estado
+          in: path
+          required: true
+          description: Estado del crédito
+          schema:
+            type: string
+            enum: [ACTIVO, BLOQUEADO, SUSPENDIDO, INACTIVO]
+      responses:
+        '200':
+          description: Lista filtrada obtenida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LimiteCreditoResponse'
+
+  /api/credito/limites/activos:
+    get:
+      tags:
+        - Límites de Crédito
+      summary: Listar créditos activos
+      description: Obtiene todos los clientes con crédito activo
+      operationId: listarActivos
+      responses:
+        '200':
+          description: Lista de créditos activos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LimiteCreditoResponse'
+
+  /api/credito/limites/bloqueados:
+    get:
+      tags:
+        - Límites de Crédito
+      summary: Listar créditos bloqueados
+      description: Obtiene todos los clientes con crédito bloqueado
+      operationId: listarBloqueados
+      responses:
+        '200':
+          description: Lista de créditos bloqueados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LimiteCreditoResponse'
+
+  /api/credito/limites/riesgo:
+    get:
+      tags:
+        - Límites de Crédito
+      summary: Listar clientes en riesgo
+      description: Obtiene clientes con utilización >= 80% de su límite
+      operationId: listarProximosAExceder
+      responses:
+        '200':
+          description: Lista de clientes en riesgo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LimiteCreditoResponse'
+
+  /api/credito/limites/sobregiro:
+    get:
+      tags:
+        - Límites de Crédito
+      summary: Listar clientes en sobregiro
+      description: Obtiene clientes que excedieron su límite de crédito
+      operationId: listarEnSobregiro
+      responses:
+        '200':
+          description: Lista de clientes en sobregiro
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LimiteCreditoResponse'
+
+  # ==================== VALIDACIÓN ====================
+  /api/credito/validar:
+    get:
+      tags:
+        - Validación
+      summary: Validar crédito disponible
+      description: |
+        Verifica si un cliente tiene crédito disponible para un monto específico.
+        **Usar ANTES de crear una venta a crédito.**
+      operationId: validarCreditoDisponible
+      parameters:
+        - name: clienteId
+          in: query
+          required: true
+          description: ID del cliente
+          schema:
+            type: integer
+        - name: monto
+          in: query
+          required: true
+          description: Monto a validar
+          schema:
+            type: number
+            format: decimal
+      responses:
+        '200':
+          description: Validación realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacionCreditoResponse'
+              examples:
+                creditoDisponible:
+                  summary: Crédito disponible OK
+                  value:
+                    creditoDisponible: true
+                    montoDisponible: 7000
+                    limiteAutorizado: 10000
+                    saldoUtilizado: 3000
+                    montoSolicitado: 5000
+                    estado: ACTIVO
+                    mensaje: Crédito disponible suficiente
+                    codigo: OK
+                limiteExcedido:
+                  summary: Límite excedido
+                  value:
+                    creditoDisponible: false
+                    montoDisponible: 2000
+                    limiteAutorizado: 10000
+                    saldoUtilizado: 8000
+                    montoSolicitado: 5000
+                    estado: ACTIVO
+                    mensaje: "Crédito insuficiente. Disponible: $2000, Solicitado: $5000"
+                    codigo: LIMITE_EXCEDIDO
+                bloqueado:
+                  summary: Cliente bloqueado
+                  value:
+                    creditoDisponible: false
+                    montoDisponible: 0
+                    limiteAutorizado: 10000
+                    saldoUtilizado: 3000
+                    montoSolicitado: 1000
+                    estado: BLOQUEADO
+                    mensaje: "Crédito BLOQUEADO: Morosidad detectada"
+                    codigo: BLOQUEADO
+
+  # ==================== MOVIMIENTOS ====================
+  /api/credito/abonos:
+    post:
+      tags:
+        - Movimientos
+      summary: Registrar abono/pago
+      description: Registra un pago del cliente que reduce su saldo de crédito
+      operationId: registrarAbono
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AbonoRequest'
+            examples:
+              efectivo:
+                summary: Pago en efectivo
+                value:
+                  clienteId: 1
+                  monto: 2000
+                  metodoPago: EFECTIVO
+                  concepto: Pago parcial
+              transferencia:
+                summary: Pago por transferencia
+                value:
+                  clienteId: 1
+                  monto: 5000
+                  metodoPago: TRANSFERENCIA
+                  folioComprobante: TRF-20240309-001
+                  concepto: Pago total de factura
+      responses:
+        '201':
+          description: Abono registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistorialCreditoResponse'
+        '400':
+          description: Monto inválido o excede saldo
+        '404':
+          description: Cliente no encontrado
+
+  # ==================== BLOQUEO/DESBLOQUEO ====================
+  /api/credito/limites/cliente/{clienteId}/bloquear:
+    put:
+      tags:
+        - Bloqueo/Desbloqueo
+      summary: Bloquear crédito
+      description: Bloquea el crédito de un cliente por morosidad u otro motivo
+      operationId: bloquearCredito
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: motivo
+          in: query
+          required: true
+          description: Motivo del bloqueo
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Crédito bloqueado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                  clienteId:
+                    type: string
+                  motivo:
+                    type: string
+
+  /api/credito/limites/cliente/{clienteId}/desbloquear:
+    put:
+      tags:
+        - Bloqueo/Desbloqueo
+      summary: Desbloquear crédito
+      description: Reactiva el crédito de un cliente previamente bloqueado
+      operationId: desbloquearCredito
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Crédito desbloqueado exitosamente
+
+  /api/credito/limites/cliente/{clienteId}/suspender:
+    put:
+      tags:
+        - Bloqueo/Desbloqueo
+      summary: Suspender crédito
+      description: Suspende temporalmente el crédito de un cliente
+      operationId: suspenderCredito
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: motivo
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Crédito suspendido exitosamente
+
+  # ==================== HISTORIAL ====================
+  /api/credito/historial/{clienteId}:
+    get:
+      tags:
+        - Historial
+      summary: Consultar historial de crédito
+      description: Obtiene el historial completo de movimientos de un cliente
+      operationId: obtenerHistorialCliente
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Historial obtenido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HistorialCreditoResponse'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+
+  /api/credito/historial/{clienteId}/cargos:
+    get:
+      tags:
+        - Historial
+      summary: Consultar cargos del cliente
+      description: Obtiene solo los cargos (ventas a crédito) de un cliente
+      operationId: obtenerCargosCliente
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Cargos obtenidos
+
+  /api/credito/historial/{clienteId}/abonos:
+    get:
+      tags:
+        - Historial
+      summary: Consultar abonos del cliente
+      description: Obtiene solo los abonos (pagos) de un cliente
+      operationId: obtenerAbonosCliente
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Abonos obtenidos
+
+  /api/credito/historial/{clienteId}/rango:
+    get:
+      tags:
+        - Historial
+      summary: Consultar historial por rango de fechas
+      description: Obtiene movimientos de un cliente en un período específico
+      operationId: obtenerHistorialPorFechas
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: fechaInicio
+          in: query
+          required: true
+          description: Fecha inicial (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: fechaFin
+          in: query
+          required: true
+          description: Fecha final (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Historial filtrado obtenido
+
+# ==================== SCHEMAS ====================
+components:
+  schemas:
+    LimiteCreditoRequest:
+      type: object
+      required:
+        - clienteId
+        - limiteAutorizado
+      properties:
+        clienteId:
+          type: integer
+          description: ID del cliente
+        limiteAutorizado:
+          type: number
+          format: decimal
+          description: Monto máximo autorizado
+          minimum: 0
+        plazoPagoDias:
+          type: integer
+          description: Plazo de pago en días
+          default: 30
+        maxFacturasVencidas:
+          type: integer
+          description: Máximo de facturas vencidas permitidas
+          default: 3
+        permiteSobregiro:
+          type: boolean
+          description: Permite exceder temporalmente el límite
+          default: false
+        montoSobregiro:
+          type: number
+          format: decimal
+          description: Monto máximo de sobregiro
+          default: 0
+        observaciones:
+          type: string
+          description: Observaciones sobre la configuración
+
+    LimiteCreditoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        cliente:
+          type: object
+          properties:
+            id:
+              type: integer
+            nombre:
+              type: string
+            rfc:
+              type: string
+            telefono:
+              type: string
+            email:
+              type: string
+        limiteAutorizado:
+          type: number
+          format: decimal
+        saldoUtilizado:
+          type: number
+          format: decimal
+        creditoDisponible:
+          type: number
+          format: decimal
+        porcentajeUtilizacion:
+          type: number
+          format: decimal
+        estado:
+          type: string
+          enum: [ACTIVO, BLOQUEADO, SUSPENDIDO, INACTIVO]
+        plazoPagoDias:
+          type: integer
+        maxFacturasVencidas:
+          type: integer
+        permiteSobregiro:
+          type: boolean
+        montoSobregiro:
+          type: number
+          format: decimal
+        fechaRevision:
+          type: string
+          format: date
+        observaciones:
+          type: string
+
+    AbonoRequest:
+      type: object
+      required:
+        - clienteId
+        - monto
+        - metodoPago
+      properties:
+        clienteId:
+          type: integer
+        monto:
+          type: number
+          format: decimal
+          minimum: 0.01
+        metodoPago:
+          type: string
+          enum: [EFECTIVO, TRANSFERENCIA, CHEQUE, TARJETA]
+        folioComprobante:
+          type: string
+          description: Número de cheque, referencia, etc.
+        concepto:
+          type: string
+        observaciones:
+          type: string
+
+    HistorialCreditoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        clienteId:
+          type: integer
+        clienteNombre:
+          type: string
+        ventaId:
+          type: integer
+          nullable: true
+        tipoMovimiento:
+          type: string
+          enum: [CARGO, ABONO, AJUSTE, BLOQUEO, DESBLOQUEO]
+        monto:
+          type: number
+          format: decimal
+        saldoResultante:
+          type: number
+          format: decimal
+        metodoPago:
+          type: string
+          nullable: true
+        folioComprobante:
+          type: string
+          nullable: true
+        concepto:
+          type: string
+        observaciones:
+          type: string
+          nullable: true
+        fechaMovimiento:
+          type: string
+          format: date-time
+        usuarioRegistro:
+          type: string
+
+    ValidacionCreditoResponse:
+      type: object
+      properties:
+        creditoDisponible:
+          type: boolean
+        montoDisponible:
+          type: number
+          format: decimal
+        limiteAutorizado:
+          type: number
+          format: decimal
+        saldoUtilizado:
+          type: number
+          format: decimal
+        montoSolicitado:
+          type: number
+          format: decimal
+        estado:
+          type: string
+        mensaje:
+          type: string
+        codigo:
+          type: string
+          enum: [OK, LIMITE_EXCEDIDO, BLOQUEADO, SIN_CREDITO]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        mensaje:
+          type: string

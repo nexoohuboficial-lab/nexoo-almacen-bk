@@ -8,6 +8,7 @@ import com.nexoohub.almacen.common.entity.Usuario;
 import com.nexoohub.almacen.common.repository.UsuarioRepository;
 import com.nexoohub.almacen.finanzas.entity.HistorialPrecio;
 import com.nexoohub.almacen.finanzas.repository.HistorialPrecioRepository;
+import com.nexoohub.almacen.finanzas.service.CreditoService;
 import com.nexoohub.almacen.inventario.entity.InventarioSucursal;
 import com.nexoohub.almacen.inventario.entity.InventarioSucursalId;
 import com.nexoohub.almacen.inventario.repository.InventarioSucursalRepository;
@@ -31,9 +32,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.nexoohub.almacen.common.exception.CreditoInsuficienteException;
 import com.nexoohub.almacen.common.exception.ResourceNotFoundException;
 import com.nexoohub.almacen.common.exception.StockInsuficienteException;
+import com.nexoohub.almacen.finanzas.dto.ValidacionCreditoDTO;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +64,9 @@ class VentaServiceTest {
 
     @Mock
     private PrecioEspecialRepository precioEspecialRepository;
+
+    @Mock
+    private CreditoService creditoService;
 
     @InjectMocks
     private VentaService ventaService;
@@ -508,6 +515,190 @@ class VentaServiceTest {
         // Si el precio de oferta es mayor, se usa el precio normal
         assertEquals(new BigDecimal("200.00"), detalleSaved.getPrecioUnitarioVenta());
         assertEquals(BigDecimal.ZERO, detalleSaved.getDescuentoEspecial());
+    }
+
+    // ========== TESTS DE INTEGRACIÓN CON SISTEMA DE CRÉDITO ==========
+
+    @Test
+    @DisplayName("Debe procesar venta a crédito exitosamente cuando hay crédito disponible")
+    void testVentaACreditoExitosa() {
+        // Given
+        VentaRequestDTO request = crearRequestVenta(1, 5);
+        request.setMetodoPago("CREDITO"); // CAMBIO CRÍTICO
+        Venta ventaMock = new Venta();
+        ventaMock.setId(1);
+
+        ValidacionCreditoDTO validacionOK = ValidacionCreditoDTO.builder()
+                .creditoDisponible(true)
+                .montoDisponible(new BigDecimal("5000.00"))
+                .limiteAutorizado(new BigDecimal("10000.00"))
+                .saldoUtilizado(new BigDecimal("4000.00"))
+                .montoSolicitado(new BigDecimal("1000.00"))
+                .estado("ACTIVO")
+                .mensaje("Crédito disponible suficiente")
+                .codigo("OK")
+                .build();
+
+        when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.of(vendedor));
+        when(clienteRepository.findById(1)).thenReturn(Optional.of(clientePublico));
+        when(creditoService.validarCreditoDisponible(eq(1), any(BigDecimal.class)))
+                .thenReturn(validacionOK);
+        when(ventaRepository.save(any(Venta.class))).thenReturn(ventaMock);
+        when(inventarioRepository.findById(any(InventarioSucursalId.class)))
+                .thenReturn(Optional.of(inventario));
+        when(historialPrecioRepository.findTopBySkuInternoOrderByFechaCalculoDesc("SKU001"))
+                .thenReturn(Optional.of(historialPrecio));
+        when(precioEspecialRepository.findBySkuInternoAndTipoClienteId("SKU001", 1))
+                .thenReturn(Optional.empty());
+        when(detalleVentaRepository.save(any(DetalleVenta.class))).thenReturn(new DetalleVenta());
+
+        // When
+        Venta resultado = ventaService.procesarVenta(request, "vendedor1");
+
+        // Then
+        assertNotNull(resultado, "La venta a crédito debe procesarse correctamente");
+        verify(creditoService, times(1)).validarCreditoDisponible(eq(1), any(BigDecimal.class));
+        verify(creditoService, times(1)).registrarCargo(
+                eq(1), 
+                any(Venta.class), 
+                any(BigDecimal.class), 
+                eq("vendedor1")
+        );
+        verify(ventaRepository, times(2)).save(any(Venta.class));
+    }
+
+    @Test
+    @DisplayName("Debe rechazar venta a crédito cuando no hay crédito suficiente")
+    void testVentaACreditoRechazadaPorLimiteExcedido() {
+        // Given
+        VentaRequestDTO request = crearRequestVenta(1, 5);
+        request.setMetodoPago("CREDITO");
+
+        ValidacionCreditoDTO validacionRechazo = ValidacionCreditoDTO.builder()
+                .creditoDisponible(false)
+                .montoDisponible(new BigDecimal("500.00"))
+                .limiteAutorizado(new BigDecimal("10000.00"))
+                .saldoUtilizado(new BigDecimal("9500.00"))
+                .montoSolicitado(new BigDecimal("1000.00"))
+                .estado("ACTIVO")
+                .mensaje("Crédito insuficiente. Disponible: $500.00, Solicitado: $1000.00")
+                .codigo("LIMITE_EXCEDIDO")
+                .build();
+
+        when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.of(vendedor));
+        when(clienteRepository.findById(1)).thenReturn(Optional.of(clientePublico));
+        when(creditoService.validarCreditoDisponible(eq(1), any(BigDecimal.class)))
+                .thenReturn(validacionRechazo);
+        when(historialPrecioRepository.findTopBySkuInternoOrderByFechaCalculoDesc("SKU001"))
+                .thenReturn(Optional.of(historialPrecio));
+        when(precioEspecialRepository.findBySkuInternoAndTipoClienteId("SKU001", 1))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        CreditoInsuficienteException exception = assertThrows(CreditoInsuficienteException.class,
+                () -> ventaService.procesarVenta(request, "vendedor1"));
+        
+        assertTrue(exception.getMessage().contains("Crédito insuficiente"));
+        assertEquals("LIMITE_EXCEDIDO", exception.getCodigoValidacion());
+        assertEquals(new BigDecimal("500.00"), exception.getCreditoDisponible());
+        verify(ventaRepository, never()).save(any(Venta.class));
+        verify(creditoService, never()).registrarCargo(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Debe rechazar venta a crédito cuando el cliente está bloqueado")
+    void testVentaACreditoRechazadaPorClienteBloqueado() {
+        // Given
+        VentaRequestDTO request = crearRequestVenta(1, 5);
+        request.setMetodoPago("CREDITO");
+
+        ValidacionCreditoDTO validacionBloqueado = ValidacionCreditoDTO.builder()
+                .creditoDisponible(false)
+                .montoDisponible(new BigDecimal("0.00"))
+                .limiteAutorizado(new BigDecimal("10000.00"))
+                .saldoUtilizado(new BigDecimal("0.00"))
+                .montoSolicitado(new BigDecimal("1000.00"))
+                .estado("BLOQUEADO")
+                .mensaje("Crédito bloqueado por morosidad")
+                .codigo("BLOQUEADO")
+                .build();
+
+        when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.of(vendedor));
+        when(clienteRepository.findById(1)).thenReturn(Optional.of(clientePublico));
+        when(creditoService.validarCreditoDisponible(eq(1), any(BigDecimal.class)))
+                .thenReturn(validacionBloqueado);
+        when(historialPrecioRepository.findTopBySkuInternoOrderByFechaCalculoDesc("SKU001"))
+                .thenReturn(Optional.of(historialPrecio));
+        when(precioEspecialRepository.findBySkuInternoAndTipoClienteId("SKU001", 1))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        CreditoInsuficienteException exception = assertThrows(CreditoInsuficienteException.class,
+                () -> ventaService.procesarVenta(request, "vendedor1"));
+        
+        assertTrue(exception.getMessage().contains("bloqueado"));
+        assertEquals("BLOQUEADO", exception.getCodigoValidacion());
+        verify(ventaRepository, never()).save(any(Venta.class));
+    }
+
+    @Test
+    @DisplayName("Debe rechazar venta a crédito cuando el cliente no tiene límite configurado")
+    void testVentaACreditoRechazadaPorSinLimite() {
+        // Given
+        VentaRequestDTO request = crearRequestVenta(1, 5);
+        request.setMetodoPago("CREDITO");
+
+        ValidacionCreditoDTO validacionSinCredito = ValidacionCreditoDTO.builder()
+                .creditoDisponible(false)
+                .mensaje("El cliente no tiene límite de crédito configurado")
+                .codigo("SIN_CREDITO")
+                .build();
+
+        when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.of(vendedor));
+        when(clienteRepository.findById(1)).thenReturn(Optional.of(clientePublico));
+        when(creditoService.validarCreditoDisponible(eq(1), any(BigDecimal.class)))
+                .thenReturn(validacionSinCredito);
+        when(historialPrecioRepository.findTopBySkuInternoOrderByFechaCalculoDesc("SKU001"))
+                .thenReturn(Optional.of(historialPrecio));
+        when(precioEspecialRepository.findBySkuInternoAndTipoClienteId("SKU001", 1))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        CreditoInsuficienteException exception = assertThrows(CreditoInsuficienteException.class,
+                () -> ventaService.procesarVenta(request, "vendedor1"));
+        
+        assertTrue(exception.getMessage().contains("no tiene límite de crédito"));
+        assertEquals("SIN_CREDITO", exception.getCodigoValidacion());
+        verify(ventaRepository, never()).save(any(Venta.class));
+    }
+
+    @Test
+    @DisplayName("Ventas en EFECTIVO no deben validar crédito")
+    void testVentaEnEfectivoNoValidaCredito() {
+        // Given
+        VentaRequestDTO request = crearRequestVenta(1, 5);
+        request.setMetodoPago("EFECTIVO"); // NO ES CREDITO
+        Venta ventaMock = new Venta();
+        ventaMock.setId(1);
+
+        when(usuarioRepository.findByUsername("vendedor1")).thenReturn(Optional.of(vendedor));
+        when(clienteRepository.findById(1)).thenReturn(Optional.of(clientePublico));
+        when(ventaRepository.save(any(Venta.class))).thenReturn(ventaMock);
+        when(inventarioRepository.findById(any(InventarioSucursalId.class)))
+                .thenReturn(Optional.of(inventario));
+        when(historialPrecioRepository.findTopBySkuInternoOrderByFechaCalculoDesc("SKU001"))
+                .thenReturn(Optional.of(historialPrecio));
+        when(precioEspecialRepository.findBySkuInternoAndTipoClienteId("SKU001", 1))
+                .thenReturn(Optional.empty());
+        when(detalleVentaRepository.save(any(DetalleVenta.class))).thenReturn(new DetalleVenta());
+
+        // When
+        Venta resultado = ventaService.procesarVenta(request, "vendedor1");
+
+        // Then
+        assertNotNull(resultado);
+        verify(creditoService, never()).validarCreditoDisponible(any(), any());
+        verify(creditoService, never()).registrarCargo(any(), any(), any(), any());
     }
 
     // ========== MÉTODOS AUXILIARES ==========
