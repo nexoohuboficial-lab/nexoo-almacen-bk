@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface InventarioSucursalRepository extends JpaRepository<InventarioSucursal, InventarioSucursalId> {
@@ -21,6 +22,9 @@ public interface InventarioSucursalRepository extends JpaRepository<InventarioSu
     // Magia de Spring Data: Busca dentro de la llave compuesta (id) el campo 'sucursalId'
     List<InventarioSucursal> findByIdSucursalId(Integer sucursalId);
     Page<InventarioSucursal> findByIdSucursalId(Integer sucursalId, Pageable pageable);
+    
+    // Buscar por SKU interno y sucursal (para sistema de reservas)
+    Optional<InventarioSucursal> findByIdSkuInternoAndIdSucursalId(String skuInterno, Integer sucursalId);
     
     @Query("SELECT new com.nexoohub.almacen.inventario.dto.InventarioSucursalDTO(" +
            "i.id.skuInterno, p.nombreComercial, i.stockActual, i.costoPromedioPonderado) " +

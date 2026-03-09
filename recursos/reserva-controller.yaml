@@ -1,0 +1,461 @@
+openapi: 3.0.1
+info:
+  title: API de Reservas - NexooHub Almacén
+  description: API para gestión de reservas/apartados de productos
+  version: 1.1.0
+  contact:
+    name: NexooHub Development Team
+    email: dev@nexoohub.com
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/reservas:
+    post:
+      summary: Crear nueva reserva
+      description: Crea una reserva de producto cuando no hay stock disponible
+      tags:
+        - Reservas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservaRequestDTO'
+            examples:
+              reservaBasica:
+                summary: Reserva básica (7 días vigencia)
+                value:
+                  clienteId: 1
+                  skuInterno: "BAL-YAM-R15-001"
+                  sucursalId: 1
+                  cantidad: 2
+                  comentarios: "Cliente urgente, llamar cuando llegue"
+              reservaExtendida:
+                summary: Reserva con vigencia extendida
+                value:
+                  clienteId: 2
+                  skuInterno: "ACE-MOT-10W40-001"
+                  sucursalId: 2
+                  cantidad: 5
+                  diasVigencia: 15
+                  comentarios: "Cliente mayorista"
+      responses:
+        '201':
+          description: Reserva creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Reserva creada exitosamente"
+                  reservaId:
+                    type: integer
+                    example: 1
+                  fechaVencimiento:
+                    type: string
+                    format: date-time
+                    example: "2026-03-16T10:30:00"
+                  estado:
+                    type: string
+                    example: "PENDIENTE"
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                tipo: "Error de Validación"
+                mensaje: "No se puede crear reserva. El producto tiene stock disponible (5 unidades). Proceda con venta directa."
+                codigo: "INVALID_OPERATION"
+        '404':
+          description: Recurso no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                tipo: "Recurso No Encontrado"
+                mensaje: "Cliente no encontrado con ID: 999"
+                codigo: "NOT_FOUND"
+
+    get:
+      summary: Listar todas las reservas
+      description: Obtiene lista paginada de todas las reservas
+      tags:
+        - Reservas
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: "fechaCreacion,desc"
+      responses:
+        '200':
+          description: Lista de reservas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageReservaResponseDTO'
+
+  /api/v1/reservas/{id}:
+    get:
+      summary: Obtener reserva por ID
+      tags:
+        - Reservas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Reserva encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponseDTO'
+        '404':
+          description: Reserva no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/reservas/cliente/{clienteId}:
+    get:
+      summary: Listar reservas de un cliente
+      tags:
+        - Reservas
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de reservas del cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageReservaResponseDTO'
+
+  /api/v1/reservas/estado/{estado}:
+    get:
+      summary: Listar reservas por estado
+      tags:
+        - Reservas
+      parameters:
+        - name: estado
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [PENDIENTE, NOTIFICADA, COMPLETADA, VENCIDA, CANCELADA]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de reservas filtradas por estado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageReservaResponseDTO'
+
+  /api/v1/reservas/proximas-vencer:
+    get:
+      summary: Listar reservas próximas a vencer
+      description: Obtiene reservas que vencen en los próximos 2 días (útil para recordatorios)
+      tags:
+        - Reservas
+      responses:
+        '200':
+          description: Lista de reservas próximas a vencer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservaResponseDTO'
+
+  /api/v1/reservas/{id}/cancelar:
+    put:
+      summary: Cancelar reserva
+      tags:
+        - Reservas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                motivo:
+                  type: string
+                  example: "Cliente ya no requiere el producto"
+      responses:
+        '200':
+          description: Reserva cancelada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Reserva cancelada exitosamente"
+                  reservaId:
+                    type: integer
+                    example: 1
+                  estado:
+                    type: string
+                    example: "CANCELADA"
+
+  /api/v1/reservas/{id}/completar:
+    put:
+      summary: Completar reserva
+      description: Marca la reserva como completada asociándola a una venta
+      tags:
+        - Reservas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ventaId
+              properties:
+                ventaId:
+                  type: integer
+                  example: 42
+      responses:
+        '200':
+          description: Reserva completada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Reserva completada exitosamente"
+                  reservaId:
+                    type: integer
+                    example: 1
+                  ventaId:
+                    type: integer
+                    example: 42
+                  estado:
+                    type: string
+                    example: "COMPLETADA"
+
+  /api/v1/reservas/procesar-vencidas:
+    post:
+      summary: Procesar reservas vencidas
+      description: Marca automáticamente como VENCIDAS las reservas que superaron su fecha límite
+      tags:
+        - Reservas
+      responses:
+        '200':
+          description: Reservas vencidas procesadas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Reservas vencidas procesadas"
+                  totalProcesadas:
+                    type: integer
+                    example: 3
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ReservaRequestDTO:
+      type: object
+      required:
+        - clienteId
+        - skuInterno
+        - sucursalId
+        - cantidad
+      properties:
+        clienteId:
+          type: integer
+          example: 1
+        skuInterno:
+          type: string
+          example: "BAL-YAM-R15-001"
+        sucursalId:
+          type: integer
+          example: 1
+        cantidad:
+          type: integer
+          minimum: 1
+          example: 2
+        comentarios:
+          type: string
+          maxLength: 500
+          example: "Cliente urgente"
+        diasVigencia:
+          type: integer
+          minimum: 1
+          example: 7
+          description: "Días de vigencia de la reserva (default: 7)"
+
+    ReservaResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        clienteId:
+          type: integer
+          example: 1
+        clienteNombre:
+          type: string
+          example: "Juan Pérez"
+        skuInterno:
+          type: string
+          example: "BAL-YAM-R15-001"
+        productoNombre:
+          type: string
+          example: "Balatas Yamaha R15 Delanteras"
+        sucursalId:
+          type: integer
+          example: 1
+        sucursalNombre:
+          type: string
+          example: "Sucursal Centro"
+        cantidad:
+          type: integer
+          example: 2
+        estado:
+          type: string
+          enum: [PENDIENTE, NOTIFICADA, COMPLETADA, VENCIDA, CANCELADA]
+          example: "PENDIENTE"
+        fechaCreacion:
+          type: string
+          format: date-time
+          example: "2026-03-09T10:30:00"
+        fechaNotificacion:
+          type: string
+          format: date-time
+          nullable: true
+        fechaVencimiento:
+          type: string
+          format: date-time
+          example: "2026-03-16T10:30:00"
+        fechaFinalizacion:
+          type: string
+          format: date-time
+          nullable: true
+        ventaId:
+          type: integer
+          nullable: true
+        comentarios:
+          type: string
+          nullable: true
+        usuarioRegistro:
+          type: string
+          example: "admin"
+
+    PageReservaResponseDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReservaResponseDTO'
+        pageable:
+          type: object
+        totalPages:
+          type: integer
+        totalElements:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        tipo:
+          type: string
+        mensaje:
+          type: string
+        codigo:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

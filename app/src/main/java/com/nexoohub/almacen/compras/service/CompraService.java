@@ -15,6 +15,9 @@ import com.nexoohub.almacen.inventario.entity.InventarioSucursalId;
 import com.nexoohub.almacen.inventario.entity.ProductoMaestro;
 import com.nexoohub.almacen.inventario.repository.InventarioSucursalRepository;
 import com.nexoohub.almacen.inventario.repository.ProductoMaestroRepository;
+import com.nexoohub.almacen.ventas.service.ReservaService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,12 +41,15 @@ import java.math.RoundingMode;
 @Service
 public class CompraService {
 
+    private static final Logger log = LoggerFactory.getLogger(CompraService.class);
+
     private final CompraRepository compraRepository;
     private final DetalleCompraRepository detalleCompraRepository;
     private final InventarioSucursalRepository inventarioRepository;
     private final ProductoMaestroRepository productoRepository;
     private final ConfiguracionFinancieraRepository finanzasRepository;
     private final HistorialPrecioRepository historialPrecioRepository;
+    private final ReservaService reservaService;
 
     /**
      * Constructor con inyección de dependencias.
@@ -54,6 +60,7 @@ public class CompraService {
      * @param productoRepository Repositorio de productos maestros
      * @param finanzasRepository Repositorio de configuración financiera
      * @param historialPrecioRepository Repositorio de historial de precios
+     * @param reservaService Servicio de reservas para notificaciones automáticas
      */
     public CompraService(
             CompraRepository compraRepository,
@@ -61,13 +68,15 @@ public class CompraService {
             InventarioSucursalRepository inventarioRepository,
             ProductoMaestroRepository productoRepository,
             ConfiguracionFinancieraRepository finanzasRepository,
-            HistorialPrecioRepository historialPrecioRepository) {
+            HistorialPrecioRepository historialPrecioRepository,
+            ReservaService reservaService) {
         this.compraRepository = compraRepository;
         this.detalleCompraRepository = detalleCompraRepository;
         this.inventarioRepository = inventarioRepository;
         this.productoRepository = productoRepository;
         this.finanzasRepository = finanzasRepository;
         this.historialPrecioRepository = historialPrecioRepository;
+        this.reservaService = reservaService;
     }
 
     /**
@@ -151,6 +160,22 @@ public class CompraService {
             inventario.setStockActual(stockTotal);
             inventario.setCostoPromedioPonderado(nuevoCpp);
             inventarioRepository.save(inventario);
+
+            // 🔔 NOTIFICAR RESERVAS PENDIENTES (nuevo stock disponible)
+            try {
+                int reservasNotificadas = reservaService.notificarReservasDisponibles(
+                    item.getSkuInterno(), 
+                    request.getSucursalDestinoId()
+                );
+                if (reservasNotificadas > 0) {
+                    log.info("✅ Se notificaron {} reservas para producto: {}", 
+                             reservasNotificadas, item.getSkuInterno());
+                }
+            } catch (Exception e) {
+                // No fallar la compra si falla la notificación
+                log.error("⚠️ Error al notificar reservas para {}: {}", 
+                         item.getSkuInterno(), e.getMessage());
+            }
 
             // --- C) CÁLCULO DE PRECIOS E INTELIGENCIA DE NEGOCIO ---
             ProductoMaestro producto = productoRepository.findById(item.getSkuInterno())
