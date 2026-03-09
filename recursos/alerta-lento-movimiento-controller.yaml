@@ -1,0 +1,483 @@
+openapi: 3.0.3
+info:
+  title: API de Alertas de Productos de Lento Movimiento - NexooHub Almacén
+  description: |
+    API REST para gestionar alertas de productos con baja rotación de inventario.
+    
+    **Funcionalidades principales:**
+    - Detección automática de productos sin ventas en X días
+    - Clasificación por niveles de criticidad (ADVERTENCIA, CRITICO)
+    - Cálculo de costos de inventario inmovilizado
+    - Sugerencias inteligentes de acciones correctivas
+    - Gestión del ciclo de vida de alertas
+    
+    **Niveles de Alerta:**
+    - `ADVERTENCIA`: 30-60 días sin venta
+    - `CRITICO`: Más de 60 días sin venta
+    - `RESUELTA`: Alerta con acción correctiva aplicada
+    
+    **Acciones Correctivas:**
+    - `LIQUIDACION`: Venta con descuento agresivo
+    - `PROMOCION`: Oferta temporal
+    - `TRANSFERENCIA`: Mover a otra sucursal
+    - `DESCONTINUADO`: Dejar de comprar el producto
+    - `NINGUNA`: Sin acción específica
+  version: 1.2.0
+  contact:
+    name: NexooHub Development Team
+    email: dev@nexoohub.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: Servidor de desarrollo local
+  - url: https://api.nexoohub.com
+    description: Servidor de producción
+
+tags:
+  - name: Alertas de Lento Movimiento
+    description: Endpoints para detectar y gestionar productos de baja rotación
+
+paths:
+  /alertas/lento-movimiento/generar:
+    post:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Genera alertas de lento movimiento
+      description: |
+        Analiza el inventario y detecta productos sin ventas en los últimos N días.
+        Crea nuevas alertas o actualiza existentes automáticamente.
+        
+        **Proceso:**
+        1. Consulta ventas históricas
+        2. Identifica productos sin movimiento
+        3. Calcula costo inmovilizado (stock × CPP)
+        4. Determina nivel de criticidad
+        5. Genera/actualiza alertas
+      operationId: generarAlertas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerarAlertasRequest'
+            examples:
+              alertas30dias:
+                summary: Detectar productos con 30+ días sin venta
+                value:
+                  diasSinVentaMinimo: 30
+              alertasSucursal:
+                summary: Solo sucursal específica
+                value:
+                  diasSinVentaMinimo: 45
+                  sucursalId: 1
+              soloActualizar:
+                summary: Solo actualizar alertas existentes
+                value:
+                  diasSinVentaMinimo: 30
+                  soloActualizarExistentes: true
+      responses:
+        '201':
+          description: Alertas generadas exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertaLentoMovimientoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /alertas/lento-movimiento:
+    get:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Lista todas las alertas activas
+      description: Retorna todas las alertas de lento movimiento que no han sido resueltas.
+      operationId: obtenerAlertasActivas
+      responses:
+        '200':
+          description: Lista de alertas activas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertaLentoMovimientoResponse'
+
+  /alertas/lento-movimiento/{id}:
+    get:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Obtiene una alerta por ID
+      description: Retorna la información completa de una alerta específica.
+      operationId: obtenerAlertaPorId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la alerta
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Alerta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertaLentoMovimientoResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Elimina una alerta
+      description: Elimina permanentemente una alerta del sistema.
+      operationId: eliminarAlerta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la alerta
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '204':
+          description: Alerta eliminada exitosamente
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /alertas/lento-movimiento/{id}/resolver:
+    put:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Resuelve una alerta
+      description: |
+        Marca una alerta como resuelta indicando la acción correctiva aplicada.
+        La alerta cambia a estado RESUELTA y ya no aparece en consultas activas.
+      operationId: resolverAlerta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la alerta
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolverAlertaRequest'
+            examples:
+              liquidacion:
+                summary: Producto liquidado
+                value:
+                  accionTomada: LIQUIDACION
+                  observaciones: "Vendido con 40% de descuento en 2 semanas"
+              transferencia:
+                summary: Transferido a otra sucursal
+                value:
+                  accionTomada: TRANSFERENCIA
+                  observaciones: "Movido a Sucursal Norte donde hay demanda"
+      responses:
+        '200':
+          description: Alerta resuelta exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertaLentoMovimientoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /alertas/lento-movimiento/sucursal/{sucursalId}:
+    get:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Lista alertas por sucursal
+      description: Retorna todas las alertas activas de una sucursal específica.
+      operationId: obtenerAlertasPorSucursal
+      parameters:
+        - name: sucursalId
+          in: path
+          required: true
+          description: ID de la sucursal
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Alertas de la sucursal
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertaLentoMovimientoResponse'
+
+  /alertas/lento-movimiento/criticas:
+    get:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Lista alertas críticas
+      description: |
+        Retorna solo las alertas con más de 60 días sin venta (estado CRITICO).
+        Útil para dashboard ejecutivo y acciones prioritarias.
+      operationId: obtenerAlertasCriticas
+      responses:
+        '200':
+          description: Alertas críticas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertaLentoMovimientoResponse'
+
+  /alertas/lento-movimiento/producto/{skuInterno}:
+    get:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Lista alertas por producto
+      description: Retorna todas las alertas activas de un producto en todas las sucursales.
+      operationId: obtenerAlertasPorProducto
+      parameters:
+        - name: skuInterno
+          in: path
+          required: true
+          description: SKU interno del producto
+          schema:
+            type: string
+            example: "BRK-001"
+      responses:
+        '200':
+          description: Alertas del producto
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertaLentoMovimientoResponse'
+
+  /alertas/lento-movimiento/costo-inmovilizado:
+    get:
+      tags:
+        - Alertas de Lento Movimiento
+      summary: Calcula costo de inventario inmovilizado
+      description: |
+        Retorna el costo total del inventario con bajo movimiento.
+        Puede calcularse globalmente o filtrado por sucursal.
+      operationId: calcularCostoInmovilizado
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          description: ID de sucursal (opcional, para filtrar)
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Resumen de costos calculado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostoInmovilizadoResumen'
+              examples:
+                global:
+                  summary: Cálculo global
+                  value:
+                    costoTotalInmovilizado: 45000.00
+                    alertasAdvertencia: 12
+                    alertasCriticas: 5
+                    totalProductosAfectados: 17
+                sucursal:
+                  summary: Cálculo por sucursal
+                  value:
+                    costoTotalInmovilizado: 15000.00
+                    alertasAdvertencia: 4
+                    alertasCriticas: 2
+                    totalProductosAfectados: 6
+                    sucursalId: 1
+                    nombreSucursal: "Sucursal Centro"
+
+components:
+  schemas:
+    GenerarAlertasRequest:
+      type: object
+      required:
+        - diasSinVentaMinimo
+      properties:
+        diasSinVentaMinimo:
+          type: integer
+          minimum: 1
+          description: Umbral de días sin venta para generar alerta
+          example: 30
+        sucursalId:
+          type: integer
+          nullable: true
+          description: ID de sucursal (null = todas las sucursales)
+          example: 1
+        soloActualizarExistentes:
+          type: boolean
+          default: false
+          description: Si true, solo actualiza alertas existentes sin crear nuevas
+          example: false
+
+    ResolverAlertaRequest:
+      type: object
+      required:
+        - accionTomada
+      properties:
+        accionTomada:
+          type: string
+          maxLength: 100
+          enum: [LIQUIDACION, PROMOCION, TRANSFERENCIA, DESCONTINUADO, NINGUNA]
+          description: Acción correctiva aplicada
+          example: "LIQUIDACION"
+        observaciones:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Notas adicionales
+          example: "Producto descontinuado, vendido al 50% de descuento"
+
+    AlertaLentoMovimientoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        skuInterno:
+          type: string
+          example: "BRK-001"
+        nombreProducto:
+          type: string
+          example: "Pastillas de freno delanteras"
+        marcaProducto:
+          type: string
+          example: "HONDA"
+        sucursalId:
+          type: integer
+          example: 1
+        nombreSucursal:
+          type: string
+          example: "Sucursal Centro"
+        diasSinVenta:
+          type: integer
+          example: 45
+        ultimaVenta:
+          type: string
+          format: date
+          nullable: true
+          example: "2025-01-15"
+        stockActual:
+          type: integer
+          example: 12
+        costoInmovilizado:
+          type: number
+          format: decimal
+          example: 3600.00
+        estadoAlerta:
+          type: string
+          enum: [ADVERTENCIA, CRITICO, RESUELTA]
+          example: "ADVERTENCIA"
+        fechaDeteccion:
+          type: string
+          format: date
+          example: "2025-03-01"
+        fechaResolucion:
+          type: string
+          format: date
+          nullable: true
+          example: null
+        accionTomada:
+          type: string
+          nullable: true
+          example: null
+        observaciones:
+          type: string
+          nullable: true
+          example: null
+        resuelto:
+          type: boolean
+          example: false
+        sugerenciaAccion:
+          type: string
+          description: Sugerencia automática de acción correctiva
+          example: "Aplicar PROMOCION o descuento agresivo"
+
+    CostoInmovilizadoResumen:
+      type: object
+      properties:
+        costoTotalInmovilizado:
+          type: number
+          format: decimal
+          example: 45000.00
+        alertasAdvertencia:
+          type: integer
+          format: int64
+          example: 12
+        alertasCriticas:
+          type: integer
+          format: int64
+          example: 5
+        totalProductosAfectados:
+          type: integer
+          format: int64
+          example: 17
+        sucursalId:
+          type: integer
+          nullable: true
+          example: 1
+        nombreSucursal:
+          type: string
+          nullable: true
+          example: "Sucursal Centro"
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2025-03-09T10:30:00"
+            status: 400
+            error: "Bad Request"
+            message: "El umbral de días sin venta es obligatorio"
+            path: "/api/alertas/lento-movimiento/generar"
+    
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2025-03-09T10:30:00"
+            status: 404
+            error: "Not Found"
+            message: "Alerta no encontrada con ID: 999"
+            path: "/api/alertas/lento-movimiento/999"

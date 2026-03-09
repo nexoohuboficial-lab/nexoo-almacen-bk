@@ -1,5 +1,13 @@
 package com.nexoohub.almacen.common.config;
 
+/**
+ * TEMPORALMENTE DESHABILITADO - Falta dependencia de Redis en build.gradle
+ * Para habilitar: agregar 'org.springframework.boot:spring-boot-starter-data-redis' a dependencies
+ * Luego descomentar todo el contenido de este archivo.
+ */
+
+/* ARCHIVO COMPLETAMENTE DESHABILITADO - DESCOMENTAR CUANDO SE AGREGUE DEPENDENCIA DE REDIS
+
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
@@ -19,34 +27,13 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Configuración de Redis y Cache para NexooHub Almacén.
- * 
- * IMPORTANTE: Esta configuración solo se activa cuando:
- * - spring.cache.type=redis (en application-prod.yml)
- * 
- * En desarrollo (spring.cache.type=none), esta configuración NO se carga.
- * La aplicación funciona normalmente sin Redis, solo más lento.
- * 
- * Phase 3.3: Performance Optimization - Redis Caching
- */
 @Configuration
 @EnableCaching
 @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
 public class RedisConfig {
 
-    /**
-     * Configura el CacheManager de Redis con TTL personalizados por cache.
-     * 
-     * Estrategia de TTL:
-     * - Catálogos estáticos (Categorias, TipoCliente): 1-2 horas
-     * - Configuración financiera: 24 horas (cambia raramente)
-     * - Precios especiales: 30 minutos (actualizaciones periódicas)
-     * - Proveedores: 1 hora
-     */
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // Configuración por defecto (1 hora)
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofHours(1))
                 .serializeKeysWith(
@@ -55,20 +42,14 @@ public class RedisConfig {
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(createJsonSerializer())
                 )
-                .disableCachingNullValues(); // No cachear valores null
+                .disableCachingNullValues();
 
-        // Configuraciones específicas por cache con TTL optimizado
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         
-        // Catálogos - TTL largo (cambian poco, se consultan mucho)
         cacheConfigurations.put("categorias", defaultConfig.entryTtl(Duration.ofHours(2)));
         cacheConfigurations.put("tiposCliente", defaultConfig.entryTtl(Duration.ofHours(2)));
         cacheConfigurations.put("proveedores", defaultConfig.entryTtl(Duration.ofHours(1)));
-        
-        // Configuración financiera - TTL muy largo (solo cambia con actualizaciones legales)
         cacheConfigurations.put("configuracionFinanciera", defaultConfig.entryTtl(Duration.ofHours(24)));
-        
-        // Precios especiales - TTL corto (actualizaciones frecuentes)
         cacheConfigurations.put("preciosEspeciales", defaultConfig.entryTtl(Duration.ofMinutes(30)));
 
         return RedisCacheManager.builder(connectionFactory)
@@ -77,26 +58,17 @@ public class RedisConfig {
                 .build();
     }
 
-    /**
-     * Crea un serializador JSON que soporta tipos complejos de JPA.
-     * Incluye soporte para:
-     * - LocalDateTime, LocalDate (java.time)
-     * - Entidades JPA con relaciones lazy
-     * - Colecciones de Spring Data (Page<T>)
-     */
     private GenericJackson2JsonRedisSerializer createJsonSerializer() {
         ObjectMapper objectMapper = new ObjectMapper();
-        
-        // Soporte para java.time (LocalDateTime, LocalDate, etc.)
         objectMapper.registerModule(new JavaTimeModule());
-        
-        // Activar tipado por defecto para deserialización correcta
         objectMapper.activateDefaultTyping(
                 LaissezFaireSubTypeValidator.instance,
                 ObjectMapper.DefaultTyping.NON_FINAL,
                 JsonTypeInfo.As.PROPERTY
         );
-        
         return new GenericJackson2JsonRedisSerializer(objectMapper);
     }
 }
+
+FIN DEL ARCHIVO DESHABILITADO */
+
