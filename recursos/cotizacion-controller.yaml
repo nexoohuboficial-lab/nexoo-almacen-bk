@@ -1,0 +1,912 @@
+openapi: 3.0.3
+info:
+  title: API de Cotizaciones (Presupuestos)
+  description: |
+    API para la gestión completa de cotizaciones o presupuestos.
+    
+    Una cotización es una oferta formal de venta que puede convertirse en una venta real.
+    Incluye funcionalidades para crear, actualizar, cambiar estados, convertir a ventas,
+    y obtener estadísticas sobre el proceso de cotización.
+  version: 1.0.0
+  contact:
+    name: NexooHub Development Team
+    email: dev@nexoohub.com
+
+servers:
+  - url: /api
+    description: Servidor de producción
+
+tags:
+  - name: Cotizaciones
+    description: Operaciones CRUD de cotizaciones
+  - name: Estados
+    description: Cambio de estados de cotizaciones
+  - name: Conversión
+    description: Conversión de cotizaciones a ventas
+  - name: Reportes
+    description: Estadísticas y reportes de cotizaciones
+  - name: Mantenimiento
+    description: Operaciones de mantenimiento
+
+paths:
+  /cotizaciones:
+    post:
+      summary: Crear nueva cotización
+      description: |
+        Crea una nueva cotización en estado BORRADOR.
+        
+        Genera automáticamente un folio único con formato COT-YYYY-NNNN
+        y calcula los totales (subtotal, IVA, descuentos, total).
+      operationId: crearCotizacion
+      tags:
+        - Cotizaciones
+      requestBody:
+        description: Datos de la cotización a crear
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CotizacionRequestDTO'
+            example:
+              clienteId: 1
+              sucursalId: 1
+              vendedorId: 5
+              fechaValidez: "2026-03-24"
+              notas: "Cliente solicita descuento especial"
+              terminosCondiciones: "Válido por 15 días. Precios sujetos a disponibilidad."
+              detalles:
+                - skuInterno: "MOT-YAM-001"
+                  cantidad: 2
+                  precioUnitario: 15000.00
+                  descuentoEspecial: 500.00
+                - skuInterno: "ACC-HLM-001"
+                  cantidad: 1
+                  precioUnitario: 850.00
+      responses:
+        '201':
+          description: Cotización creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CotizacionResponseDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    get:
+      summary: Listar cotizaciones con filtros
+      description: |
+        Obtiene una lista paginada de cotizaciones con filtros opcionales.
+        
+        Filtros disponibles:
+        - Cliente
+        - Sucursal
+        - Vendedor
+        - Estado
+        - Rango de fechas
+      operationId: listarCotizaciones
+      tags:
+        - Cotizaciones
+      parameters:
+        - name: clienteId
+          in: query
+          description: Filtrar por ID de cliente
+          required: false
+          schema:
+            type: integer
+        - name: sucursalId
+          in: query
+          description: Filtrar por ID de sucursal
+          required: false
+          schema:
+            type: integer
+        - name: vendedorId
+          in: query
+          description: Filtrar por ID de vendedor
+          required: false
+          schema:
+            type: integer
+        - name: estado
+          in: query
+          description: Filtrar por estado de la cotización
+          required: false
+          schema:
+            type: string
+            enum: [BORRADOR, ENVIADA, ACEPTADA, RECHAZADA, VENCIDA, CONVERTIDA]
+        - name: fechaInicio
+          in: query
+          description: Fecha de inicio del rango (formato ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: fechaFin
+          in: query
+          description: Fecha de fin del rango (formato ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          description: Número de página (base 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Tamaño de página
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          description: Campo de ordenamiento (ej. fechaCotizacion,desc)
+          required: false
+          schema:
+            type: string
+            default: "fechaCotizacion,desc"
+      responses:
+        '200':
+          description: Lista de cotizaciones obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CotizacionResponseDTO'
+                  pageable:
+                    $ref: '#/components/schemas/PageableResponse'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  last:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /cotizaciones/{id}:
+    get:
+      summary: Obtener cotización por ID
+      description: Recupera los detalles completos de una cotización específica, incluyendo todos sus items.
+      operationId: obtenerCotizacion
+      tags:
+        - Cotizaciones
+      parameters:
+        - name: id
+          in: path
+          description: ID de la cotización
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Cotización encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CotizacionResponseDTO'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    put:
+      summary: Actualizar cotización
+      description: |
+        Actualiza una cotización existente.
+        
+        **Restricción:** Solo se pueden actualizar cotizaciones en estado BORRADOR.
+      operationId: actualizarCotizacion
+      tags:
+        - Cotizaciones
+      parameters:
+        - name: id
+          in: path
+          description: ID de la cotización
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Nuevos datos de la cotización
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CotizacionRequestDTO'
+      responses:
+        '200':
+          description: Cotización actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CotizacionResponseDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    delete:
+      summary: Eliminar cotización
+      description: |
+        Elimina una cotización.
+        
+        **Restricción:** Solo se pueden eliminar cotizaciones en estado BORRADOR.
+      operationId: eliminarCotizacion
+      tags:
+        - Cotizaciones
+      parameters:
+        - name: id
+          in: path
+          description: ID de la cotización a eliminar
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Cotización eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: "Cotización eliminada exitosamente"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /cotizaciones/folio/{folio}:
+    get:
+      summary: Obtener cotización por folio
+      description: Recupera una cotización usando su folio único (ej. COT-2026-0001)
+      operationId: obtenerCotizacionPorFolio
+      tags:
+        - Cotizaciones
+      parameters:
+        - name: folio
+          in: path
+          description: Folio de la cotización (formato COT-YYYY-NNNN)
+          required: true
+          schema:
+            type: string
+            pattern: '^COT-\d{4}-\d{4}$'
+            example: "COT-2026-0001"
+      responses:
+        '200':
+          description: Cotización encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CotizacionResponseDTO'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /cotizaciones/{id}/estado:
+    put:
+      summary: Cambiar estado de cotización
+      description: |
+        Modifica el estado de una cotización siguiendo el flujo de estados permitido.
+        
+        Transiciones permitidas:
+        - BORRADOR → ENVIADA (marcar como enviada al cliente)
+        - ENVIADA → ACEPTADA (cliente acepta la cotización)
+        - ENVIADA → RECHAZADA (cliente rechaza la cotización)
+        - Cualquier estado → RECHAZADA (cancelación por otras razones)
+      operationId: cambiarEstado
+      tags:
+        - Estados
+      parameters:
+        - name: id
+          in: path
+          description: ID de la cotización
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Nuevo estado y motivo (si aplica)
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarEstadoRequestDTO'
+            examples:
+              enviar:
+                summary: Enviar cotización al cliente
+                value:
+                  nuevoEstado: "ENVIADA"
+              aceptar:
+                summary: Marcar como aceptada
+                value:
+                  nuevoEstado: "ACEPTADA"
+              rechazar:
+                summary: Rechazar cotización
+                value:
+                  nuevoEstado: "RECHAZADA"
+                  motivo: "Cliente encontró mejor precio con competencia"
+      responses:
+        '200':
+          description: Estado actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CotizacionResponseDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /cotizaciones/{id}/convertir-venta:
+    post:
+      summary: Convertir cotización a venta
+      description: |
+        Convierte una cotización aprobada en una venta real.
+        
+        **Validaciones:**
+        - La cotización debe estar en estado ENVIADA o ACEPTADA
+        - La cotización no debe estar vencida
+        - Debe haber stock disponible de todos los productos
+        
+        **Proceso:**
+        1. Valida stock disponible
+        2. Crea la venta con los mismos datos
+        3. Crea los detalles de venta
+        4. Actualiza el inventario (descuenta stock)
+        5. Marca la cotización como CONVERTIDA
+      operationId: convertirAVenta
+      tags:
+        - Conversión
+      parameters:
+        - name: id
+          in: path
+          description: ID de la cotización a convertir
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Datos adicionales para la venta
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvertirVentaRequestDTO'
+            example:
+              metodoPago: "TRANSFERENCIA"
+              observaciones: "Cliente solicita factura electrónica"
+      responses:
+        '201':
+          description: Cotización convertida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ventaId:
+                    type: integer
+                    description: ID de la venta creada
+                    example: 42
+                  mensaje:
+                    type: string
+                    example: "Cotización convertida exitosamente a venta"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Stock insuficiente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Stock insuficiente para Casco Integral. Disponible: 3, Requerido: 5"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /cotizaciones/vencimiento/proximas:
+    get:
+      summary: Obtener cotizaciones próximas a vencer
+      description: |
+        Devuelve cotizaciones cuya fecha de validez está dentro de los próximos N días.
+        
+        Solo incluye cotizaciones en estados activos (no convertidas, rechazadas, o ya vencidas).
+      operationId: obtenerProximasAVencer
+      tags:
+        - Reportes
+      parameters:
+        - name: dias
+          in: query
+          description: Días de anticipación para la alerta
+          required: false
+          schema:
+            type: integer
+            default: 7
+            example: 7
+      responses:
+        '200':
+          description: Lista de cotizaciones próximas a vencer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CotizacionResponseDTO'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /cotizaciones/pendientes-conversion:
+    get:
+      summary: Obtener cotizaciones pendientes de conversión
+      description: |
+        Devuelve cotizaciones que están listas para ser convertidas en ventas.
+        
+        Criterios:
+        - Estado ENVIADA o ACEPTADA
+        - No vencidas
+        - Aún no convertidas a venta
+      operationId: obtenerPendientesDeConversion
+      tags:
+        - Reportes
+      responses:
+        '200':
+          description: Lista de cotizaciones pendientes de conversión
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CotizacionResponseDTO'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /cotizaciones/estadisticas:
+    get:
+      summary: Obtener estadísticas de cotizaciones
+      description: |
+        Devuelve métricas generales sobre el proceso de cotizaciones.
+        
+        Incluye:
+        - Conteo de cotizaciones por estado
+        - Valor total cotizado por estado
+        - Tasa de conversión (% convertidas a ventas)
+        - Tasa de aceptación (% aceptadas)
+        - Tasa de rechazo (% rechazadas)
+      operationId: obtenerEstadisticas
+      tags:
+        - Reportes
+      responses:
+        '200':
+          description: Estadísticas calculadas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadisticasCotizacionDTO'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /cotizaciones/marcar-vencidas:
+    post:
+      summary: Marcar cotizaciones vencidas
+      description: |
+        Busca cotizaciones cuya fecha de validez ya pasó y las marca como VENCIDAS.
+        
+        Este endpoint puede ser invocado por un job programado (cron) para mantener
+        actualizado el estado de las cotizaciones automáticamente.
+      operationId: marcarCotizacionesVencidas
+      tags:
+        - Mantenimiento
+      responses:
+        '200':
+          description: Cotizaciones vencidas actualizadas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cantidadActualizadas:
+                    type: integer
+                    description: Número de cotizaciones marcadas como vencidas
+                    example: 5
+                  mensaje:
+                    type: string
+                    example: "5 cotizaciones marcadas como vencidas"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  schemas:
+    CotizacionRequestDTO:
+      type: object
+      required:
+        - clienteId
+        - sucursalId
+        - fechaValidez
+        - detalles
+      properties:
+        clienteId:
+          type: integer
+          description: ID del cliente
+          example: 1
+        sucursalId:
+          type: integer
+          description: ID de la sucursal
+          example: 1
+        vendedorId:
+          type: integer
+          description: ID del vendedor (opcional)
+          nullable: true
+          example: 5
+        fechaValidez:
+          type: string
+          format: date
+          description: Fecha hasta la cual la cotización es válida
+          example: "2026-03-24"
+        notas:
+          type: string
+          description: Notas adicionales de la cotización
+          maxLength: 1000
+          example: "Cliente solicita descuento por volumen"
+        terminosCondiciones:
+          type: string
+          description: Términos y condiciones aplicables
+          maxLength: 2000
+          example: "Válido por 15 días. Precios sujetos a disponibilidad de stock."
+        observacionesInternas:
+          type: string
+          description: Observaciones internas (no visibles al cliente)
+          maxLength: 1000
+          example: "Cliente tiene crédito pre-aprobado"
+        detalles:
+          type: array
+          description: Líneas de detalle de la cotización
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DetalleCotizacionDTO'
+    
+    DetalleCotizacionDTO:
+      type: object
+      required:
+        - skuInterno
+        - cantidad
+        - precioUnitario
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID del detalle (solo en respuestas)
+          readOnly: true
+        skuInterno:
+          type: string
+          description: SKU interno del producto
+          example: "MOT-YAM-001"
+        nombreProducto:
+          type: string
+          description: Nombre del producto (solo en respuestas)
+          readOnly: true
+          example: "Yamaha FZ250"
+        cantidad:
+          type: integer
+          minimum: 1
+          description: Cantidad del producto
+          example: 2
+        precioUnitario:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Precio unitario del producto
+          example: 15000.00
+        descuentoEspecial:
+          type: number
+          format: decimal
+          minimum: 0
+          default: 0
+          description: Descuento especial aplicado (en pesos)
+          example: 500.00
+        porcentajeDescuento:
+          type: number
+          format: decimal
+          minimum: 0
+          default: 0
+          description: Porcentaje de descuento aplicado
+          example: 5.00
+        notas:
+          type: string
+          maxLength: 500
+          description: Notas específicas del item
+          example: "Incluye envío gratis"
+        importe:
+          type: number
+          format: decimal
+          description: Importe total de la línea (solo en respuestas)
+          readOnly: true
+          example: 29500.00
+    
+    CotizacionResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        folio:
+          type: string
+          description: Folio único generado automáticamente
+          example: "COT-2026-0001"
+        clienteId:
+          type: integer
+          example: 1
+        nombreCliente:
+          type: string
+          example: "Juan Pérez García"
+        sucursalId:
+          type: integer
+          example: 1
+        nombreSucursal:
+          type: string
+          example: "Sucursal Centro"
+        vendedorId:
+          type: integer
+          nullable: true
+          example: 5
+        nombreVendedor:
+          type: string
+          nullable: true
+          example: "María López"
+        estado:
+          type: string
+          enum: [BORRADOR, ENVIADA, ACEPTADA, RECHAZADA, VENCIDA, CONVERTIDA]
+          example: "ENVIADA"
+        fechaCotizacion:
+          type: string
+          format: date-time
+          example: "2026-03-09T10:30:00"
+        fechaValidez:
+          type: string
+          format: date
+          example: "2026-03-24"
+        total:
+          type: number
+          format: decimal
+          example: 35038.00
+        subtotal:
+          type: number
+          format: decimal
+          example: 30200.00
+        iva:
+          type: number
+          format: decimal
+          example: 4838.00
+        descuentoTotal:
+          type: number
+          format: decimal
+          example: 500.00
+        notas:
+          type: string
+          nullable: true
+        terminosCondiciones:
+          type: string
+          nullable: true
+        observacionesInternas:
+          type: string
+          nullable: true
+        fechaAceptacion:
+          type: string
+          format: date-time
+          nullable: true
+        fechaRechazo:
+          type: string
+          format: date-time
+          nullable: true
+        motivoRechazo:
+          type: string
+          nullable: true
+        ventaId:
+          type: integer
+          nullable: true
+          description: ID de la venta si la cotización fue convertida
+        fechaConversion:
+          type: string
+          format: date-time
+          nullable: true
+        vencida:
+          type: boolean
+          description: Indica si la cotización está vencida
+          example: false
+        puedeConvertirse:
+          type: boolean
+          description: Indica si la cotización puede convertirse en venta
+          example: true
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleCotizacionDTO'
+    
+    CambiarEstadoRequestDTO:
+      type: object
+      required:
+        - nuevoEstado
+      properties:
+        nuevoEstado:
+          type: string
+          enum: [ENVIADA, ACEPTADA, RECHAZADA]
+          description: Nuevo estado de la cotización
+          example: "ENVIADA"
+        motivo:
+          type: string
+          description: Motivo del cambio (obligatorio para RECHAZADA)
+          maxLength: 500
+          example: "Cliente encontró mejor precio"
+    
+    ConvertirVentaRequestDTO:
+      type: object
+      required:
+        - metodoPago
+      properties:
+        metodoPago:
+          type: string
+          enum: [EFECTIVO, TARJETA, TRANSFERENCIA, CREDITO]
+          description: Método de pago de la venta
+          example: "TRANSFERENCIA"
+        observaciones:
+          type: string
+          maxLength: 500
+          description: Observaciones adicionales para la venta
+          example: "Cliente solicita factura electrónica"
+    
+    EstadisticasCotizacionDTO:
+      type: object
+      properties:
+        totalCotizaciones:
+          type: integer
+          format: int64
+          example: 150
+        cotizacionesBorrador:
+          type: integer
+          format: int64
+          example: 20
+        cotizacionesEnviadas:
+          type: integer
+          format: int64
+          example: 45
+        cotizacionesAceptadas:
+          type: integer
+          format: int64
+          example: 30
+        cotizacionesRechazadas:
+          type: integer
+          format: int64
+          example: 15
+        cotizacionesVencidas:
+          type: integer
+          format: int64
+          example: 10
+        cotizacionesConvertidas:
+          type: integer
+          format: int64
+          example: 30
+        valorTotalBorrador:
+          type: number
+          format: decimal
+          example: 250000.00
+        valorTotalEnviadas:
+          type: number
+          format: decimal
+          example: 680000.00
+        valorTotalAceptadas:
+          type: number
+          format: decimal
+          example: 450000.00
+        valorTotalConvertidas:
+          type: number
+          format: decimal
+          example: 480000.00
+        tasaConversion:
+          type: number
+          format: double
+          description: Porcentaje de cotizaciones convertidas a ventas
+          example: 20.0
+        tasaAceptacion:
+          type: number
+          format: double
+          description: Porcentaje de cotizaciones aceptadas
+          example: 33.33
+        tasaRechazo:
+          type: number
+          format: double
+          description: Porcentaje de cotizaciones rechazadas
+          example: 16.67
+    
+    PageableResponse:
+      type: object
+      properties:
+        sort:
+          type: object
+        offset:
+          type: integer
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+    
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+  responses:
+    Unauthorized:
+      description: No autorizado - Token JWT inválido o expirado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    BadRequest:
+      description: Solicitud incorrecta - Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Autenticación mediante token JWT.
+        
+        Incluir el token en el header Authorization:
+        ```
+        Authorization: Bearer <token>
+        ```
+
+security:
+  - bearerAuth: []
