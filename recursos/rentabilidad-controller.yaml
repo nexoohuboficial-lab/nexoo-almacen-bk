@@ -1,0 +1,516 @@
+openapi: 3.0.3
+info:
+  title: API de Rentabilidad por Venta/Producto - NexooHub Almacén
+  description: |
+    **Módulo de Análisis de Rentabilidad**
+    
+    Responde la pregunta clave: **¿Cuánto GANAS realmente?**
+    
+    Este módulo permite:
+    - Calcular rentabilidad de ventas individuales (Precio - Costo = Utilidad)
+    - Analizar rentabilidad agregada por producto en períodos
+    - Identificar ventas bajo costo (con pérdida)
+    - Obtener top productos más/menos rentables
+    - Generar estadísticas y alertas de rentabilidad
+    
+    **Fórmulas clave:**
+    - **Utilidad Bruta** = Precio de Venta - Costo Total
+    - **Margen %** = (Utilidad / Precio de Venta) × 100
+    - **Venta Bajo Costo** = Utilidad < 0 (PÉRDIDA)
+  version: 1.0.0
+  contact:
+    name: NexooHub Development Team
+    email: dev@nexoohub.com
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo local
+
+tags:
+  - name: Rentabilidad Venta
+    description: Análisis de rentabilidad de ventas individuales
+  - name: Rentabilidad Producto
+    description: Análisis agregado de rentabilidad por producto
+  - name: Estadísticas
+    description: Estadísticas y alertas de rentabilidad
+
+paths:
+  /api/v1/rentabilidad/venta/{ventaId}:
+    post:
+      tags:
+        - Rentabilidad Venta
+      summary: Calcular rentabilidad de una venta
+      description: |
+        Genera el análisis de rentabilidad de una venta específica.
+        
+        **Cálculos realizados:**
+        1. Obtiene el Costo Promedio Ponderado (CPP) de cada producto vendido
+        2. Calcula Costo Total = Σ(CPP × Cantidad)
+        3. Calcula Utilidad Bruta = Precio Venta - Costo Total
+        4. Calcula Margen % = (Utilidad / Precio) × 100
+        5. Detecta si la venta fue bajo costo (pérdida)
+        
+        **IMPORTANTE:** Solo se puede calcular UNA vez por venta.
+      operationId: calcularRentabilidadVenta
+      parameters:
+        - name: ventaId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la venta a analizar
+          example: 100
+      responses:
+        '201':
+          description: Análisis de rentabilidad generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentabilidadVentaResponse'
+              example:
+                id: 1
+                ventaId: 100
+                fechaVenta: "2024-03-11T14:30:00"
+                clienteNombre: "Juan Pérez"
+                sucursalNombre: "Sucursal Centro"
+                costoTotal: 600.00
+                precioVentaTotal: 1000.00
+                utilidadBruta: 400.00
+                margenPorcentaje: 40.00
+                ventaBajoCosto: false
+                cantidadItems: 3
+                alertaCalidad: "EXCELENTE"
+        '400':
+          description: Ya existe un análisis previo para esta venta
+        '404':
+          description: Venta no encontrada
+      security:
+        - bearerAuth: []
+
+    get:
+      tags:
+        - Rentabilidad Venta
+      summary: Consultar rentabilidad de una venta
+      description: Obtiene el análisis de rentabilidad previamente calculado de una venta.
+      operationId: consultarRentabilidadVenta
+      parameters:
+        - name: ventaId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 100
+      responses:
+        '200':
+          description: Análisis de rentabilidad encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentabilidadVentaResponse'
+        '404':
+          description: No existe análisis de rentabilidad para esta venta
+      security:
+        - bearerAuth: []
+
+  /api/v1/rentabilidad/productos:
+    post:
+      tags:
+        - Rentabilidad Producto
+      summary: Generar análisis por producto
+      description: |
+        Genera análisis agregado de rentabilidad por producto en un período.
+        
+        **Proceso:**
+        1. Elimina análisis previo del mismo período (si existe)
+        2. Obtiene todas las ventas del período
+        3. Agrupa detalles por SKU
+        4. Calcula métricas por producto:
+           - Cantidad total vendida
+           - Precio promedio de venta
+           - Costo promedio unitario
+           - Utilidad total generada
+           - Margen promedio %
+        5. Guarda análisis para consultas futuras
+        
+        **Útil para:** Identificar productos MÁS/MENOS rentables del mes.
+      operationId: generarAnalisisPorProducto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisRentabilidadRequest'
+            example:
+              fechaInicio: "2024-01-01"
+              fechaFin: "2024-01-31"
+      responses:
+        '201':
+          description: Análisis generado exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RentabilidadProductoResponse'
+              example:
+                - id: 1
+                  skuInterno: "SKU001"
+                  nombreComercial: "Producto A"
+                  marca: "MARCA-X"
+                  periodoInicio: "2024-01-01"
+                  periodoFin: "2024-01-31"
+                  cantidadVendida: 150
+                  costoPromedioUnitario: 30.00
+                  precioPromedioVenta: 50.00
+                  utilidadTotalGenerada: 3000.00
+                  utilidadPorUnidad: 20.00
+                  margenPromedioPorcentaje: 40.00
+                  numeroVentas: 25
+                  clasificacionRentabilidad: "MUY_RENTABLE"
+        '400':
+          description: Período inválido o sin ventas
+      security:
+        - bearerAuth: []
+
+  /api/v1/rentabilidad/productos/mas-rentables:
+    get:
+      tags:
+        - Rentabilidad Producto
+      summary: Top productos MÁS rentables
+      description: |
+        Obtiene los N productos que generaron MÁS utilidad en un período.
+        
+        **Ordenado por:** `utilidadTotalGenerada DESC`
+      operationId: obtenerProductosMasRentables
+      parameters:
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-01-01"
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-01-31"
+        - name: limite
+          in: query
+          schema:
+            type: integer
+            default: 10
+          example: 5
+          description: Número máximo de productos a retornar
+      responses:
+        '200':
+          description: Lista de productos más rentables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RentabilidadProductoResponse'
+      security:
+        - bearerAuth: []
+
+  /api/v1/rentabilidad/productos/menos-rentables:
+    get:
+      tags:
+        - Rentabilidad Producto
+      summary: Top productos MENOS rentables
+      description: |
+        Obtiene los N productos con MENOR rentabilidad en un período.
+        
+        **ALERTA:** Puede incluir productos con pérdida (margen negativo).
+        
+        **Ordenado por:** `utilidadTotalGenerada ASC`
+      operationId: obtenerProductosMenosRentables
+      parameters:
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-01-01"
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-01-31"
+        - name: limite
+          in: query
+          schema:
+            type: integer
+            default: 10
+          example: 5
+      responses:
+        '200':
+          description: Lista de productos menos rentables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RentabilidadProductoResponse'
+      security:
+        - bearerAuth: []
+
+  /api/v1/rentabilidad/ventas/bajo-costo:
+    get:
+      tags:
+        - Rentabilidad Venta
+      summary: Ventas con PÉRDIDA
+      description: |
+        **⚠️ ALERTA CRÍTICA ⚠️**
+        
+        Obtiene TODAS las ventas realizadas bajo costo (con pérdida).
+        
+        Esto ocurre cuando:
+        - Precio de Venta < Costo Total
+        - Utilidad Bruta < 0
+        - Margen % < 0
+        
+        **Acción recomendada:** Revisar precios de venta o costos.
+      operationId: obtenerVentasBajoCosto
+      responses:
+        '200':
+          description: Lista de ventas con pérdida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RentabilidadVentaResponse'
+              example:
+                - id: 5
+                  ventaId: 205
+                  fechaVenta: "2024-03-10T10:15:00"
+                  clienteNombre: "Cliente XYZ"
+                  sucursalNombre: "Sucursal Norte"
+                  costoTotal: 1200.00
+                  precioVentaTotal: 1000.00
+                  utilidadBruta: -200.00
+                  margenPorcentaje: -20.00
+                  ventaBajoCosto: true
+                  cantidadItems: 2
+                  alertaCalidad: "PERDIDA"
+      security:
+        - bearerAuth: []
+
+  /api/v1/rentabilidad/estadisticas:
+    get:
+      tags:
+        - Estadísticas
+      summary: Estadísticas de rentabilidad
+      description: |
+        Calcula métricas agregadas de rentabilidad en un período.
+        
+        **Incluye:**
+        - Utilidad total del período
+        - Margen promedio %
+        - Total de ventas analizadas
+        - Ventas bajo costo (con pérdida)
+        - % de ventas con pérdida
+        - Venta más/menos rentable
+        - Producto más/menos rentable
+      operationId: obtenerEstadisticas
+      parameters:
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-01-01"
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-01-31"
+      responses:
+        '200':
+          description: Estadísticas calculadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadisticasRentabilidadDTO'
+              example:
+                utilidadTotalPeriodo: 50000.00
+                margenPromedioPorcentaje: 35.50
+                totalVentasAnalizadas: 100
+                ventasBajoCosto: 5
+                porcentajeVentasBajoCosto: 5.00
+                ventaMasRentable: 2000.00
+                ventaMenosRentable: -150.00
+                productoMasRentable: "SKU-BEST-001"
+                productoMenosRentable: "SKU-WORST-099"
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    RentabilidadVentaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID del análisis
+        ventaId:
+          type: integer
+          description: ID de la venta analizada
+        fechaVenta:
+          type: string
+          format: date-time
+          description: Fecha en que se realizó la venta
+        clienteNombre:
+          type: string
+          description: Nombre del cliente
+        sucursalNombre:
+          type: string
+          description: Nombre de la sucursal
+        costoTotal:
+          type: number
+          format: decimal
+          description: Costo total de los productos vendidos (CPP)
+        precioVentaTotal:
+          type: number
+          format: decimal
+          description: Precio total de la venta (lo que se cobró)
+        utilidadBruta:
+          type: number
+          format: decimal
+          description: Utilidad o pérdida (Precio - Costo)
+        margenPorcentaje:
+          type: number
+          format: decimal
+          description: Margen de rentabilidad porcentual
+        ventaBajoCosto:
+          type: boolean
+          description: TRUE si la venta generó pérdida
+        cantidadItems:
+          type: integer
+          description: Número de productos diferentes vendidos
+        alertaCalidad:
+          type: string
+          enum: [EXCELENTE, BUENA, REGULAR, BAJA, PERDIDA]
+          description: |
+            Clasificación de calidad de la venta según margen:
+            - EXCELENTE: >= 30%
+            - BUENA: >= 20%
+            - REGULAR: >= 10%
+            - BAJA: >= 5%
+            - PERDIDA: < 5%
+
+    RentabilidadProductoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        skuInterno:
+          type: string
+        nombreComercial:
+          type: string
+        marca:
+          type: string
+        periodoInicio:
+          type: string
+          format: date
+        periodoFin:
+          type: string
+          format: date
+        cantidadVendida:
+          type: integer
+          description: Total de unidades vendidas en el período
+        costoPromedioUnitario:
+          type: number
+          format: decimal
+        precioPromedioVenta:
+          type: number
+          format: decimal
+        utilidadTotalGenerada:
+          type: number
+          format: decimal
+          description: GANANCIA TOTAL del producto en el período
+        utilidadPorUnidad:
+          type: number
+          format: decimal
+          description: Ganancia promedio por unidad vendida
+        margenPromedioPorcentaje:
+          type: number
+          format: decimal
+        numeroVentas:
+          type: integer
+          description: Número de ventas en las que apareció
+        clasificacionRentabilidad:
+          type: string
+          enum: [MUY_RENTABLE, RENTABLE, POCO_RENTABLE, NO_RENTABLE]
+
+    AnalisisRentabilidadRequest:
+      type: object
+      required:
+        - fechaInicio
+        - fechaFin
+      properties:
+        fechaInicio:
+          type: string
+          format: date
+          description: Fecha de inicio del período
+        fechaFin:
+          type: string
+          format: date
+          description: Fecha de fin del período
+
+    EstadisticasRentabilidadDTO:
+      type: object
+      properties:
+        utilidadTotalPeriodo:
+          type: number
+          format: decimal
+          description: Suma de todas las utilidades del período
+        margenPromedioPorcentaje:
+          type: number
+          format: decimal
+          description: Margen promedio de todas las ventas
+        totalVentasAnalizadas:
+          type: integer
+          format: int64
+          description: Total de ventas en el período
+        ventasBajoCosto:
+          type: integer
+          format: int64
+          description: Número de ventas con pérdida
+        porcentajeVentasBajoCosto:
+          type: number
+          format: decimal
+          description: Porcentaje de ventas con pérdida
+        ventaMasRentable:
+          type: number
+          format: decimal
+          description: Mayor utilidad de una venta individual
+        ventaMenosRentable:
+          type: number
+          format: decimal
+          description: Menor utilidad (puede ser negativa)
+        productoMasRentable:
+          type: string
+          description: SKU del producto más rentable
+        productoMenosRentable:
+          type: string
+          description: SKU del producto menos rentable
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenido del endpoint /api/auth/login

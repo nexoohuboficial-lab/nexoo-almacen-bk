@@ -26,6 +26,9 @@ public interface InventarioSucursalRepository extends JpaRepository<InventarioSu
     // Buscar por SKU interno y sucursal (para sistema de reservas)
     Optional<InventarioSucursal> findByIdSkuInternoAndIdSucursalId(String skuInterno, Integer sucursalId);
     
+    // Buscar por SKU interno en todas las sucursales (para cálculo de rentabilidad)
+    List<InventarioSucursal> findByIdSkuInterno(String skuInterno);
+    
     @Query("SELECT new com.nexoohub.almacen.inventario.dto.InventarioSucursalDTO(" +
            "i.id.skuInterno, p.nombreComercial, i.stockActual, i.costoPromedioPonderado) " +
            "FROM InventarioSucursal i " +
