@@ -1,0 +1,502 @@
+package com.nexoohub.almacen.inventario.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexoohub.almacen.common.exception.BusinessException;
+import com.nexoohub.almacen.common.exception.GlobalExceptionHandler;
+import com.nexoohub.almacen.inventario.dto.AnalisisABCRequestDTO;
+import com.nexoohub.almacen.inventario.dto.AnalisisABCResumenDTO;
+import com.nexoohub.almacen.inventario.dto.AnalisisABCResponseDTO;
+import com.nexoohub.almacen.inventario.service.AnalisisABCService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+/**
+ * Tests unitarios para AnalisisABCController - Módulo #10
+ * Valida el comportamiento de los endpoints REST del análisis ABC
+ * 
+ * @author NexooHub Development Team
+ * @since 1.4.0
+ */
+@DisplayName("AnalisisABCController - Tests de Endpoints REST")
+class AnalisisABCControllerTest {
+
+    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
+
+    // Create mock manually and inject into controller
+    private AnalisisABCService analisisService;
+    private AnalisisABCController controller;
+
+    private AnalisisABCRequestDTO requestDTO;
+    private AnalisisABCResponseDTO responseDTO1;
+    private AnalisisABCResponseDTO responseDTO2;
+    private AnalisisABCResponseDTO responseDTO3;
+
+    @BeforeEach
+    void setUp() {
+        // Create ObjectMapper manually
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        
+        // Create a fresh Mockito mock for each test
+        analisisService = Mockito.mock(AnalisisABCService.class);
+        
+        // Create controller manually and inject mock via constructor would be ideal,
+        // but since the controller uses field injection, we use ReflectionTestUtils
+        controller = new AnalisisABCController();
+        ReflectionTestUtils.setField(controller, "analisisService", analisisService);
+        
+        // Build MockMvc in standalone mode (no Spring context)
+        mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders
+                .standaloneSetup(controller)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+        
+        // Setup Request DTO con fechas relativas para evitar problemas con @PastOrPresent
+        LocalDate hoy = LocalDate.now();
+        LocalDate periodoInicio = hoy.minusMonths(3);  // 3 meses atrás
+        LocalDate periodoFin = hoy.minusDays(1);        // Ayer
+        
+        requestDTO = new AnalisisABCRequestDTO();
+        requestDTO.setSucursalId(1);
+        requestDTO.setPeriodoInicio(periodoInicio);
+        requestDTO.setPeriodoFin(periodoFin);
+        requestDTO.setPorcentajeA(80.0);
+        requestDTO.setPorcentajeB(95.0);
+        requestDTO.setForzarRegeneracion(false);
+
+        // Setup Response DTOs - Clase A
+        responseDTO1 = new AnalisisABCResponseDTO();
+        responseDTO1.setId(1);
+        responseDTO1.setSkuProducto("ACEITE-10W40");
+        responseDTO1.setNombreProducto("Aceite Motul 10W40 4T");
+        responseDTO1.setSucursalId(1);
+        responseDTO1.setNombreSucursal("Sucursal Centro");
+        responseDTO1.setClasificacion("A");
+        responseDTO1.setPeriodoInicio(periodoInicio);
+        responseDTO1.setPeriodoFin(periodoFin);
+        responseDTO1.setCantidadVendida(100);
+        responseDTO1.setValorVentas(BigDecimal.valueOf(15000.00));
+        responseDTO1.setPorcentajeValor(BigDecimal.valueOf(80.00));
+        responseDTO1.setPorcentajeAcumulado(BigDecimal.valueOf(80.00));
+        responseDTO1.setStockActual(50);
+        responseDTO1.setValorStock(BigDecimal.valueOf(5000.00));
+        responseDTO1.setRotacionInventario(BigDecimal.valueOf(3.0000));
+        responseDTO1.setFechaAnalisis(hoy);
+        responseDTO1.setObservaciones("Producto de alta rotación y valor");
+
+        // Setup Response DTOs - Clase B
+        responseDTO2 = new AnalisisABCResponseDTO();
+        responseDTO2.setId(2);
+        responseDTO2.setSkuProducto("FILTRO-ACEITE");
+        responseDTO2.setNombreProducto("Filtro de Aceite Universal");
+        responseDTO2.setSucursalId(1);
+        responseDTO2.setNombreSucursal("Sucursal Centro");
+        responseDTO2.setClasificacion("B");
+        responseDTO2.setCantidadVendida(30);
+        responseDTO2.setValorVentas(BigDecimal.valueOf(2400.00));
+        responseDTO2.setPorcentajeValor(BigDecimal.valueOf(13.00));
+        responseDTO2.setPorcentajeAcumulado(BigDecimal.valueOf(93.00));
+        responseDTO2.setFechaAnalisis(hoy);
+
+        // Setup Response DTOs - Clase C
+        responseDTO3 = new AnalisisABCResponseDTO();
+        responseDTO3.setId(3);
+        responseDTO3.setSkuProducto("TORNILLO-M8");
+        responseDTO3.setNombreProducto("Tornillo M8x20mm");
+        responseDTO3.setSucursalId(1);
+        responseDTO3.setNombreSucursal("Sucursal Centro");
+        responseDTO3.setClasificacion("C");
+        responseDTO3.setCantidadVendida(50);
+        responseDTO3.setValorVentas(BigDecimal.valueOf(250.00));
+        responseDTO3.setPorcentajeValor(BigDecimal.valueOf(1.35));
+        responseDTO3.setPorcentajeAcumulado(BigDecimal.valueOf(100.00));
+        responseDTO3.setFechaAnalisis(hoy);
+    }
+
+    // ==========================================
+    // TEST DE VERIFICACIÓN DE MOCK
+    // ==========================================
+    
+    @Test
+    @DisplayName("MOCKITO TEST - Verificar que Mockito funciona")
+    void testMockitoBasico() {
+        // Test that Mockito itself works with a simple interface
+        java.util.List<String> mockList = Mockito.mock(java.util.List.class);
+        String listClassName = mockList.getClass().getName();
+        boolean isListMock = listClassName.contains("Mockito") || listClassName.contains("Mock");
+        
+        if (!isListMock) {
+            throw new AssertionError("MOCKITO NO FUNCIONA! List class: " + listClassName);
+        }
+        
+        // Now test with the actual service class
+        AnalisisABCService testService = Mockito.mock(AnalisisABCService.class);
+        String serviceClassName = testService.getClass().getName();
+        boolean isServiceMock = serviceClassName.contains("Mockito") || 
+                               serviceClassName.contains("Mock") ||
+                               serviceClassName.contains("EnhancerByMockito");
+        
+        String fullDiagnostic = String.format(
+            "List mock: %s (isMock=%b)%nService mock: %s (isMock=%b)",
+            listClassName, isListMock,
+            serviceClassName, isServiceMock
+        );
+        
+        if (!isServiceMock) {
+            throw new AssertionError("SERVICE MOCK FAILED!\n" + fullDiagnostic);
+        }
+    }
+
+    @Test
+    @DisplayName("DEBUG - Verificar tipo de bean inyectado")
+    void testDebugTipoDeBeanInyectado() {
+        // Verify mock was created correctly
+        String message = String.format(
+            "Mock created: %s%nMock is null: %b%nMock class: %s",
+            analisisService,
+            analisisService == null,
+            analisisService != null ? analisisService.getClass().getName() : "NULL"
+        );
+        
+        System.out.println("=== DIAGNOSTIC INFO ===");
+        System.out.println(message);
+        
+        // Check the field injected in this test class
+        String fieldClassName = analisisService != null ? analisisService.getClass().getName() : "NULL";
+        boolean isFieldMock = fieldClassName.contains("Mockito") || 
+                              fieldClassName.contains("Mock") ||
+                              fieldClassName.contains("EnhancerByMockito");
+        
+        // Check the field injected in the controller via ReflectionTestUtils
+        Object controllerService = ReflectionTestUtils.getField(controller, "analisisService");
+        String controllerServiceClassName = controllerService != null ? controllerService.getClass().getName() : "NULL";
+        boolean isControllerMock = controllerServiceClassName.contains("Mockito") || 
+                                   controllerServiceClassName.contains("Mock") ||
+                                   controllerServiceClassName.contains("EnhancerByMockito");
+        
+        // Check if they're the same object
+        boolean sameObject = analisisService == controllerService;
+        
+        // Diagnostic output
+        String fullMessage = String.format(
+            "Test field mock: %s (isMock=%b)%nController service: %s (isMock=%b)%nSame object: %b",
+            fieldClassName, isFieldMock,
+            controllerServiceClassName, isControllerMock,
+            sameObject
+        );
+        
+        if (!isFieldMock) {
+            throw new AssertionError("TEST FIELD NO ES MOCK!\n" + fullMessage);
+        }
+        if (!isControllerMock) {
+            throw new AssertionError("CONTROLLER SERVICE NO ES MOCK!\n" + fullMessage);
+        }
+        if (!sameObject) {
+            throw new AssertionError("NO SON EL MISMO OBJETO!\n" + fullMessage);
+        }
+    }
+
+    @Test
+    @DisplayName("VERIFICAR MOCK - Servicio debe ser un mock")
+    void testVerificarMockFunciona() throws Exception {
+        // Given - Configurar mock simple
+        when(analisisService.obtenerUltimoAnalisis(anyInt()))
+            .thenReturn(new ArrayList<>());
+
+        // When - Ejecutar endpoint simple
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/999/ultimo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        // Then - Verificar que se llamó al mock
+        verify(analisisService, times(1)).obtenerUltimoAnalisis(999);
+    }
+
+    // ==========================================
+    // TESTS: POST /api/v1/inventario/analisis-abc/generar
+    // ==========================================
+
+    @Test
+    @DisplayName("POST /generar - Debe generar análisis ABC exitosamente")
+    void testGenerarAnalisisABC_Exitoso() throws Exception {
+        // Given
+        List<AnalisisABCResponseDTO> expectedResponse = Arrays.asList(responseDTO1, responseDTO2, responseDTO3);
+        when(analisisService.generarAnalisisABC(any(AnalisisABCRequestDTO.class)))
+            .thenReturn(expectedResponse);
+
+        // When & Then
+        mockMvc.perform(post("/api/v1/inventario/analisis-abc/generar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].skuProducto", is("ACEITE-10W40")))
+                .andExpect(jsonPath("$[0].clasificacion", is("A")))
+                .andExpect(jsonPath("$[0].valorVentas", is(15000.00)))
+                .andExpect(jsonPath("$[0].rotacionInventario", is(3.0)))
+                .andExpect(jsonPath("$[1].clasificacion", is("B")))
+                .andExpect(jsonPath("$[2].clasificacion", is("C")));
+
+        verify(analisisService, times(1)).generarAnalisisABC(any(AnalisisABCRequestDTO.class));
+    }
+
+    @Test
+    @DisplayName("POST /generar - Debe retornar 400 cuando faltan campos requeridos")
+    void testGenerarAnalisisABC_CamposRequeridos() throws Exception {
+        // Given - Request sin fechas
+        requestDTO.setPeriodoInicio(null);
+        requestDTO.setPeriodoFin(null);
+
+        // When & Then
+        mockMvc.perform(post("/api/v1/inventario/analisis-abc/generar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest());
+
+        verify(analisisService, never()).generarAnalisisABC(any());
+    }
+
+    @Test
+    @DisplayName("POST /generar - Debe retornar 400 cuando porcentajes son inválidos")
+    void testGenerarAnalisisABC_PorcentajesInvalidos() throws Exception {
+        // Given - Porcentajes fuera de rango
+        requestDTO.setPorcentajeA(105.0); // Mayor que 100
+        requestDTO.setPorcentajeB(0.5);    // Menor que 1
+
+        // When & Then
+        mockMvc.perform(post("/api/v1/inventario/analisis-abc/generar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest());
+
+        verify(analisisService, never()).generarAnalisisABC(any());
+    }
+
+    @Test
+    @DisplayName("POST /generar - Debe manejar BusinessException del servicio")
+    void testGenerarAnalisisABC_BusinessException() throws Exception {
+        // Given
+        when(analisisService.generarAnalisisABC(any(AnalisisABCRequestDTO.class)))
+            .thenThrow(new BusinessException("La fecha de inicio debe ser anterior a la fecha de fin"));
+
+        // When & Then
+        mockMvc.perform(post("/api/v1/inventario/analisis-abc/generar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje", containsString("fecha de inicio")));
+
+        verify(analisisService, times(1)).generarAnalisisABC(any());
+    }
+
+    @Test
+    @DisplayName("POST /generar - Debe generar análisis vacío cuando no hay ventas")
+    void testGenerarAnalisisABC_SinVentas() throws Exception {
+        // Given
+        when(analisisService.generarAnalisisABC(any(AnalisisABCRequestDTO.class)))
+            .thenReturn(new ArrayList<>());
+
+        // When & Then
+        mockMvc.perform(post("/api/v1/inventario/analisis-abc/generar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(analisisService, times(1)).generarAnalisisABC(any());
+    }
+
+    // ==========================================
+    // TESTS: GET /api/v1/inventario/analisis-abc/sucursal/{sucursalId}/ultimo
+    // ==========================================
+
+    @Test
+    @DisplayName("GET /sucursal/{id}/ultimo - Debe obtener último análisis exitosamente")
+    void testObtenerUltimoAnalisis_Exitoso() throws Exception {
+        // Given
+        List<AnalisisABCResponseDTO> expectedResponse = Arrays.asList(responseDTO1, responseDTO2, responseDTO3);
+        when(analisisService.obtenerUltimoAnalisis(1))
+            .thenReturn(expectedResponse);
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/1/ultimo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].clasificacion", is("A")))
+                .andExpect(jsonPath("$[0].valorVentas", is(15000.00)));
+
+        verify(analisisService, times(1)).obtenerUltimoAnalisis(1);
+    }
+
+    @Test
+    @DisplayName("GET /sucursal/{id}/ultimo - Debe retornar datos vacíos cuando no hay análisis")
+    void testObtenerUltimoAnalisis_SinDatos() throws Exception {
+        // Given
+        when(analisisService.obtenerUltimoAnalisis(1))
+            .thenReturn(new ArrayList<>());
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/1/ultimo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(analisisService, times(1)).obtenerUltimoAnalisis(1);
+    }
+
+    // ==========================================
+    // TESTS: GET /api/v1/inventario/analisis-abc/sucursal/{sucursalId}/clasificacion/{clasificacion}
+    // ==========================================
+
+    @Test
+    @DisplayName("GET /sucursal/{id}/clasificacion/A - Debe obtener productos clase A")
+    void testObtenerPorClasificacion_ClaseA() throws Exception {
+        // Given
+        when(analisisService.obtenerPorClasificacion(eq(1), eq("A")))
+            .thenReturn(Arrays.asList(responseDTO1));
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/1/clasificacion/A"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].clasificacion", is("A")))
+                .andExpect(jsonPath("$[0].skuProducto", is("ACEITE-10W40")));
+
+        verify(analisisService, times(1)).obtenerPorClasificacion(eq(1), eq("A"));
+    }
+
+    @Test
+    @DisplayName("GET /sucursal/{id}/clasificacion/B - Debe obtener productos clase B")
+    void testObtenerPorClasificacion_ClaseB() throws Exception {
+        // Given
+        when(analisisService.obtenerPorClasificacion(eq(1), eq("B")))
+            .thenReturn(Arrays.asList(responseDTO2));
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/1/clasificacion/B"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].clasificacion", is("B")));
+
+        verify(analisisService, times(1)).obtenerPorClasificacion(eq(1), eq("B"));
+    }
+
+    @Test
+    @DisplayName("GET /sucursal/{id}/clasificacion/C - Debe obtener productos clase C")
+    void testObtenerPorClasificacion_ClaseC() throws Exception {
+        // Given
+        when(analisisService.obtenerPorClasificacion(eq(1), eq("C")))
+            .thenReturn(Arrays.asList(responseDTO3));
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/1/clasificacion/C"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].clasificacion", is("C")));
+
+        verify(analisisService, times(1)).obtenerPorClasificacion(eq(1), eq("C"));
+    }
+
+    @Test
+    @DisplayName("GET /sucursal/{id}/clasificacion/X - Debe retornar 400 para clasificación inválida")
+    void testObtenerPorClasificacion_ClasificacionInvalida() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/1/clasificacion/X"))
+                .andExpect(status().isBadRequest());
+
+        verify(analisisService, never()).obtenerPorClasificacion(anyInt(), anyString());
+    }
+
+    // ==========================================
+    // TESTS: GET /api/v1/inventario/analisis-abc/sucursal/{sucursalId}/resumen
+    // ==========================================
+
+    @Test
+    @DisplayName("GET /sucursal/{id}/resumen - Debe obtener resumen estadístico exitosamente")
+    void testObtenerResumen_Exitoso() throws Exception {
+        // Given
+        AnalisisABCResumenDTO resumenDTO = new AnalisisABCResumenDTO();
+        resumenDTO.setSucursalId(1);
+        resumenDTO.setNombreSucursal("Sucursal Centro");
+        resumenDTO.setFechaAnalisis(LocalDate.of(2026, 4, 1));
+        resumenDTO.setPeriodoInicio(LocalDate.of(2026, 1, 1));
+        resumenDTO.setPeriodoFin(LocalDate.of(2026, 3, 31));
+        resumenDTO.setTotalProductos(3);
+        resumenDTO.setValorTotalVentas(BigDecimal.valueOf(17650.00));
+        
+        AnalisisABCResumenDTO.ResumenClasificacion resumenA = new AnalisisABCResumenDTO.ResumenClasificacion();
+        resumenA.setCantidadProductos(1);
+        resumenA.setPorcentajeProductos(BigDecimal.valueOf(33.33));
+        resumenA.setValorVentas(BigDecimal.valueOf(15000.00));
+        resumenA.setPorcentajeValor(BigDecimal.valueOf(85.00));
+        resumenDTO.setClasificacionA(resumenA);
+
+        AnalisisABCResumenDTO.ResumenClasificacion resumenB = new AnalisisABCResumenDTO.ResumenClasificacion();
+        resumenB.setCantidadProductos(1);
+        resumenB.setValorVentas(BigDecimal.valueOf(2400.00));
+        resumenB.setPorcentajeValor(BigDecimal.valueOf(13.60));
+        resumenDTO.setClasificacionB(resumenB);
+
+        AnalisisABCResumenDTO.ResumenClasificacion resumenC = new AnalisisABCResumenDTO.ResumenClasificacion();
+        resumenC.setCantidadProductos(1);
+        resumenC.setValorVentas(BigDecimal.valueOf(250.00));
+        resumenC.setPorcentajeValor(BigDecimal.valueOf(1.40));
+        resumenDTO.setClasificacionC(resumenC);
+
+        resumenDTO.setProductosClaseA(Arrays.asList(responseDTO1));
+
+        when(analisisService.obtenerResumen(eq(1)))
+            .thenReturn(resumenDTO);
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/1/resumen"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalProductos", is(3)))
+                .andExpect(jsonPath("$.valorTotalVentas", is(17650.00)))
+                .andExpect(jsonPath("$.clasificacionA.cantidadProductos", is(1)))
+                .andExpect(jsonPath("$.clasificacionA.porcentajeValor", is(85.00)))
+                .andExpect(jsonPath("$.clasificacionB.cantidadProductos", is(1)))
+                .andExpect(jsonPath("$.clasificacionC.cantidadProductos", is(1)))
+                .andExpect(jsonPath("$.productosClaseA", hasSize(1)))
+                .andExpect(jsonPath("$.productosClaseA[0].clasificacion", is("A")));
+
+        verify(analisisService, times(1)).obtenerResumen(eq(1));
+    }
+
+    @Test
+    @DisplayName("GET /sucursal/{id}/resumen - Debe retornar error cuando no hay datos")
+    void testObtenerResumen_SinDatos() throws Exception {
+        // Given
+        when(analisisService.obtenerResumen(eq(1)))
+            .thenThrow(new BusinessException("No se encontró análisis para la sucursal especificada"));
+
+        // When & Then
+        mockMvc.perform(get("/api/v1/inventario/analisis-abc/sucursal/1/resumen"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje", containsString("No se encontró análisis")));
+
+        verify(analisisService, times(1)).obtenerResumen(eq(1));
+    }
+}

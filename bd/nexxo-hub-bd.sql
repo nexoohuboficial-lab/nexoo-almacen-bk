@@ -1,11 +1,11 @@
 ﻿-- ============================================================================
--- SCRIPT MAESTRO NEXOOHUB v4.0 (CONSOLIDADO COMPLETO)
+-- SCRIPT MAESTRO NEXOOHUB v5.0 (CONSOLIDADO COMPLETO)
 -- ============================================================================
 -- Descripción: Script completo para inicialización de base de datos
 -- Base de datos: PostgreSQL 15+ (compatible con JPA/Hibernate)
 -- Autor: NexooHub Development Team
 -- Fecha: 2026-03-09
--- Versión: 4.0.0
+-- Versión: 5.0.0
 -- 
 -- CONTENIDO CONSOLIDADO:
 -- - Schema base (configuración, catálogos, productos, clientes, ventas)
@@ -13,6 +13,8 @@
 -- - Módulo de Reservas/Apartados
 -- - Módulo de Control de Crédito
 -- - Módulo de Alertas de Lento Movimiento
+-- - Módulo de Comisiones para Vendedores (V2)
+-- - Módulo de Predicción de Demanda (V3)
 -- ============================================================================
 
 -- ==================================================================
@@ -41,6 +43,10 @@
 -- Eliminar todos los objetos existentes en orden de dependencia
 
 -- MÃ³dulos nuevos (orden inverso de dependencias)
+DROP TABLE IF EXISTS analisis_abc CASCADE;
+DROP TABLE IF EXISTS prediccion_demanda CASCADE;
+DROP TABLE IF EXISTS comision CASCADE;
+DROP TABLE IF EXISTS regla_comision CASCADE;
 DROP TABLE IF EXISTS alerta_lento_movimiento CASCADE;
 DROP TABLE IF EXISTS historial_credito CASCADE;
 DROP TABLE IF EXISTS limite_credito CASCADE;
@@ -1571,22 +1577,281 @@ GROUP BY s.id, s.nombre
 ORDER BY costo_total_inmovilizado DESC;
 
 -- ==================================================
--- PERMISOS (Opcional - ajustar segÃºn usuarios)
+-- FIN MÓDULO DE ALERTAS DE LENTO MOVIMIENTO
 -- ==================================================
 
--- Para usuario de aplicaciÃ³n
-GRANT SELECT, INSERT, UPDATE, DELETE ON alerta_lento_movimiento TO 'nexoo_app'@'localhost';
-GRANT SELECT ON v_alertas_criticas TO 'nexoo_app'@'localhost';
-GRANT SELECT ON v_costo_inmovilizado_por_sucursal TO 'nexoo_app'@'localhost';
+-- ============================================================================
+-- MÓDULO V2: COMISIONES PARA VENDEDORES
+-- ============================================================================
+-- Descripción: Agrega tablas para gestionar comisiones de vendedores
+--              - Reglas de comisión configurables
+--              - Cálculo automático de comisiones por periodo
+--              - Control de aprobación y pago
+-- Fecha: 2026-03-09
+-- ============================================================================
 
--- Para usuario de reportes (solo lectura)
-GRANT SELECT ON alerta_lento_movimiento TO 'nexoo_reportes'@'localhost';
-GRANT SELECT ON v_alertas_criticas TO 'nexoo_reportes'@'localhost';
-GRANT SELECT ON v_costo_inmovilizado_por_sucursal TO 'nexoo_reportes'@'localhost';
+-- Tabla de reglas de comisión
+CREATE TABLE regla_comision (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(500),
+    tipo VARCHAR(50) NOT NULL, -- 'PORCENTAJE_VENTA', 'MONTO_FIJO', 'POR_META', 'POR_PRODUCTO'
+    puesto VARCHAR(50), -- NULL = aplica a todos los puestos
+    porcentaje_comision NUMERIC(5, 4) DEFAULT 0.0000 CHECK (porcentaje_comision >= 0 AND porcentaje_comision <= 1),
+    monto_fijo NUMERIC(10, 2) DEFAULT 0.00 CHECK (monto_fijo >= 0),
+    meta_mensual NUMERIC(12, 2) CHECK (meta_mensual >= 0),
+    bono_meta NUMERIC(10, 2) CHECK (bono_meta >= 0),
+    sku_producto VARCHAR(50), -- Para comisiones específicas por producto
+    activa BOOLEAN DEFAULT TRUE NOT NULL,
+    prioridad INTEGER DEFAULT 1 NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_creacion VARCHAR(50),
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_actualizacion VARCHAR(50)
+);
+
+-- Índices para regla_comision
+CREATE INDEX idx_regla_comision_puesto ON regla_comision(puesto);
+CREATE INDEX idx_regla_comision_activa ON regla_comision(activa);
+CREATE INDEX idx_regla_comision_tipo ON regla_comision(tipo);
+CREATE INDEX idx_regla_comision_sku ON regla_comision(sku_producto);
+
+-- Tabla de comisiones calculadas
+CREATE TABLE comision (
+    id SERIAL PRIMARY KEY,
+    vendedor_id INTEGER NOT NULL REFERENCES empleados(id) ON DELETE CASCADE,
+    periodo_anio INTEGER NOT NULL CHECK (periodo_anio >= 2000 AND periodo_anio <= 2100),
+    periodo_mes INTEGER NOT NULL CHECK (periodo_mes >= 1 AND periodo_mes <= 12),
+    total_ventas NUMERIC(12, 2) DEFAULT 0.00 NOT NULL CHECK (total_ventas >= 0),
+    cantidad_ventas INTEGER DEFAULT 0 NOT NULL,
+    comision_base NUMERIC(10, 2) DEFAULT 0.00 NOT NULL CHECK (comision_base >= 0),
+    bonos NUMERIC(10, 2) DEFAULT 0.00 CHECK (bonos >= 0),
+    ajustes NUMERIC(10, 2) DEFAULT 0.00, -- Puede ser positivo o negativo
+    total_comision NUMERIC(10, 2) DEFAULT 0.00 NOT NULL CHECK (total_comision >= 0),
+    estado VARCHAR(20) DEFAULT 'PENDIENTE' NOT NULL, -- 'PENDIENTE', 'APROBADA', 'PAGADA', 'RECHAZADA'
+    fecha_aprobacion DATE,
+    fecha_pago DATE,
+    usuario_aprobador VARCHAR(100),
+    notas VARCHAR(1000),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_creacion VARCHAR(50),
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_actualizacion VARCHAR(50),
+    
+    -- Constraint: Un vendedor solo puede tener una comisión por periodo
+    CONSTRAINT uk_comision_vendedor_periodo UNIQUE (vendedor_id, periodo_anio, periodo_mes)
+);
+
+-- Índices para comision
+CREATE INDEX idx_comision_vendedor ON comision(vendedor_id);
+CREATE INDEX idx_comision_periodo ON comision(periodo_anio, periodo_mes);
+CREATE INDEX idx_comision_estado ON comision(estado);
+CREATE INDEX idx_comision_fecha_pago ON comision(fecha_pago);
+
+-- Comentarios en las tablas
+COMMENT ON TABLE regla_comision IS 'Define las reglas para cálculo de comisiones de vendedores';
+COMMENT ON TABLE comision IS 'Almacena las comisiones calculadas por vendedor y periodo';
+
+COMMENT ON COLUMN regla_comision.tipo IS 'PORCENTAJE_VENTA: % sobre ventas totales | MONTO_FIJO: cantidad fija | POR_META: bono por alcanzar meta | POR_PRODUCTO: % sobre producto específico';
+COMMENT ON COLUMN regla_comision.puesto IS 'Si es NULL, la regla aplica a todos los puestos';
+COMMENT ON COLUMN regla_comision.prioridad IS 'Orden de aplicación de reglas (menor = mayor prioridad)';
+
+COMMENT ON COLUMN comision.estado IS 'PENDIENTE: calculada pero no aprobada | APROBADA: revisada y aprobada | PAGADA: ya fue pagada al vendedor | RECHAZADA: no procede el pago';
+COMMENT ON COLUMN comision.ajustes IS 'Ajustes manuales positivos o negativos al monto calculado';
+
+-- ==================================================================
+-- DATOS DE EJEMPLO: Reglas de Comisión por Defecto
+-- ==================================================================
+
+-- Regla 1: Comisión del 3% para todos los vendedores
+INSERT INTO regla_comision 
+    (nombre, descripcion, tipo, puesto, porcentaje_comision, activa, prioridad, usuario_creacion)
+VALUES 
+    ('Comisión Base Vendedores', 
+     'Comisión estándar del 3% sobre ventas totales para todos los vendedores', 
+     'PORCENTAJE_VENTA', 
+     'Vendedor', 
+     0.0300, 
+     TRUE, 
+     1, 
+     'SYSTEM');
+
+-- Regla 2: Comisión del 2% para cajeros
+INSERT INTO regla_comision 
+    (nombre, descripcion, tipo, puesto, porcentaje_comision, activa, prioridad, usuario_creacion)
+VALUES 
+    ('Comisión Cajeros', 
+     'Comisión del 2% sobre ventas para personal de caja', 
+     'PORCENTAJE_VENTA', 
+     'Cajero', 
+     0.0200, 
+     TRUE, 
+     1, 
+     'SYSTEM');
+
+-- Regla 3: Bono por meta mensual de $50,000
+INSERT INTO regla_comision 
+    (nombre, descripcion, tipo, puesto, meta_mensual, bono_meta, activa, prioridad, usuario_creacion)
+VALUES 
+    ('Bono Meta $50K', 
+     'Bono de $2,000 por alcanzar meta de ventas de $50,000 mensuales', 
+     'POR_META', 
+     NULL, -- Aplica a todos
+     50000.00, 
+     2000.00, 
+     TRUE, 
+     2, 
+     'SYSTEM');
+
+-- Regla 4: Comisión del 5% para gerentes
+INSERT INTO regla_comision 
+    (nombre, descripcion, tipo, puesto, porcentaje_comision, activa, prioridad, usuario_creacion)
+VALUES 
+    ('Comisión Gerentes', 
+     'Comisión del 5% sobre ventas totales para gerentes', 
+     'PORCENTAJE_VENTA', 
+     'Gerente', 
+     0.0500, 
+     TRUE, 
+     1, 
+     'SYSTEM');
 
 -- ==================================================
--- FIN DEL SCRIPT
+-- FIN MÓDULO DE COMISIONES
 -- ==================================================
--- Para ejecutar este script:
--- mysql -u root -p nexoo_almacen < alerta_lento_movimiento.sql
+
+-- ============================================================================
+-- MÓDULO V3: PREDICCIÓN DE DEMANDA
+-- ============================================================================
+-- Descripción: Agrega tabla para almacenar predicciones de demanda
+--              - Análisis histórico de ventas
+--              - Proyección de demanda futura
+--              - Recomendaciones de compra
+-- Fecha: 2026-03-09
+-- ============================================================================
+
+-- Tabla de predicciones de demanda
+CREATE TABLE prediccion_demanda (
+    id SERIAL PRIMARY KEY,
+    sku_producto VARCHAR(50) NOT NULL,
+    sucursal_id INTEGER NOT NULL,
+    periodo_anio INTEGER NOT NULL,
+    periodo_mes INTEGER NOT NULL CHECK (periodo_mes >= 1 AND periodo_mes <= 12),
+    demanda_historica NUMERIC(10, 2) NOT NULL CHECK (demanda_historica >= 0),
+    tendencia NUMERIC(10, 4),
+    demanda_predicha NUMERIC(10, 2) NOT NULL CHECK (demanda_predicha >= 0),
+    stock_actual INTEGER NOT NULL CHECK (stock_actual >= 0),
+    stock_seguridad INTEGER NOT NULL CHECK (stock_seguridad >= 0),
+    stock_sugerido INTEGER NOT NULL CHECK (stock_sugerido >= 0),
+    cantidad_comprar INTEGER NOT NULL CHECK (cantidad_comprar >= 0),
+    nivel_confianza NUMERIC(5, 2) CHECK (nivel_confianza >= 0 AND nivel_confianza <= 100),
+    metodo_calculo VARCHAR(50) NOT NULL,
+    periodos_analizados INTEGER,
+    fecha_calculo DATE NOT NULL,
+    observaciones VARCHAR(500),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_creacion VARCHAR(50),
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_actualizacion VARCHAR(50),
+    
+    -- Constraint único: solo una predicción por producto-sucursal-periodo
+    CONSTRAINT uk_prediccion_producto_periodo UNIQUE (sku_producto, sucursal_id, periodo_anio, periodo_mes)
+);
+
+-- Comentarios en columnas
+COMMENT ON TABLE prediccion_demanda IS 'Almacena predicciones de demanda basadas en análisis histórico';
+COMMENT ON COLUMN prediccion_demanda.sku_producto IS 'SKU del producto analizado';
+COMMENT ON COLUMN prediccion_demanda.sucursal_id IS 'Sucursal para la que se calcula la predicción';
+COMMENT ON COLUMN prediccion_demanda.periodo_anio IS 'Año del periodo predicho';
+COMMENT ON COLUMN prediccion_demanda.periodo_mes IS 'Mes del periodo predicho (1-12)';
+COMMENT ON COLUMN prediccion_demanda.demanda_historica IS 'Promedio de demanda histórica (unidades/periodo)';
+COMMENT ON COLUMN prediccion_demanda.tendencia IS 'Tendencia calculada (positiva=crecimiento, negativa=decrecimiento)';
+COMMENT ON COLUMN prediccion_demanda.demanda_predicha IS 'Demanda predicha para el periodo (unidades)';
+COMMENT ON COLUMN prediccion_demanda.stock_actual IS 'Stock disponible al momento del cálculo';
+COMMENT ON COLUMN prediccion_demanda.stock_seguridad IS 'Stock de seguridad recomendado (unidades)';
+COMMENT ON COLUMN prediccion_demanda.stock_sugerido IS 'Stock total sugerido (demanda + seguridad)';
+COMMENT ON COLUMN prediccion_demanda.cantidad_comprar IS 'Cantidad recomendada para comprar';
+COMMENT ON COLUMN prediccion_demanda.nivel_confianza IS 'Nivel de confianza de la predicción (0-100%)';
+COMMENT ON COLUMN prediccion_demanda.metodo_calculo IS 'Método usado: PROMEDIO_MOVIL, TENDENCIA_LINEAL, ESTACIONAL';
+COMMENT ON COLUMN prediccion_demanda.periodos_analizados IS 'Número de periodos históricos analizados';
+COMMENT ON COLUMN prediccion_demanda.fecha_calculo IS 'Fecha en que se realizó el cálculo';
+COMMENT ON COLUMN prediccion_demanda.observaciones IS 'Observaciones adicionales del análisis';
+
+-- Índices para búsqueda eficiente
+CREATE INDEX idx_pred_sku ON prediccion_demanda(sku_producto);
+CREATE INDEX idx_pred_sucursal ON prediccion_demanda(sucursal_id);
+CREATE INDEX idx_pred_periodo ON prediccion_demanda(periodo_anio, periodo_mes);
+CREATE INDEX idx_pred_fecha_calculo ON prediccion_demanda(fecha_calculo);
+CREATE INDEX idx_pred_cantidad_comprar ON prediccion_demanda(cantidad_comprar) WHERE cantidad_comprar > 0;
+
+-- Comentarios en índices
+COMMENT ON INDEX idx_pred_sku IS 'Búsqueda por producto';
+COMMENT ON INDEX idx_pred_sucursal IS 'Búsqueda por sucursal';
+COMMENT ON INDEX idx_pred_periodo IS 'Búsqueda por periodo';
+COMMENT ON INDEX idx_pred_fecha_calculo IS 'Filtrado por fecha de cálculo';
+COMMENT ON INDEX idx_pred_cantidad_comprar IS 'Búsqueda de productos que requieren compra';
+
+-- ==================================================
+-- FIN MÓDULO DE PREDICCIÓN DE DEMANDA
+-- ==================================================
+
+-- ==================================================================
+-- MÓDULO #10: ANÁLISIS ABC DE INVENTARIO
+-- ==================================================================
+-- Descripción: Clasificación de productos según su valor (Principio Pareto 80/20)
+--              - Clase A: ~20% productos, ~80% valor
+--              - Clase B: ~30% productos, ~15% valor
+--              - Clase C: ~50% productos, ~5% valor
+-- Autor: NexooHub Development Team
+-- Fecha: 2026-03-09
+-- ==================================================================
+
+CREATE TABLE analisis_abc (
+    id SERIAL PRIMARY KEY,
+    sku_producto VARCHAR(50) NOT NULL,
+    sucursal_id INTEGER NOT NULL,
+    clasificacion VARCHAR(1) NOT NULL CHECK (clasificacion IN ('A', 'B', 'C')),
+    periodo_inicio DATE NOT NULL,
+    periodo_fin DATE NOT NULL,
+    cantidad_vendida INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_vendida >= 0),
+    valor_ventas NUMERIC(12, 2) NOT NULL DEFAULT 0.00 CHECK (valor_ventas >= 0),
+    porcentaje_valor NUMERIC(5, 2) NOT NULL DEFAULT 0.00 CHECK (porcentaje_valor >= 0 AND porcentaje_valor <= 100),
+    porcentaje_acumulado NUMERIC(5, 2) NOT NULL DEFAULT 0.00 CHECK (porcentaje_acumulado >= 0 AND porcentaje_acumulado <= 100),
+    stock_actual INTEGER NOT NULL DEFAULT 0 CHECK (stock_actual >= 0),
+    valor_stock NUMERIC(12, 2) DEFAULT 0.00 CHECK (valor_stock >= 0),
+    rotacion_inventario NUMERIC(10, 4) DEFAULT 0.0000,
+    fecha_analisis DATE NOT NULL,
+    observaciones TEXT,
+    fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE,
+    usuario_creacion VARCHAR(50),
+    
+    -- Restricciones
+    CONSTRAINT chk_periodo_valido CHECK (periodo_inicio <= periodo_fin)
+);
+
+-- Índices para optimización de consultas
+CREATE INDEX idx_analisis_abc_sucursal ON analisis_abc(sucursal_id);
+CREATE INDEX idx_analisis_abc_clasificacion ON analisis_abc(clasificacion);
+CREATE INDEX idx_analisis_abc_fecha ON analisis_abc(fecha_analisis);
+CREATE INDEX idx_analisis_abc_sku_sucursal ON analisis_abc(sku_producto, sucursal_id);
+CREATE INDEX idx_analisis_abc_sucursal_fecha ON analisis_abc(sucursal_id, fecha_analisis);
+CREATE INDEX idx_analisis_abc_valor_ventas ON analisis_abc(valor_ventas DESC);
+
+-- Comentarios de documentación
+COMMENT ON TABLE analisis_abc IS 'Análisis ABC de inventario - Clasificación de productos según valor (Pareto 80/20)';
+COMMENT ON COLUMN analisis_abc.clasificacion IS 'A=alto valor (80%), B=medio (15%), C=bajo (5%)';
+COMMENT ON COLUMN analisis_abc.porcentaje_valor IS 'Porcentaje del valor total de ventas';
+COMMENT ON COLUMN analisis_abc.porcentaje_acumulado IS 'Porcentaje acumulado (determina clasificación)';
+COMMENT ON COLUMN analisis_abc.rotacion_inventario IS 'Rotación: valor_ventas / valor_stock';
+COMMENT ON COLUMN analisis_abc.observaciones IS 'Recomendaciones automáticas según clasificación';
+
+-- ==================================================
+-- FIN MÓDULO DE ANÁLISIS ABC
+-- ==================================================
+
+-- ==================================================
+-- FIN DEL SCRIPT CONSOLIDADO
+-- ==================================================
+-- Para ejecutar este script en PostgreSQL:
+-- psql -U postgres -d nexoo_almacen -f nexxo-hub-bd.sql
 -- ==================================================

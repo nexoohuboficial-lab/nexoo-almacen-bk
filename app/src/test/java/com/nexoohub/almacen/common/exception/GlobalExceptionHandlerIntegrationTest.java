@@ -48,11 +48,13 @@ class GlobalExceptionHandlerIntegrationTest {
     void setUp() {
         usuarioRepository.deleteAll();
 
-        Usuario usuario = new Usuario();
-        usuario.setUsername("admin@nexoo.com");
-        usuario.setPassword("$2a$10$test");
-        usuario.setRole("ROLE_ADMIN");
-        usuarioRepository.save(usuario);
+        if (usuarioRepository.findByUsername("admin@nexoo.com").isEmpty()) {
+            Usuario usuario = new Usuario();
+            usuario.setUsername("admin@nexoo.com");
+            usuario.setPassword("$2a$10$test");
+            usuario.setRole("ROLE_ADMIN");
+            usuarioRepository.save(usuario);
+        }
 
         token = jwtUtil.generateToken("admin@nexoo.com");
     }

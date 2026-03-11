@@ -1,0 +1,456 @@
+openapi: 3.0.0
+info:
+  title: API de Análisis ABC de Inventario
+  description: API para el análisis ABC (Pareto 80/20) de inventario por sucursal. Clasifica productos en categorías A (alto valor), B (valor medio) y C (bajo valor) según su contribución a las ventas.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /inventario/analisis-abc/generar:
+    post:
+      summary: Generar nuevo análisis ABC
+      description: |
+        Genera un análisis ABC para el período especificado. El análisis clasifica productos según el principio de Pareto:
+        - **Clase A**: ~20% de productos que representan ~80% del valor de ventas (alta prioridad)
+        - **Clase B**: ~30% de productos que representan ~15% del valor (prioridad media)
+        - **Clase C**: ~50% de productos que representan ~5% del valor (baja prioridad)
+        
+        Calcula automáticamente rotación de inventario y genera observaciones de negocio.
+      operationId: generarAnalisisABC
+      tags:
+        - Análisis ABC
+      requestBody:
+        description: Parámetros del análisis ABC a generar.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisABCRequestDTO'
+            examples:
+              analisisBasico:
+                summary: Análisis básico con parámetros por defecto
+                value:
+                  sucursalId: 1
+                  periodoInicio: "2026-01-01"
+                  periodoFin: "2026-03-31"
+                  porcentajeA: 80.0
+                  porcentajeB: 95.0
+                  forzarRegeneracion: false
+              analisTodasSucursales:
+                summary: Análisis de todas las sucursales
+                value:
+                  periodoInicio: "2026-01-01"
+                  periodoFin: "2026-03-31"
+                  porcentajeA: 75.0
+                  porcentajeB: 90.0
+                  forzarRegeneracion: true
+      responses:
+        '200':
+          description: Análisis ABC generado exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListAnalisisABC'
+        '400':
+          description: Parámetros inválidos (fechas incorrectas, porcentajes fuera de rango, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inventario/analisis-abc/sucursal/{sucursalId}/ultimo:
+    get:
+      summary: Obtener último análisis ABC de una sucursal
+      description: Retorna el análisis ABC más reciente generado para la sucursal especificada.
+      operationId: obtenerUltimoAnalisis
+      tags:
+        - Análisis ABC
+      parameters:
+        - name: sucursalId
+          in: path
+          description: ID de la sucursal
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Último análisis ABC obtenido exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListAnalisisABC'
+        '404':
+          description: No se encontró análisis para la sucursal especificada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inventario/analisis-abc/sucursal/{sucursalId}/clasificacion/{clasificacion}:
+    get:
+      summary: Obtener productos por clasificación ABC
+      description: |
+        Retorna productos del último análisis filtrados por clasificación específica:
+        - **A**: Productos de alta rotación y alto valor (requieren gestión prioritaria)
+        - **B**: Productos de importancia media (control moderado)
+        - **C**: Productos de bajo valor relativo (minimizar inversión en inventario)
+      operationId: obtenerPorClasificacion
+      tags:
+        - Análisis ABC
+      parameters:
+        - name: sucursalId
+          in: path
+          description: ID de la sucursal
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: clasificacion
+          in: path
+          description: Clasificación ABC (A, B o C)
+          required: true
+          schema:
+            type: string
+            pattern: '^[ABC]$'
+            example: A
+      responses:
+        '200':
+          description: Productos obtenidos exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListAnalisisABC'
+        '400':
+          description: Clasificación inválida (debe ser A, B o C)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No se encontraron productos para la clasificación especificada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inventario/analisis-abc/sucursal/{sucursalId}/resumen:
+    get:
+      summary: Obtener resumen estadístico del análisis ABC
+      description: |
+        Retorna estadísticas agregadas del último análisis ABC:
+        - Total de productos analizados
+        - Distribución por clasificación (A/B/C)
+        - Valores totales y porcentajes
+        - Top productos de clase A
+        - Indicadores de rotación de inventario
+      operationId: obtenerResumen
+      tags:
+        - Análisis ABC
+      parameters:
+        - name: sucursalId
+          in: path
+          description: ID de la sucursal
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Resumen obtenido exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseResumenABC'
+        '404':
+          description: No se encontró análisis para la sucursal especificada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AnalisisABCRequestDTO:
+      type: object
+      description: Parámetros para solicitar la generación de un análisis ABC
+      properties:
+        sucursalId:
+          type: integer
+          description: ID de la sucursal a analizar (omitir para analizar todas)
+          example: 1
+          nullable: true
+        periodoInicio:
+          type: string
+          format: date
+          description: Fecha de inicio del período de análisis
+          example: "2026-01-01"
+        periodoFin:
+          type: string
+          format: date
+          description: Fecha de fin del período de análisis
+          example: "2026-03-31"
+        porcentajeA:
+          type: number
+          format: double
+          description: Porcentaje acumulado para clasificación A (default 80%)
+          minimum: 1.0
+          maximum: 99.0
+          default: 80.0
+          example: 80.0
+        porcentajeB:
+          type: number
+          format: double
+          description: Porcentaje acumulado para clasificación B (default 95%)
+          minimum: 1.0
+          maximum: 99.0
+          default: 95.0
+          example: 95.0
+        forzarRegeneracion:
+          type: boolean
+          description: Si true, regenera el análisis aunque ya exista uno para la fecha
+          default: false
+          example: false
+      required:
+        - periodoInicio
+        - periodoFin
+
+    AnalisisABCResponseDTO:
+      type: object
+      description: Resultado del análisis ABC de un producto
+      properties:
+        id:
+          type: integer
+          description: ID único del registro de análisis
+          example: 1
+        skuProducto:
+          type: string
+          description: SKU del producto analizado
+          example: "ACEITE-10W40-4T-1L"
+        nombreProducto:
+          type: string
+          description: Nombre descriptivo del producto
+          example: "Aceite Motul 10W40 4T 1 Litro"
+        sucursalId:
+          type: integer
+          description: ID de la sucursal
+          example: 1
+        nombreSucursal:
+          type: string
+          description: Nombre de la sucursal
+          example: "Sucursal Centro"
+        clasificacion:
+          type: string
+          description: Clasificación ABC del producto
+          enum: [A, B, C]
+          example: "A"
+        periodoInicio:
+          type: string
+          format: date
+          description: Inicio del período analizado
+          example: "2026-01-01"
+        periodoFin:
+          type: string
+          format: date
+          description: Fin del período analizado
+          example: "2026-03-31"
+        cantidadVendida:
+          type: integer
+          description: Cantidad total vendida en el período
+          example: 150
+        valorVentas:
+          type: number
+          format: decimal
+          description: Valor monetario total de ventas
+          example: 45000.00
+        porcentajeValor:
+          type: number
+          format: decimal
+          description: Porcentaje del valor total que representa este producto
+          example: 15.25
+        porcentajeAcumulado:
+          type: number
+          format: decimal
+          description: Porcentaje acumulado hasta este producto (usado para clasificación)
+          example: 15.25
+        stockActual:
+          type: integer
+          description: Stock actual en inventario
+          example: 45
+        valorStock:
+          type: number
+          format: decimal
+          description: Valor monetario del stock actual
+          example: 12000.00
+        rotacionInventario:
+          type: number
+          format: decimal
+          description: Índice de rotación (valorVentas / valorStock)
+          example: 3.75
+        fechaAnalisis:
+          type: string
+          format: date
+          description: Fecha en que se generó el análisis
+          example: "2026-04-01"
+        observaciones:
+          type: string
+          description: Observaciones automáticas generadas según la clasificación
+          example: "Producto de alta rotación y valor. Requiere gestión prioritaria, monitoreo continuo del stock y reposición frecuente. Evitar quiebres de stock."
+        fechaCreacion:
+          type: string
+          format: date
+          description: Fecha de creación del registro
+          example: "2026-04-01"
+        usuarioCreacion:
+          type: string
+          description: Usuario que generó el análisis
+          example: "admin"
+
+    AnalisisABCResumenDTO:
+      type: object
+      description: Resumen estadístico del análisis ABC
+      properties:
+        sucursalId:
+          type: integer
+          description: ID de la sucursal analizada
+          example: 1
+        nombreSucursal:
+          type: string
+          description: Nombre de la sucursal
+          example: "Sucursal Centro"
+        fechaAnalisis:
+          type: string
+          format: date
+          description: Fecha del análisis
+          example: "2026-04-01"
+        periodoInicio:
+          type: string
+          format: date
+          example: "2026-01-01"
+        periodoFin:
+          type: string
+          format: date
+          example: "2026-03-31"
+        totalProductos:
+          type: integer
+          description: Total de productos analizados
+          example: 120
+        valorTotalVentas:
+          type: number
+          format: decimal
+          description: Valor total de ventas del período
+          example: 295000.00
+        valorTotalStock:
+          type: number
+          format: decimal
+          description: Valor total del stock actual
+          example: 85000.00
+        resumenClaseA:
+          $ref: '#/components/schemas/ResumenClasificacion'
+        resumenClaseB:
+          $ref: '#/components/schemas/ResumenClasificacion'
+        resumenClaseC:
+          $ref: '#/components/schemas/ResumenClasificacion'
+        productosClaseA:
+          type: array
+          description: Top 10 productos de clase A
+          items:
+            $ref: '#/components/schemas/AnalisisABCResponseDTO'
+
+    ResumenClasificacion:
+      type: object
+      description: Resumen estadístico de una clasificación específica
+      properties:
+        clasificacion:
+          type: string
+          enum: [A, B, C]
+          example: "A"
+        cantidadProductos:
+          type: integer
+          description: Cantidad de productos en esta clasificación
+          example: 24
+        porcentajeProductos:
+          type: number
+          format: decimal
+          description: Porcentaje del total de productos
+          example: 20.0
+        valorVentas:
+          type: number
+          format: decimal
+          description: Valor total de ventas de esta clasificación
+          example: 236000.00
+        porcentajeValorVentas:
+          type: number
+          format: decimal
+          description: Porcentaje del valor total de ventas
+          example: 80.0
+        valorStock:
+          type: number
+          format: decimal
+          description: Valor del stock de esta clasificación
+          example: 45000.00
+        rotacionPromedio:
+          type: number
+          format: decimal
+          description: Rotación promedio de inventario
+          example: 5.24
+
+    ApiResponseListAnalisisABC:
+      type: object
+      description: Respuesta estándar con lista de análisis ABC
+      properties:
+        exitoso:
+          type: boolean
+          example: true
+        mensaje:
+          type: string
+          example: "Análisis ABC generado exitosamente"
+        datos:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalisisABCResponseDTO'
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-04-01T10:30:00"
+
+    ApiResponseResumenABC:
+      type: object
+      description: Respuesta estándar con resumen ABC
+      properties:
+        exitoso:
+          type: boolean
+          example: true
+        mensaje:
+          type: string
+          example: "Resumen ABC obtenido exitosamente"
+        datos:
+          $ref: '#/components/schemas/AnalisisABCResumenDTO'
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-04-01T10:30:00"
+
+    ErrorResponse:
+      type: object
+      description: Respuesta de error estándar
+      properties:
+        exitoso:
+          type: boolean
+          example: false
+        mensaje:
+          type: string
+          example: "Error al generar análisis ABC"
+        error:
+          type: string
+          example: "Las fechas del período son inválidas"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-04-01T10:30:00"

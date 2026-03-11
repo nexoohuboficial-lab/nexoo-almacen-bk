@@ -49,7 +49,11 @@ public class Venta {
     private List<DetalleVenta> detalles = new ArrayList<>();
 
     @PrePersist
-    public void prePersist() { this.fechaVenta = LocalDateTime.now(); }
+    public void prePersist() {
+        if (this.fechaVenta == null) {
+            this.fechaVenta = LocalDateTime.now();
+        }
+    }
 
     // Getters y Setters...
     public Integer getId() { return id; }
@@ -75,6 +79,7 @@ public class Venta {
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }
     public LocalDateTime getFechaVenta() { return fechaVenta; }
+    public void setFechaVenta(LocalDateTime fechaVenta) { this.fechaVenta = fechaVenta; }
     
     public List<DetalleVenta> getDetalles() { return detalles; }
     public void setDetalles(List<DetalleVenta> detalles) { this.detalles = detalles; }

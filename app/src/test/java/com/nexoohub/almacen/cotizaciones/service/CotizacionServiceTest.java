@@ -157,11 +157,20 @@ class CotizacionServiceTest {
     @DisplayName("Test 1: Debe crear cotización exitosamente con generación de folio")
     void testCrearCotizacion_Exitoso() {
         // Given
+        DetalleCotizacion detalleGuardado = new DetalleCotizacion();
+        detalleGuardado.setId(1L);
+        detalleGuardado.setCotizacionId(cotizacion.getId());
+        detalleGuardado.setSkuInterno("SKU001");
+        detalleGuardado.setCantidad(5);
+        detalleGuardado.setPrecioUnitario(new BigDecimal("100.00"));
+        detalleGuardado.setProducto(producto);
+        
         when(clienteRepository.findById(1)).thenReturn(Optional.of(cliente));
         when(sucursalRepository.findById(1)).thenReturn(Optional.of(sucursal));
         when(empleadoRepository.findById(1)).thenReturn(Optional.of(vendedor));
         when(productoRepository.findById("SKU001")).thenReturn(Optional.of(producto));
         when(cotizacionRepository.save(any(Cotizacion.class))).thenReturn(cotizacion);
+        when(detalleCotizacionRepository.saveAll(anyList())).thenReturn(Arrays.asList(detalleGuardado));
 
         // When
         CotizacionResponseDTO resultado = cotizacionService.crearCotizacion(requestDTO);
@@ -174,7 +183,8 @@ class CotizacionServiceTest {
         verify(sucursalRepository, times(1)).findById(1);
         verify(empleadoRepository, times(1)).findById(1);
         verify(productoRepository, atLeastOnce()).findById("SKU001");
-        verify(cotizacionRepository, times(1)).save(any(Cotizacion.class));
+        verify(detalleCotizacionRepository, times(1)).saveAll(anyList());
+        verify(cotizacionRepository, times(2)).save(any(Cotizacion.class)); // Parent + totals
     }
 
     @Test
@@ -198,11 +208,20 @@ class CotizacionServiceTest {
     @DisplayName("Test 3: Debe actualizar cotización exitosamente cuando está en estado BORRADOR")
     void testActualizarCotizacion_Exitoso() {
         // Given
-        when(cotizacionRepository.findWithDetallesById(1L)).thenReturn(Optional.of(cotizacion));
+        DetalleCotizacion detalleGuardado = new DetalleCotizacion();
+        detalleGuardado.setId(1L);
+        detalleGuardado.setCotizacionId(cotizacion.getId());
+        detalleGuardado.setSkuInterno("SKU001");
+        detalleGuardado.setCantidad(5);
+        detalleGuardado.setPrecioUnitario(new BigDecimal("100.00"));
+        detalleGuardado.setProducto(producto);
+        
+        when(cotizacionRepository.findById(1L)).thenReturn(Optional.of(cotizacion));
         when(clienteRepository.findById(1)).thenReturn(Optional.of(cliente));
         when(sucursalRepository.findById(1)).thenReturn(Optional.of(sucursal));
         when(empleadoRepository.findById(1)).thenReturn(Optional.of(vendedor));
         when(productoRepository.findById("SKU001")).thenReturn(Optional.of(producto));
+        when(detalleCotizacionRepository.saveAll(anyList())).thenReturn(Arrays.asList(detalleGuardado));
         when(cotizacionRepository.save(any(Cotizacion.class))).thenReturn(cotizacion);
 
         // When
@@ -210,9 +229,10 @@ class CotizacionServiceTest {
 
         // Then
         assertNotNull(resultado, "La cotización actualizada no debe ser null");
-        verify(cotizacionRepository, times(1)).findWithDetallesById(1L);
-        verify(detalleCotizacionRepository, times(1)).deleteByCotizacionId(1L);
-        verify(cotizacionRepository, times(1)).save(any(Cotizacion.class));
+        verify(cotizacionRepository, times(1)).findById(1L);
+        verify(detalleCotizacionRepository, times(1)).deleteByCotizacion_Id(1L);
+        verify(detalleCotizacionRepository, times(1)).saveAll(anyList());
+        verify(cotizacionRepository, times(2)).save(any(Cotizacion.class));
     }
 
     @Test
@@ -220,7 +240,7 @@ class CotizacionServiceTest {
     void testActualizarCotizacion_NoEditable() {
         // Given
         cotizacion.setEstado("ENVIADA"); // Estado no editable
-        when(cotizacionRepository.findWithDetallesById(1L)).thenReturn(Optional.of(cotizacion));
+        when(cotizacionRepository.findById(1L)).thenReturn(Optional.of(cotizacion));
 
         // When & Then
         InvalidOperationException exception = assertThrows(
@@ -238,7 +258,7 @@ class CotizacionServiceTest {
     void testCambiarEstado_BorradorAEnviada() {
         // Given
         CambiarEstadoRequestDTO request = new CambiarEstadoRequestDTO("ENVIADA");
-        when(cotizacionRepository.findById(1L)).thenReturn(Optional.of(cotizacion));
+        when(cotizacionRepository.findWithDetallesById(1L)).thenReturn(Optional.of(cotizacion));
         when(cotizacionRepository.save(any(Cotizacion.class))).thenReturn(cotizacion);
 
         // When
@@ -246,7 +266,7 @@ class CotizacionServiceTest {
 
         // Then
         assertNotNull(resultado);
-        verify(cotizacionRepository, times(1)).findById(1L);
+        verify(cotizacionRepository, times(1)).findWithDetallesById(1L);
         verify(cotizacionRepository, times(1)).save(any(Cotizacion.class));
     }
 
@@ -256,7 +276,7 @@ class CotizacionServiceTest {
         // Given
         cotizacion.setEstado("ENVIADA");
         CambiarEstadoRequestDTO request = new CambiarEstadoRequestDTO("RECHAZADA", null);
-        when(cotizacionRepository.findById(1L)).thenReturn(Optional.of(cotizacion));
+        when(cotizacionRepository.findWithDetallesById(1L)).thenReturn(Optional.of(cotizacion));
 
         // When & Then
         InvalidOperationException exception = assertThrows(
@@ -285,6 +305,7 @@ class CotizacionServiceTest {
         venta.setId(1);
 
         when(cotizacionRepository.findWithDetallesById(1L)).thenReturn(Optional.of(cotizacion));
+        when(detalleCotizacionRepository.findByCotizacionId(1L)).thenReturn(cotizacion.getDetalles());
         when(inventarioRepository.findById(any(InventarioSucursalId.class))).thenReturn(Optional.of(inventario));
         when(ventaRepository.save(any(Venta.class))).thenReturn(venta);
         when(detalleVentaRepository.save(any(DetalleVenta.class))).thenReturn(new DetalleVenta());
@@ -337,6 +358,7 @@ class CotizacionServiceTest {
         inventario.setStockActual(2); // Stock insuficiente (necesita 5)
 
         when(cotizacionRepository.findWithDetallesById(1L)).thenReturn(Optional.of(cotizacion));
+        when(detalleCotizacionRepository.findByCotizacionId(1L)).thenReturn(cotizacion.getDetalles());
         when(inventarioRepository.findById(any(InventarioSucursalId.class))).thenReturn(Optional.of(inventario));
 
         // When & Then

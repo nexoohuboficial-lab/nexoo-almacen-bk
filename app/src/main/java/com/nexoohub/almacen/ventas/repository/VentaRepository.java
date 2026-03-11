@@ -59,4 +59,20 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
      * Cuenta ventas en un periodo (para dashboard)
      */
     Long countByFechaVentaBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);
+    
+    /**
+     * Buscar ventas de un vendedor en un periodo (para cálculo de comisiones)
+     * Carga detalles para calcular comisiones por producto
+     */
+    @Query("SELECT DISTINCT v FROM Venta v " +
+           "LEFT JOIN FETCH v.detalles d " +
+           "LEFT JOIN FETCH d.producto " +
+           "WHERE v.vendedorId = :vendedorId " +
+           "AND v.fechaVenta BETWEEN :inicio AND :fin " +
+           "ORDER BY v.fechaVenta DESC")
+    List<Venta> findByVendedorIdAndFechaVentaBetween(
+        @Param("vendedorId") Integer vendedorId,
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin
+    );
 }

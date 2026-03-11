@@ -39,6 +39,19 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "Datos invalidos", "Datos de entrada inválidos", details);
     }
 
+    @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingParams(org.springframework.web.bind.MissingServletRequestParameterException ex) {
+        log.warn("Parámetro requerido faltante: {}", ex.getParameterName());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Parametro Faltante", 
+                "Parámetro requerido '" + ex.getParameterName() + "' no fue proporcionado", null);
+    }
+
+    @ExceptionHandler(jakarta.persistence.EntityNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleEntityNotFound(jakarta.persistence.EntityNotFoundException ex) {
+        log.warn("Entidad no encontrada: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "No encontrado", ex.getMessage(), null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleAll(Exception ex) {
         // 2. ERROR CRÍTICO: Aquí sí mandamos el STACKTRACE completo al log 

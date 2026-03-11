@@ -110,7 +110,7 @@ public class Cotizacion {
     @Column(name = "fecha_conversion")
     private LocalDateTime fechaConversion;
     
-    @OneToMany(mappedBy = "cotizacion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cotizacion", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<DetalleCotizacion> detalles = new ArrayList<>();
     
     @PrePersist
@@ -132,7 +132,16 @@ public class Cotizacion {
      * Calcula el total de la cotización basándose en los detalles
      */
     public void calcularTotales() {
-        if (detalles == null || detalles.isEmpty()) {
+        calcularTotales(this.detalles);
+    }
+    
+    /**
+     * Calcula el total de la cotización basándose en detalles externos
+     * (útil para evitar modificar colecciones managed)
+     * @param detallesExternos Lista de detalles para calcular
+     */
+    public void calcularTotales(List<DetalleCotizacion> detallesExternos) {
+        if (detallesExternos == null || detallesExternos.isEmpty()) {
             this.subtotal = BigDecimal.ZERO;
             this.iva = BigDecimal.ZERO;
             this.descuentoTotal = BigDecimal.ZERO;
@@ -143,7 +152,7 @@ public class Cotizacion {
         BigDecimal subtotalCalculado = BigDecimal.ZERO;
         BigDecimal descuentoCalculado = BigDecimal.ZERO;
         
-        for (DetalleCotizacion detalle : detalles) {
+        for (DetalleCotizacion detalle : detallesExternos) {
             BigDecimal precioTotal = detalle.getPrecioUnitario()
                 .multiply(new BigDecimal(detalle.getCantidad()));
             subtotalCalculado = subtotalCalculado.add(precioTotal);

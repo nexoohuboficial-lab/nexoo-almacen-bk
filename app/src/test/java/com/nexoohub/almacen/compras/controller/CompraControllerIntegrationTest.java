@@ -83,11 +83,13 @@ class CompraControllerIntegrationTest {
         configuracionFinancieraRepository.deleteAll();
         usuarioRepository.deleteAll();
 
-        Usuario usuario = new Usuario();
-        usuario.setUsername("admin@nexoo.com");
-        usuario.setPassword("$2a$10$test");
-        usuario.setRole("ROLE_ADMIN");
-        usuarioRepository.save(usuario);
+        if (usuarioRepository.findByUsername("admin@nexoo.com").isEmpty()) {
+            Usuario usuario = new Usuario();
+            usuario.setUsername("admin@nexoo.com");
+            usuario.setPassword("$2a$10$test");
+            usuario.setRole("ROLE_ADMIN");
+            usuarioRepository.save(usuario);
+        }
 
         ConfiguracionFinanciera config = new ConfiguracionFinanciera();
         config.setId(1); // Service busca ID=1

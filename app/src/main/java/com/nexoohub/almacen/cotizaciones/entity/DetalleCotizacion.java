@@ -22,21 +22,20 @@ public class DetalleCotizacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(name = "cotizacion_id", insertable = false, updatable = false)
+    @Column(name = "cotizacion_id")
     private Long cotizacionId;
     
     @NotNull(message = "La cotización es obligatoria")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cotizacion_id", nullable = false)
+    @JoinColumn(name = "cotizacion_id", nullable = false, insertable = false, updatable = false)
     private Cotizacion cotizacion;
     
-    @NotBlank(message = "El SKU interno es obligatorio")
-    @Column(name = "sku_interno", insertable = false, updatable = false)
+    @Column(name = "sku_interno", nullable = false, length = 50)
     private String skuInterno;
     
+    @NotNull(message = "El producto es obligatorio") 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sku_interno", nullable = false)
+    @JoinColumn(name = "sku_interno", nullable = false, insertable = false, updatable = false)
     private ProductoMaestro producto;
     
     @NotNull(message = "La cantidad es obligatoria")
@@ -102,20 +101,20 @@ public class DetalleCotizacion {
         this.id = id;
     }
     
-    public Long getCotizacionId() {
-        return cotizacionId;
-    }
-    
-    public void setCotizacionId(Long cotizacionId) {
-        this.cotizacionId = cotizacionId;
-    }
-    
     public Cotizacion getCotizacion() {
         return cotizacion;
     }
     
     public void setCotizacion(Cotizacion cotizacion) {
         this.cotizacion = cotizacion;
+    }
+    
+    public Long getCotizacionId() {
+        return cotizacionId;
+    }
+    
+    public void setCotizacionId(Long cotizacionId) {
+        this.cotizacionId = cotizacionId;
     }
     
     public String getSkuInterno() {

@@ -41,11 +41,13 @@ class AuthControllerIntegrationTest {
         usuarioRepository.deleteAll();
         
         // Crear usuario de prueba
-        Usuario usuario = new Usuario();
-        usuario.setUsername("admin@nexoo.com");
-        usuario.setPassword(passwordEncoder.encode("Admin123!"));
-        usuario.setRole("ROLE_ADMIN");
-        usuarioRepository.save(usuario);
+        if (usuarioRepository.findByUsername("admin@nexoo.com").isEmpty()) {
+            Usuario usuario = new Usuario();
+            usuario.setUsername("admin@nexoo.com");
+            usuario.setPassword(passwordEncoder.encode("Admin123!"));
+            usuario.setRole("ROLE_ADMIN");
+            usuarioRepository.save(usuario);
+        }
     }
 
     @Test

@@ -23,6 +23,8 @@ import com.nexoohub.almacen.ventas.entity.DetalleVenta;
 import com.nexoohub.almacen.ventas.entity.Venta;
 import com.nexoohub.almacen.ventas.repository.DetalleVentaRepository;
 import com.nexoohub.almacen.ventas.repository.VentaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class CotizacionService {
+    
+    @PersistenceContext
+    private EntityManager entityManager;
     
     private final CotizacionRepository cotizacionRepository;
     private final DetalleCotizacionRepository detalleCotizacionRepository;
@@ -122,7 +127,15 @@ public class CotizacionService {
         cotizacion.setTerminosCondiciones(request.getTerminosCondiciones());
         cotizacion.setObservacionesInternas(request.getObservacionesInternas());
         
-        // Crear los detalles
+        // Inicializar totales en cero (requerido por @NotNull)
+        cotizacion.setSubtotal(BigDecimal.ZERO);
+        cotizacion.setDescuentoTotal(BigDecimal.ZERO);
+        cotizacion.setTotal(BigDecimal.ZERO);
+        
+        // Guardar primero la cotización padre para obtener el ID
+        Cotizacion cotizacionGuardada = cotizacionRepository.save(cotizacion);
+        
+        // Crear los detalles con FK manuales
         List<DetalleCotizacion> detalles = new ArrayList<>();
         for (DetalleCotizacionDTO detalleDTO : request.getDetalles()) {
             // Buscar el producto
@@ -130,8 +143,11 @@ public class CotizacionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con SKU: " + detalleDTO.getSkuInterno()));
             
             DetalleCotizacion detalle = new DetalleCotizacion();
-            detalle.setCotizacion(cotizacion);
+            // Establecer FKs manualmente (requerido con insertable=false)
+            detalle.setCotizacionId(cotizacionGuardada.getId());
             detalle.setSkuInterno(detalleDTO.getSkuInterno());
+            // Establecer relaciones para validación
+            detalle.setCotizacion(cotizacionGuardada);
             detalle.setProducto(producto);
             detalle.setCantidad(detalleDTO.getCantidad());
             detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
@@ -141,16 +157,17 @@ public class CotizacionService {
             detalles.add(detalle);
         }
         
-        cotizacion.setDetalles(detalles);
+        // Guardar detalles explícitamente
+        List<DetalleCotizacion> detallesGuardados = detalleCotizacionRepository.saveAll(detalles);
         
-        // Calcular totales
-        cotizacion.calcularTotales();
+        // Calcular totales usando método que acepta detalles como parámetro (evita modificar colección managed)
+        cotizacionGuardada.calcularTotales(detallesGuardados);
         
-        // Guardar
-        Cotizacion cotizacionGuardada = cotizacionRepository.save(cotizacion);
+        // Guardar totales
+        cotizacionGuardada = cotizacionRepository.save(cotizacionGuardada);
         
-        // Retornar DTO
-        return mapearAResponseDTO(cotizacionGuardada);
+        // Retornar DTO usando método que acepta detalles separados
+        return mapearAResponseDTOConDetalles(cotizacionGuardada, detallesGuardados);
     }
     
     /**
@@ -161,7 +178,8 @@ public class CotizacionService {
      */
     @Transactional
     public CotizacionResponseDTO actualizarCotizacion(Long id, CotizacionRequestDTO request) {
-        Cotizacion cotizacion = cotizacionRepository.findWithDetallesById(id)
+        // Cargar cotización sin detalles
+        Cotizacion cotizacion = cotizacionRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada con ID: " + id));
         
         if (!cotizacion.esEditable()) {
@@ -181,7 +199,7 @@ public class CotizacionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado con ID: " + request.getVendedorId()));
         }
         
-        // Actualizar campos
+        // Actualizar campos del padre
         cotizacion.setClienteId(request.getClienteId());
         cotizacion.setCliente(cliente);
         cotizacion.setSucursalId(request.getSucursalId());
@@ -198,34 +216,47 @@ public class CotizacionService {
         cotizacion.setTerminosCondiciones(request.getTerminosCondiciones());
         cotizacion.setObservacionesInternas(request.getObservacionesInternas());
         
-        // Actualizar detalles - NO reemplazar la colección, sino limpiarla y agregar nuevos
-        // Esto evita el error "orphanRemoval" de Hibernate
-        cotizacion.getDetalles().clear();
+        // Guardar cambios del padre y obtener referencia fresh
+        Cotizacion cotizacionGuardada = cotizacionRepository.save(cotizacion);
         
-        // Crear nuevos detalles
+        // Eliminar detalles antiguos
+        detalleCotizacionRepository.deleteByCotizacion_Id(cotizacionGuardada.getId());
+        
+        // Crear nuevos detalles manualmente
+        List<DetalleCotizacion> nuevosDetalles = new ArrayList<>();
+        
         for (DetalleCotizacionDTO detalleDTO : request.getDetalles()) {
             ProductoMaestro producto = productoRepository.findById(detalleDTO.getSkuInterno())
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con SKU: " + detalleDTO.getSkuInterno()));
             
             DetalleCotizacion detalle = new DetalleCotizacion();
-            detalle.setCotizacion(cotizacion);
+            // Establecer FKs manualmente (los @Column son writable)
+            detalle.setCotizacionId(cotizacionGuardada.getId());
             detalle.setSkuInterno(detalleDTO.getSkuInterno());
+            // Establecer relación bidireccional (requerido por @NotNull validation)
+            detalle.setCotizacion(cotizacionGuardada);
             detalle.setProducto(producto);
+            // Establecer campos de negocio
             detalle.setCantidad(detalleDTO.getCantidad());
             detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
             detalle.setDescuentoEspecial(detalleDTO.getDescuentoEspecial() != null ? detalleDTO.getDescuentoEspecial() : BigDecimal.ZERO);
             detalle.setPorcentajeDescuento(detalleDTO.getPorcentajeDescuento() != null ? detalleDTO.getPorcentajeDescuento() : BigDecimal.ZERO);
             detalle.setNotas(detalleDTO.getNotas());
-            cotizacion.getDetalles().add(detalle);
+            
+            nuevosDetalles.add(detalle);
         }
         
-        // Recalcular totales
-        cotizacion.calcularTotales();
+        // Guardar nuevos detalles via repositorio
+        List<DetalleCotizacion> detallesGuardados = detalleCotizacionRepository.saveAll(nuevosDetalles);
         
-        // Guardar
-        Cotizacion cotizacionActualizada = cotizacionRepository.save(cotizacion);
+        // Recalcular totales usando método que acepta detalles como parámetro (evita modificar colección managed)
+        cotizacionGuardada.calcularTotales(detallesGuardados);
         
-        return mapearAResponseDTO(cotizacionActualizada);
+        // Guardar totales
+        Cotizacion cotizacionActualizada = cotizacionRepository.save(cotizacionGuardada);
+        
+        // Retornar DTO usando método que acepta detalles separados
+        return mapearAResponseDTOConDetalles(cotizacionActualizada, detallesGuardados);
     }
     
     /**
@@ -238,7 +269,11 @@ public class CotizacionService {
         Cotizacion cotizacion = cotizacionRepository.findWithDetallesById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada con ID: " + id));
         
-        return mapearAResponseDTO(cotizacion);
+        // Cargar detalles manualmente (insertable=false no mantiene colección)
+        List<DetalleCotizacion> detalles = detalleCotizacionRepository.findByCotizacionId(id);
+        
+        // Usar método que acepta detalles como parámetro para evitar modificar entidad managed
+        return mapearAResponseDTOConDetalles(cotizacion, detalles);
     }
     
     /**
@@ -251,7 +286,11 @@ public class CotizacionService {
         Cotizacion cotizacion = cotizacionRepository.findWithDetallesByFolio(folio)
             .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada con folio: " + folio));
         
-        return mapearAResponseDTO(cotizacion);
+        // Cargar detalles manualmente (insertable=false no mantiene colección)
+        List<DetalleCotizacion> detalles = detalleCotizacionRepository.findByCotizacionId(cotizacion.getId());
+        
+        // Usar método que acepta detalles como parámetro para evitar modificar entidad managed
+        return mapearAResponseDTOConDetalles(cotizacion, detalles);
     }
     
     /**
@@ -261,8 +300,13 @@ public class CotizacionService {
      */
     @Transactional(readOnly = true)
     public Page<CotizacionResponseDTO> listarCotizaciones(Pageable pageable) {
-        return cotizacionRepository.findAll(pageable)
-            .map(this::mapearAResponseDTO);
+        Page<Cotizacion> page = cotizacionRepository.findAll(pageable);
+        
+        // Mapear usando método que acepta detalles como parámetro
+        return page.map(cotizacion -> {
+            List<DetalleCotizacion> detalles = detalleCotizacionRepository.findByCotizacionId(cotizacion.getId());
+            return mapearAResponseDTOConDetalles(cotizacion, detalles);
+        });
     }
     
     /**
@@ -286,9 +330,15 @@ public class CotizacionService {
             LocalDateTime fechaFin,
             Pageable pageable) {
         
-        return cotizacionRepository.buscarConFiltros(
+        Page<Cotizacion> page = cotizacionRepository.buscarConFiltros(
             clienteId, sucursalId, vendedorId, estado, fechaInicio, fechaFin, pageable
-        ).map(this::mapearAResponseDTO);
+        );
+        
+        // Mapear usando método que acepta detalles como parámetro
+        return page.map(cotizacion -> {
+            List<DetalleCotizacion> detalles = detalleCotizacionRepository.findByCotizacionId(cotizacion.getId());
+            return mapearAResponseDTOConDetalles(cotizacion, detalles);
+        });
     }
     
     /**
@@ -299,7 +349,8 @@ public class CotizacionService {
      */
     @Transactional
     public CotizacionResponseDTO cambiarEstado(Long id, CambiarEstadoRequestDTO request) {
-        Cotizacion cotizacion = cotizacionRepository.findById(id)
+        // Cargar cotización con relaciones
+        Cotizacion cotizacion = cotizacionRepository.findWithDetallesById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada con ID: " + id));
         
         String nuevoEstado = request.getNuevoEstado().toUpperCase();
@@ -321,9 +372,13 @@ public class CotizacionService {
                 throw new InvalidOperationException("Estado no válido: " + nuevoEstado + ". Estados permitidos: ENVIADA, ACEPTADA, RECHAZADA");
         }
         
-        Cotizacion cotizacionActualizada = cotizacionRepository.save(cotizacion);
+        cotizacion = cotizacionRepository.save(cotizacion);
         
-        return mapearAResponseDTO(cotizacionActualizada);
+        // Cargar detalles separadamente para el DTO (NO setear en la entidad managed)
+        List<DetalleCotizacion> detalles = detalleCotizacionRepository.findByCotizacionId(id);
+        
+        // Crear el DTO manualmente pasando los detalles
+        return mapearAResponseDTOConDetalles(cotizacion, detalles);
     }
     
     /**
@@ -334,15 +389,19 @@ public class CotizacionService {
      */
     @Transactional
     public Integer convertirAVenta(Long id, ConvertirVentaRequestDTO request) {
+        // Cargar cotización con relaciones
         Cotizacion cotizacion = cotizacionRepository.findWithDetallesById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada con ID: " + id));
+        
+        // Cargar detalles separadamente (insertable=false no mantiene colección)
+        List<DetalleCotizacion> detalles = detalleCotizacionRepository.findByCotizacionId(id);
         
         if (!cotizacion.puedeConvertirseEnVenta()) {
             throw new InvalidOperationException("La cotización no puede ser convertida en venta. Estado: " + cotizacion.getEstado());
         }
         
         // Validar stock disponible para todos los productos
-        for (DetalleCotizacion detalle : cotizacion.getDetalles()) {
+        for (DetalleCotizacion detalle : detalles) {
             InventarioSucursalId inventarioId = new InventarioSucursalId(
                 cotizacion.getSucursalId(),
                 detalle.getSkuInterno()
@@ -372,7 +431,7 @@ public class CotizacionService {
         Venta ventaGuardada = ventaRepository.save(venta);
         
         // Crear detalles de venta y actualizar inventario
-        for (DetalleCotizacion detalleCot : cotizacion.getDetalles()) {
+        for (DetalleCotizacion detalleCot : detalles) {
             DetalleVenta detalleVenta = new DetalleVenta();
             detalleVenta.setVentaId(ventaGuardada.getId());
             detalleVenta.setSkuInterno(detalleCot.getSkuInterno());
@@ -574,19 +633,74 @@ public class CotizacionService {
             dto.setNombreVendedor(cotizacion.getVendedor().getNombre() + " " + cotizacion.getVendedor().getApellidos());
         }
         
-        // Mapear detalles
+        // Mapear detalles (siempre setear el campo, incluso si está vacío)
+        List<DetalleCotizacionDTO> detallesDTO = new ArrayList<>();
         if (cotizacion.getDetalles() != null && !cotizacion.getDetalles().isEmpty()) {
-            List<DetalleCotizacionDTO> detallesDTO = cotizacion.getDetalles().stream()
+            detallesDTO = cotizacion.getDetalles().stream()
                 .map(this::mapearDetalleADTO)
                 .collect(Collectors.toList());
-            dto.setDetalles(detallesDTO);
         }
+        dto.setDetalles(detallesDTO);
         
         return dto;
     }
     
-    /**
-     * Mapea un detalle de cotización a DTO
+    /**     * Mapea una cotizaci\u00f3n a DTO con detalles provistos externamente
+     * (Para casos donde no queremos modificar la colecci\u00f3n managed de la entidad)
+     * @param cotizacion entidad de cotizaci\u00f3n
+     * @param detalles lista de detalles cargados externamente
+     * @return DTO de respuesta
+     */
+    private CotizacionResponseDTO mapearAResponseDTOConDetalles(Cotizacion cotizacion, List<DetalleCotizacion> detalles) {
+        CotizacionResponseDTO dto = new CotizacionResponseDTO();
+        
+        dto.setId(cotizacion.getId());
+        dto.setFolio(cotizacion.getFolio());
+        dto.setClienteId(cotizacion.getClienteId());
+        dto.setSucursalId(cotizacion.getSucursalId());
+        dto.setVendedorId(cotizacion.getVendedorId());
+        dto.setEstado(cotizacion.getEstado());
+        dto.setFechaCotizacion(cotizacion.getFechaCotizacion());
+        dto.setFechaValidez(cotizacion.getFechaValidez());
+        dto.setTotal(cotizacion.getTotal());
+        dto.setSubtotal(cotizacion.getSubtotal());
+        dto.setIva(cotizacion.getIva());
+        dto.setDescuentoTotal(cotizacion.getDescuentoTotal());
+        dto.setNotas(cotizacion.getNotas());
+        dto.setTerminosCondiciones(cotizacion.getTerminosCondiciones());
+        dto.setObservacionesInternas(cotizacion.getObservacionesInternas());
+        dto.setFechaAceptacion(cotizacion.getFechaAceptacion());
+        dto.setFechaRechazo(cotizacion.getFechaRechazo());
+        dto.setMotivoRechazo(cotizacion.getMotivoRechazo());
+        dto.setVentaId(cotizacion.getVentaId());
+        dto.setFechaConversion(cotizacion.getFechaConversion());
+        dto.setVencida(cotizacion.estaVencida());
+        dto.setPuedeConvertirse(cotizacion.puedeConvertirseEnVenta());
+        
+        // Mapear nombres de entidades relacionadas si están cargadas
+        if (cotizacion.getCliente() != null) {
+            dto.setNombreCliente(cotizacion.getCliente().getNombre());
+        }
+        if (cotizacion.getSucursal() != null) {
+            dto.setNombreSucursal(cotizacion.getSucursal().getNombre());
+        }
+        if (cotizacion.getVendedor() != null) {
+            dto.setNombreVendedor(cotizacion.getVendedor().getNombre() + " " + cotizacion.getVendedor().getApellidos());
+        }
+        
+        // Mapear detalles provistos externamente
+        List<DetalleCotizacionDTO> detallesDTO = new ArrayList<>();
+        if (detalles != null && !detalles.isEmpty()) {
+            detallesDTO = detalles.stream()
+                .map(this::mapearDetalleADTO)
+                .collect(Collectors.toList());
+        }
+        dto.setDetalles(detallesDTO);
+        
+        return dto;
+    }
+    
+    /**     * Mapea un detalle de cotización a DTO
      * @param detalle entidad de detalle
      * @return DTO de detalle
      */

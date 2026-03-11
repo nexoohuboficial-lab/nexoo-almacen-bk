@@ -21,7 +21,7 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
      * Carga una cotización con todas sus relaciones en 1 sola query
      * Evita N+1: Sin esto se harían 1 query para cotización + N para detalles + N para productos
      */
-    @EntityGraph(attributePaths = {"detalles", "detalles.producto", "cliente", "sucursal", "vendedor"})
+    @EntityGraph(attributePaths = {"cliente", "sucursal", "vendedor"})
     Optional<Cotizacion> findWithDetallesById(Long id);
     
     /**
@@ -32,7 +32,7 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
     /**
      * Buscar cotización por folio con detalles
      */
-    @EntityGraph(attributePaths = {"detalles", "detalles.producto", "cliente", "sucursal", "vendedor"})
+    @EntityGraph(attributePaths = {"cliente", "sucursal", "vendedor"})
     Optional<Cotizacion> findWithDetallesByFolio(String folio);
     
     /**

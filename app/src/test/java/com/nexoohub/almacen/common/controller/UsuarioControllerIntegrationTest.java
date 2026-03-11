@@ -46,11 +46,13 @@ class UsuarioControllerIntegrationTest {
     void setUp() {
         usuarioRepository.deleteAll();
 
-        Usuario admin = new Usuario();
-        admin.setUsername("admin@nexoo.com");
-        admin.setPassword(passwordEncoder.encode("admin123"));
-        admin.setRole("ROLE_ADMIN");
-        usuarioRepository.save(admin);
+        if (usuarioRepository.findByUsername("admin@nexoo.com").isEmpty()) {
+            Usuario admin = new Usuario();
+            admin.setUsername("admin@nexoo.com");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setRole("ROLE_ADMIN");
+            usuarioRepository.save(admin);
+        }
 
         token = jwtUtil.generateToken("admin@nexoo.com");
     }

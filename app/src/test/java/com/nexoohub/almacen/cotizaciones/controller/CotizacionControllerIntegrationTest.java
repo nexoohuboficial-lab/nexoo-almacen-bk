@@ -27,8 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -49,6 +53,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DisplayName("CotizacionController - Tests de Integración")
 class CotizacionControllerIntegrationTest {
 
@@ -108,12 +114,14 @@ class CotizacionControllerIntegrationTest {
         tipoClienteRepository.deleteAll();
         usuarioRepository.deleteAll();
 
-        // Crear usuario para autenticación
-        Usuario usuario = new Usuario();
-        usuario.setUsername("admin@nexoo.com");
-        usuario.setPassword("$2a$10$test");
-        usuario.setRole("ROLE_ADMIN");
-        usuarioRepository.save(usuario);
+        // Crear usuario para autenticación (verificar que no exista)
+        if (usuarioRepository.findByUsername("admin@nexoo.com").isEmpty()) {
+            Usuario usuario = new Usuario();
+            usuario.setUsername("admin@nexoo.com");
+            usuario.setPassword("$2a$10$test");
+            usuario.setRole("ROLE_ADMIN");
+            usuarioRepository.save(usuario);
+        }
 
         // Crear sucursal
         Sucursal sucursal = new Sucursal();
@@ -260,6 +268,7 @@ class CotizacionControllerIntegrationTest {
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(cotizacionId))
                 .andExpect(jsonPath("$.notas").value("Cotización actualizada"))
@@ -530,6 +539,7 @@ class CotizacionControllerIntegrationTest {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @DisplayName("Test 9: DELETE /api/cotizaciones/{id} - Debe eliminar cotización y retornar 200")
     void testEliminarCotizacion() throws Exception {
         // Given - Crear cotización via HTTP POST
