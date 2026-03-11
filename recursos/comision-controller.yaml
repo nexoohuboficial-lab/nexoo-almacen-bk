@@ -1,0 +1,517 @@
+openapi: 3.0.0
+info:
+  title: API de Comisiones de Vendedores
+  description: API para la gestión de comisiones de vendedores, incluyendo reglas, cálculos y aprobaciones.
+  version: 1.0.0
+servers:
+  - url: /api/comisiones
+paths:
+  # ========================================
+  # REGLAS DE COMISIÓN
+  # ========================================
+  /reglas:
+    post:
+      summary: Crear regla de comisión
+      description: Define una nueva regla de comisión con porcentajes y condiciones.
+      operationId: crearRegla
+      tags:
+        - Reglas de Comisión
+      requestBody:
+        description: Detalles de la regla de comisión.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReglaComisionRequest'
+            example:
+              nombreRegla: "Comisión Ventas Standard"
+              descripcion: "5% sobre ventas de contado"
+              porcentajeComision: 0.05
+              aplicaProductos: ["REF-001", "REF-002"]
+              tipoVenta: "CONTADO"
+              activa: true
+      responses:
+        '201':
+          description: Regla creada exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReglaComisionResponse'
+        '400':
+          description: Datos inválidos.
+
+    get:
+      summary: Listar reglas de comisión
+      description: Obtiene todas las reglas de comisión (activas o todas).
+      operationId: listarReglas
+      tags:
+        - Reglas de Comisión
+      parameters:
+        - name: soloActivas
+          in: query
+          description: Filtrar solo reglas activas
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Lista de reglas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReglaComisionResponse'
+
+  /reglas/{id}:
+    get:
+      summary: Obtener regla por ID
+      description: Consulta detalles de una regla específica.
+      operationId: obtenerReglaPorId
+      tags:
+        - Reglas de Comisión
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Regla encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReglaComisionResponse'
+        '404':
+          description: Regla no encontrada.
+
+    put:
+      summary: Actualizar regla de comisión
+      description: Modifica una regla existente.
+      operationId: actualizarRegla
+      tags:
+        - Reglas de Comisión
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReglaComisionRequest'
+      responses:
+        '200':
+          description: Regla actualizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReglaComisionResponse'
+        '404':
+          description: Regla no encontrada.
+
+    delete:
+      summary: Eliminar regla de comisión
+      description: Desactiva o elimina una regla.
+      operationId: eliminarRegla
+      tags:
+        - Reglas de Comisión
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Regla eliminada.
+        '404':
+          description: Regla no encontrada.
+
+  # ========================================
+  # CÁLCULO DE COMISIONES
+  # ========================================
+  /calcular:
+    post:
+      summary: Calcular comisiones de un periodo
+      description: Calcula comisiones para todos los vendedores en un mes específico.
+      operationId: calcularComisionesPeriodo
+      tags:
+        - Cálculos
+      parameters:
+        - name: anio
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 2026
+        - name: mes
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 3
+      responses:
+        '200':
+          description: Comisiones calculadas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComisionResponse'
+
+  /calcular/vendedor/{vendedorId}:
+    post:
+      summary: Calcular comisión de un vendedor
+      description: Calcula la comisión para un vendedor específico en un periodo.
+      operationId: calcularComisionVendedor
+      tags:
+        - Cálculos
+      parameters:
+        - name: vendedorId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: anio
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: mes
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comisión calculada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComisionResponse'
+
+  # ========================================
+  # CONSULTAS
+  # ========================================
+  /{id}:
+    get:
+      summary: Obtener comisión por ID
+      description: Consulta detalles de una comisión específica.
+      operationId: obtenerComisionPorId
+      tags:
+        - Consultas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comisión encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComisionResponse'
+        '404':
+          description: Comisión no encontrada.
+
+  /vendedor/{vendedorId}:
+    get:
+      summary: Listar comisiones de un vendedor
+      description: Obtiene todas las comisiones de un vendedor.
+      operationId: listarComisionesPorVendedor
+      tags:
+        - Consultas
+      parameters:
+        - name: vendedorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de comisiones.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComisionResponse'
+
+  /periodo:
+    get:
+      summary: Listar comisiones por periodo
+      description: Obtiene comisiones de todos los vendedores en un periodo.
+      operationId: listarComisionesPorPeriodo
+      tags:
+        - Consultas
+      parameters:
+        - name: anio
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: mes
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de comisiones.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComisionResponse'
+
+  /estado/{estado}:
+    get:
+      summary: Listar comisiones por estado
+      description: Filtra comisiones por estado (PENDIENTE, APROBADA, PAGADA).
+      operationId: listarComisionesPorEstado
+      tags:
+        - Consultas
+      parameters:
+        - name: estado
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [PENDIENTE, APROBADA, PAGADA, RECHAZADA]
+      responses:
+        '200':
+          description: Lista de comisiones.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComisionResponse'
+
+  /resumen:
+    get:
+      summary: Obtener resumen de comisiones
+      description: Devuelve estadísticas y totales de comisiones por periodo.
+      operationId: obtenerResumenPeriodo
+      tags:
+        - Consultas
+      parameters:
+        - name: anio
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: mes
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Resumen de comisiones.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumenComisiones'
+
+  # ========================================
+  # APROBACIÓN Y PAGO
+  # ========================================
+  /{id}/aprobar:
+    put:
+      summary: Aprobar comisión
+      description: Marca una comisión como aprobada.
+      operationId: aprobarComision
+      tags:
+        - Aprobación
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comentarioAprobador:
+                  type: string
+                  example: "Comisión aprobada - ventas verificadas"
+      responses:
+        '200':
+          description: Comisión aprobada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComisionResponse'
+        '404':
+          description: Comisión no encontrada.
+
+  /{id}/pagar:
+    put:
+      summary: Marcar comisión como pagada
+      description: Registra el pago de una comisión aprobada.
+      operationId: marcarComoPagada
+      tags:
+        - Aprobación
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comisión marcada como pagada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComisionResponse'
+        '404':
+          description: Comisión no encontrada.
+
+components:
+  schemas:
+    ReglaComisionRequest:
+      type: object
+      required:
+        - nombreRegla
+        - porcentajeComision
+        - activa
+      properties:
+        nombreRegla:
+          type: string
+        descripcion:
+          type: string
+        porcentajeComision:
+          type: number
+          format: double
+        aplicaProductos:
+          type: array
+          items:
+            type: string
+        tipoVenta:
+          type: string
+          enum: [CONTADO, CREDITO, AMBOS]
+        activa:
+          type: boolean
+
+    ReglaComisionResponse:
+      allOf:
+        - $ref: '#/components/schemas/ReglaComisionRequest'
+        - type: object
+          properties:
+            id:
+              type: integer
+            fechaCreacion:
+              type: string
+              format: date-time
+
+    ComisionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        vendedorId:
+          type: integer
+        vendedorNombre:
+          type: string
+        anio:
+          type: integer
+        mes:
+          type: integer
+        montoVentasBase:
+          type: number
+          format: double
+        porcentajeComision:
+          type: number
+          format: double
+        montoComision:
+          type: number
+          format: double
+        estado:
+          type: string
+          enum: [PENDIENTE, APROBADA, PAGADA, RECHAZADA]
+        fechaCalculo:
+          type: string
+          format: date-time
+        fechaPago:
+          type: string
+          format: date-time
+
+    ResumenComisiones:
+      type: object
+      properties:
+        anio:
+          type: integer
+        mes:
+          type: integer
+        totalVendedores:
+          type: integer
+        totalComisionesPendientes:
+          type: number
+          format: double
+        totalComisionesAprobadas:
+          type: number
+          format: double
+        totalComisionesPagadas:
+          type: number
+          format: double
+
+# ============================================================================
+# EJEMPLOS DE CURL
+# ============================================================================
+x-curl-examples:
+  - title: "Crear regla de comisión"
+    curl: |
+      curl -X POST http://localhost:8080/api/comisiones/reglas \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer {token}" \
+        -d '{
+          "nombreRegla": "Comisión Standard 5%",
+          "descripcion": "5% sobre ventas de contado",
+          "porcentajeComision": 0.05,
+          "tipoVenta": "CONTADO",
+          "activa": true
+        }'
+
+  - title: "Calcular comisiones de marzo 2026"
+    curl: |
+      curl -X POST "http://localhost:8080/api/comisiones/calcular?anio=2026&mes=3" \
+        -H "Authorization: Bearer {token}"
+
+  - title: "Listar comisiones pendientes"
+    curl: |
+      curl -X GET http://localhost:8080/api/comisiones/estado/PENDIENTE \
+        -H "Authorization: Bearer {token}"
+
+  - title: "Aprobar comisión"
+    curl: |
+      curl -X PUT http://localhost:8080/api/comisiones/1/aprobar \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer {token}" \
+        -d '{
+          "comentarioAprobador": "Ventas verificadas correctamente"
+        }'
+
+  - title: "Marcar como pagada"
+    curl: |
+      curl -X PUT http://localhost:8080/api/comisiones/1/pagar \
+        -H "Authorization: Bearer {token}"
+
+  - title: "Obtener resumen del periodo"
+    curl: |
+      curl -X GET "http://localhost:8080/api/comisiones/resumen?anio=2026&mes=3" \
+        -H "Authorization: Bearer {token}"

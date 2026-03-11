@@ -1,0 +1,531 @@
+openapi: 3.0.3
+info:
+  title: API de Programa de Fidelidad - NexooHub Almacén
+  description: |
+    API REST para gestión del programa de fidelidad de clientes.
+    
+    **Reglas de negocio:**
+    - 1 punto por cada $10 MXN de compra
+    - 100 puntos = $10 MXN de descuento
+    - Los puntos no caducan
+    - Solo clientes activos pueden acumular puntos
+    
+    **Casos de uso:**
+    - Crear programas de fidelidad
+    - Acumular puntos automáticamente en ventas
+    - Canjear puntos por descuentos
+    - Consultar saldo y historial de movimientos
+    - Obtener estadísticas del sistema
+  version: 1.0.0
+  contact:
+    name: NexooHub Development Team
+    email: dev@nexoohub.com
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Servidor de desarrollo
+  - url: https://api.nexoohub.com/v1
+    description: Servidor de producción
+
+tags:
+  - name: Programa de Fidelidad
+    description: Gestión de programas de fidelidad y puntos
+
+paths:
+  /fidelidad/programa:
+    post:
+      tags:
+        - Programa de Fidelidad
+      summary: Crear programa de fidelidad
+      description: Crea un nuevo programa de fidelidad para un cliente
+      operationId: crearPrograma
+      parameters:
+        - name: clienteId
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: ID del cliente
+      responses:
+        '201':
+          description: Programa creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Programa de fidelidad creado exitosamente"
+                  data:
+                    $ref: '#/components/schemas/ProgramaFidelidadResponse'
+        '400':
+          description: Cliente ya tiene programa o datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /fidelidad/programa/cliente/{clienteId}:
+    get:
+      tags:
+        - Programa de Fidelidad
+      summary: Consultar programa por cliente
+      description: Obtiene la información del programa de fidelidad de un cliente
+      operationId: consultarPorCliente
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: ID del cliente
+      responses:
+        '200':
+          description: Programa encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramaFidelidadResponse'
+        '404':
+          description: Cliente no tiene programa de fidelidad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /fidelidad/acumular:
+    post:
+      tags:
+        - Programa de Fidelidad
+      summary: Acumular puntos
+      description: Acumula puntos en el programa de un cliente por una compra
+      operationId: acumularPuntos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcumularPuntosRequest'
+      responses:
+        '200':
+          description: Puntos acumulados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Puntos acumulados exitosamente"
+                  data:
+                    $ref: '#/components/schemas/ProgramaFidelidadResponse'
+        '400':
+          description: Monto insuficiente o programa inactivo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /fidelidad/canjear:
+    post:
+      tags:
+        - Programa de Fidelidad
+      summary: Canjear puntos
+      description: Canjea puntos por descuento en efectivo
+      operationId: canjearPuntos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanjearPuntosRequest'
+      responses:
+        '200':
+          description: Puntos canjeados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Puntos canjeados exitosamente"
+                  data:
+                    $ref: '#/components/schemas/ProgramaFidelidadResponse'
+        '400':
+          description: Puntos insuficientes o menores al mínimo requerido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cliente sin programa de fidelidad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /fidelidad/historial/cliente/{clienteId}:
+    get:
+      tags:
+        - Programa de Fidelidad
+      summary: Obtener historial de movimientos
+      description: Obtiene el historial completo de acumulaciones y canjes de un cliente
+      operationId: obtenerHistorial
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: ID del cliente
+      responses:
+        '200':
+          description: Historial obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovimientoPuntoResponse'
+        '404':
+          description: Cliente sin programa de fidelidad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /fidelidad/calcular-descuento:
+    get:
+      tags:
+        - Programa de Fidelidad
+      summary: Calcular descuento por puntos
+      description: Calcula el descuento en pesos que equivale a una cantidad de puntos
+      operationId: calcularDescuento
+      parameters:
+        - name: puntos
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+            example: 200
+          description: Cantidad de puntos a calcular
+      responses:
+        '200':
+          description: Cálculo exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  puntos:
+                    type: integer
+                    example: 200
+                  descuentoMXN:
+                    type: number
+                    format: decimal
+                    example: 20.00
+      security:
+        - bearerAuth: []
+
+  /fidelidad/estadisticas:
+    get:
+      tags:
+        - Programa de Fidelidad
+      summary: Obtener estadísticas del sistema
+      description: Obtiene estadísticas generales del programa de fidelidad
+      operationId: obtenerEstadisticas
+      responses:
+        '200':
+          description: Estadísticas obtenidas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadisticasFidelidad'
+      security:
+        - bearerAuth: []
+
+  /fidelidad/programa/cliente/{clienteId}/desactivar:
+    patch:
+      tags:
+        - Programa de Fidelidad
+      summary: Desactivar programa
+      description: Desactiva el programa de fidelidad de un cliente
+      operationId: desactivarPrograma
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: ID del cliente
+      responses:
+        '200':
+          description: Programa desactivado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Programa de fidelidad desactivado"
+        '404':
+          description: Cliente sin programa de fidelidad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /fidelidad/programa/cliente/{clienteId}/reactivar:
+    patch:
+      tags:
+        - Programa de Fidelidad
+      summary: Reactivar programa
+      description: Reactiva el programa de fidelidad de un cliente
+      operationId: reactivarPrograma
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: ID del cliente
+      responses:
+        '200':
+          description: Programa reactivado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exitoso:
+                    type: boolean
+                    example: true
+                  mensaje:
+                    type: string
+                    example: "Programa de fidelidad reactivado"
+        '404':
+          description: Cliente sin programa de fidelidad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    ProgramaFidelidadResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        clienteId:
+          type: integer
+          example: 1
+        clienteNombre:
+          type: string
+          example: "Juan Pérez"
+        puntosAcumulados:
+          type: integer
+          example: 150
+        totalCompras:
+          type: number
+          format: decimal
+          example: 1500.00
+        totalCanjeado:
+          type: number
+          format: decimal
+          example: 0.00
+        activo:
+          type: boolean
+          example: true
+        fechaCreacion:
+          type: string
+          format: date-time
+          example: "2026-03-11T10:30:00"
+        fechaActualizacion:
+          type: string
+          format: date-time
+          example: "2026-03-11T14:20:00"
+
+    AcumularPuntosRequest:
+      type: object
+      required:
+        - clienteId
+        - montoCompra
+      properties:
+        clienteId:
+          type: integer
+          example: 1
+          description: ID del cliente
+        montoCompra:
+          type: number
+          format: decimal
+          minimum: 10.00
+          example: 250.00
+          description: Monto de la compra en MXN
+        ventaId:
+          type: integer
+          example: 100
+          description: ID de la venta asociada (opcional)
+        descripcion:
+          type: string
+          maxLength: 500
+          example: "Compra de productos varios"
+          description: Descripción del movimiento (opcional)
+
+    CanjearPuntosRequest:
+      type: object
+      required:
+        - clienteId
+        - puntosACanjear
+      properties:
+        clienteId:
+          type: integer
+          example: 1
+          description: ID del cliente
+        puntosACanjear:
+          type: integer
+          minimum: 100
+          example: 100
+          description: Cantidad de puntos a canjear (mínimo 100)
+        ventaId:
+          type: integer
+          example: 101
+          description: ID de la venta donde se aplicará el descuento (opcional)
+        descripcion:
+          type: string
+          maxLength: 500
+          example: "Canje por descuento en compra"
+          description: Descripción del canje (opcional)
+
+    MovimientoPuntoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        programaId:
+          type: integer
+          example: 1
+        tipoMovimiento:
+          type: string
+          enum: [ACUMULACION, CANJE]
+          example: "ACUMULACION"
+        puntos:
+          type: integer
+          example: 25
+          description: Positivo para acumulación, negativo para canje
+        montoAsociado:
+          type: number
+          format: decimal
+          example: 250.00
+          description: Monto de compra (acumulación) o descuento (canje)
+        ventaId:
+          type: integer
+          example: 100
+          description: ID de la venta asociada
+        descripcion:
+          type: string
+          example: "Acumulación por compra de $250.00"
+        fechaCreacion:
+          type: string
+          format: date-time
+          example: "2026-03-11T10:30:00"
+
+    EstadisticasFidelidad:
+      type: object
+      properties:
+        totalProgramasActivos:
+          type: integer
+          format: int64
+          example: 150
+          description: Cantidad de programas de fidelidad activos
+        totalPuntosEnSistema:
+          type: integer
+          format: int64
+          example: 50000
+          description: Total de puntos acumulados en el sistema
+        tasaConversionPuntos:
+          type: integer
+          example: 10
+          description: Pesos por punto ($10 MXN = 1 punto)
+        tasaConversionDescuento:
+          type: integer
+          example: 100
+          description: Puntos mínimos para canjear
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-03-11T10:30:00"
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "Bad Request"
+        message:
+          type: string
+          example: "El cliente ya tiene un programa de fidelidad activo"
+        path:
+          type: string
+          example: "/api/v1/fidelidad/programa"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Token JWT obtenido del endpoint /api/v1/auth/login
+        Formato: Bearer {token}

@@ -1,0 +1,337 @@
+openapi: 3.0.0
+info:
+  title: API de Predicción de Demanda
+  description: API para generar predicciones de demanda basadas en histórico de ventas y obtener recomendaciones de compra.
+  version: 1.0.0
+servers:
+  - url: /api/predicciones
+paths:
+  # ========================================
+  # GENERAR PREDICCIONES
+  # ========================================
+  /generar:
+    post:
+      summary: Generar predicciones de demanda
+      description: Analiza el histórico de ventas y genera predicciones para un periodo futuro.
+      operationId: generarPredicciones
+      tags:
+        - Generación
+      requestBody:
+        description: Parámetros para generación de predicciones.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerarPrediccionRequest'
+            example:
+              sucursalId: 1
+              skuProducto: "ACEITE-10W40"
+              anio: 2026
+              mes: 4
+              mesesHistorico: 6
+              metodo: "PROMEDIO_MOVIL"
+      responses:
+        '201':
+          description: Predicciones generadas exitosamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrediccionDemandaResponse'
+        '400':
+          description: Datos inválidos o histórico insuficiente.
+
+  # ========================================
+  # CONSULTAR PREDICCIONES
+  # ========================================
+  /{id}:
+    get:
+      summary: Obtener predicción por ID
+      description: Devuelve los detalles de una predicción específica.
+      operationId: obtenerPrediccion
+      tags:
+        - Consultas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la predicción
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Predicción encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrediccionDemandaResponse'
+        '404':
+          description: Predicción no encontrada.
+
+  /producto/{skuProducto}:
+    get:
+      summary: Obtener predicciones de un producto
+      description: Devuelve todas las predicciones de un producto en una sucursal.
+      operationId: obtenerPrediccionesProducto
+      tags:
+        - Consultas
+      parameters:
+        - name: skuProducto
+          in: path
+          required: true
+          description: SKU del producto
+          schema:
+            type: string
+        - name: sucursalId
+          in: query
+          required: true
+          description: ID de la sucursal
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de predicciones del producto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrediccionDemandaResponse'
+        '404':
+          description: Producto no encontrado.
+
+  # ========================================
+  # RECOMENDACIONES DE COMPRA
+  # ========================================
+  /recomendaciones:
+    get:
+      summary: Obtener recomendaciones de compra
+      description: Devuelve lista de productos que necesitan reorden para un periodo basado en predicciones.
+      operationId: obtenerRecomendacionesCompra
+      tags:
+        - Recomendaciones
+      parameters:
+        - name: sucursalId
+          in: query
+          required: true
+          description: ID de la sucursal
+          schema:
+            type: integer
+        - name: anio
+          in: query
+          required: true
+          description: Año del periodo
+          schema:
+            type: integer
+            example: 2026
+        - name: mes
+          in: query
+          required: true
+          description: Mes del periodo (1-12)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            example: 4
+      responses:
+        '200':
+          description: Recomendaciones generadas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecomendacionCompra'
+        '404':
+          description: Sucursal no encontrada o sin datos.
+
+components:
+  schemas:
+    GenerarPrediccionRequest:
+      type: object
+      required:
+        - sucursalId
+        - anio
+        - mes
+      properties:
+        sucursalId:
+          type: integer
+          description: ID de la sucursal para la cual generar predicciones
+        skuProducto:
+          type: string
+          description: SKU específico (opcional). Si no se proporciona, se genera para todos los productos.
+        anio:
+          type: integer
+          description: Año del periodo a predecir
+          example: 2026
+        mes:
+          type: integer
+          description: Mes del periodo a predecir (1-12)
+          minimum: 1
+          maximum: 12
+          example: 4
+        mesesHistorico:
+          type: integer
+          description: Cantidad de meses de histórico a analizar
+          default: 6
+          minimum: 3
+          maximum: 24
+        metodo:
+          type: string
+          description: Método de predicción
+          enum: [PROMEDIO_MOVIL, SUAVIZADO_EXPONENCIAL, TENDENCIA_LINEAL]
+          default: PROMEDIO_MOVIL
+
+    PrediccionDemandaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        sucursalId:
+          type: integer
+        sucursalNombre:
+          type: string
+        skuProducto:
+          type: string
+        nombreProducto:
+          type: string
+        anio:
+          type: integer
+        mes:
+          type: integer
+        demandaPredicha:
+          type: number
+          format: double
+          description: Cantidad predicha de unidades
+        nivelConfianza:
+          type: number
+          format: double
+          description: Nivel de confianza de la predicción (0-1)
+        metodoUtilizado:
+          type: string
+          enum: [PROMEDIO_MOVIL, SUAVIZADO_EXPONENCIAL, TENDENCIA_LINEAL]
+        mesesHistoricoAnalizados:
+          type: integer
+        stockActual:
+          type: number
+          format: double
+        puntoReorden:
+          type: number
+          format: double
+        necesitaReorden:
+          type: boolean
+        fechaGeneracion:
+          type: string
+          format: date-time
+
+    RecomendacionCompra:
+      type: object
+      properties:
+        sucursalId:
+          type: integer
+        sucursalNombre:
+          type: string
+        anio:
+          type: integer
+        mes:
+          type: integer
+        fechaGeneracion:
+          type: string
+          format: date-time
+        totalProductos:
+          type: integer
+          description: Total de productos analizados
+        productosConReorden:
+          type: integer
+          description: Cantidad de productos que necesitan reorden
+        productos:
+          type: array
+          description: Lista de productos que requieren reorden
+          items:
+            $ref: '#/components/schemas/ProductoRecomendado'
+
+    ProductoRecomendado:
+      type: object
+      properties:
+        skuProducto:
+          type: string
+        nombreProducto:
+          type: string
+        demandaPredicha:
+          type: number
+          format: double
+        stockActual:
+          type: number
+          format: double
+        puntoReorden:
+          type: number
+          format: double
+        cantidadSugerida:
+          type: number
+          format: double
+          description: Cantidad sugerida a comprar
+        nivelConfianza:
+          type: number
+          format: double
+        prioridad:
+          type: string
+          enum: [ALTA, MEDIA, BAJA]
+          description: Prioridad de reorden basada en stock vs demanda
+
+# ============================================================================
+# EJEMPLOS DE CURL
+# ============================================================================
+x-curl-examples:
+  - title: "Generar predicciones para todos los productos de una sucursal"
+    curl: |
+      curl -X POST http://localhost:8080/api/predicciones/generar \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer {token}" \
+        -d '{
+          "sucursalId": 1,
+          "anio": 2026,
+          "mes": 4,
+          "mesesHistorico": 6,
+          "metodo": "PROMEDIO_MOVIL"
+        }'
+
+  - title: "Generar predicción para un producto específico"
+    curl: |
+      curl -X POST http://localhost:8080/api/predicciones/generar \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer {token}" \
+        -d '{
+          "sucursalId": 1,
+          "skuProducto": "ACEITE-10W40",
+          "anio": 2026,
+          "mes": 4,
+          "mesesHistorico": 6,
+          "metodo": "SUAVIZADO_EXPONENCIAL"
+        }'
+
+  - title: "Obtener predicción por ID"
+    curl: |
+      curl -X GET http://localhost:8080/api/predicciones/123 \
+        -H "Authorization: Bearer {token}"
+
+  - title: "Obtener todas las predicciones de un producto"
+    curl: |
+      curl -X GET "http://localhost:8080/api/predicciones/producto/ACEITE-10W40?sucursalId=1" \
+        -H "Authorization: Bearer {token}"
+
+  - title: "Obtener recomendaciones de compra para abril 2026"
+    curl: |
+      curl -X GET "http://localhost:8080/api/predicciones/recomendaciones?sucursalId=1&anio=2026&mes=4" \
+        -H "Authorization: Bearer {token}"
+
+  - title: "Generar predicciones con tendencia lineal (12 meses de histórico)"
+    curl: |
+      curl -X POST http://localhost:8080/api/predicciones/generar \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer {token}" \
+        -d '{
+          "sucursalId": 1,
+          "anio": 2026,
+          "mes": 5,
+          "mesesHistorico": 12,
+          "metodo": "TENDENCIA_LINEAL"
+        }'
