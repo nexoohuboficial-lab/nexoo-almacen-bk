@@ -5,6 +5,7 @@ import com.nexoohub.almacen.comisiones.service.ComisionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -37,6 +38,7 @@ public class ComisionController {
     // ==========================================
 
     @PostMapping("/reglas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<ReglaComisionResponseDTO> crearRegla(
             @Valid @RequestBody ReglaComisionRequestDTO request) {
         ReglaComisionResponseDTO response = comisionService.crearRegla(request);
@@ -44,6 +46,7 @@ public class ComisionController {
     }
 
     @PutMapping("/reglas/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<ReglaComisionResponseDTO> actualizarRegla(
             @PathVariable Integer id,
             @Valid @RequestBody ReglaComisionRequestDTO request) {
@@ -52,12 +55,14 @@ public class ComisionController {
     }
 
     @GetMapping("/reglas/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<ReglaComisionResponseDTO> obtenerReglaPorId(@PathVariable Integer id) {
         ReglaComisionResponseDTO response = comisionService.obtenerReglaPorId(id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/reglas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<ReglaComisionResponseDTO>> listarReglas(
             @RequestParam(required = false, defaultValue = "true") Boolean soloActivas) {
         List<ReglaComisionResponseDTO> reglas = soloActivas 
@@ -67,6 +72,7 @@ public class ComisionController {
     }
 
     @DeleteMapping("/reglas/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Void> eliminarRegla(@PathVariable Integer id) {
         comisionService.eliminarRegla(id);
         return ResponseEntity.ok().build();
@@ -77,6 +83,7 @@ public class ComisionController {
     // ==========================================
 
     @PostMapping("/calcular")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     public ResponseEntity<List<ComisionResponseDTO>> calcularComisionesPeriodo(
             @RequestParam Integer anio,
             @RequestParam Integer mes) {
@@ -85,6 +92,7 @@ public class ComisionController {
     }
 
     @PostMapping("/calcular/vendedor/{vendedorId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     public ResponseEntity<ComisionResponseDTO> calcularComisionVendedor(
             @PathVariable Integer vendedorId,
             @RequestParam Integer anio,
@@ -98,12 +106,14 @@ public class ComisionController {
     // ==========================================
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<ComisionResponseDTO> obtenerComisionPorId(@PathVariable Integer id) {
         ComisionResponseDTO comision = comisionService.obtenerComisionPorId(id);
         return ResponseEntity.ok(comision);
     }
 
     @GetMapping("/vendedor/{vendedorId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<ComisionResponseDTO>> listarComisionesPorVendedor(
             @PathVariable Integer vendedorId) {
         List<ComisionResponseDTO> comisiones = comisionService.listarComisionesPorVendedor(vendedorId);
@@ -111,6 +121,7 @@ public class ComisionController {
     }
 
     @GetMapping("/periodo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<ComisionResponseDTO>> listarComisionesPorPeriodo(
             @RequestParam Integer anio,
             @RequestParam Integer mes) {
@@ -119,6 +130,7 @@ public class ComisionController {
     }
 
     @GetMapping("/estado/{estado}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<ComisionResponseDTO>> listarComisionesPorEstado(
             @PathVariable String estado) {
         List<ComisionResponseDTO> comisiones = comisionService.listarComisionesPorEstado(estado);
@@ -126,6 +138,7 @@ public class ComisionController {
     }
 
     @GetMapping("/resumen")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<ResumenComisionesDTO> obtenerResumenPeriodo(
             @RequestParam Integer anio,
             @RequestParam Integer mes) {
@@ -138,6 +151,7 @@ public class ComisionController {
     // ==========================================
 
     @PutMapping("/{id}/aprobar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<ComisionResponseDTO> aprobarComision(
             @PathVariable Integer id,
             @Valid @RequestBody AprobarComisionRequestDTO request) {
@@ -146,12 +160,14 @@ public class ComisionController {
     }
 
     @PutMapping("/{id}/pagar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<ComisionResponseDTO> marcarComoPagada(@PathVariable Integer id) {
         ComisionResponseDTO comision = comisionService.marcarComoPagada(id);
         return ResponseEntity.ok(comision);
     }
 
     @PutMapping("/{id}/ajustar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<ComisionResponseDTO> ajustarComision(
             @PathVariable Integer id,
             @RequestParam BigDecimal ajuste,

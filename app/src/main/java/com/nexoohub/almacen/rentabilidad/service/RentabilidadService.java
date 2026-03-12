@@ -267,7 +267,7 @@ public class RentabilidadService {
             LocalDate fechaInicio, LocalDate fechaFin, int limite) {
         
         List<RentabilidadProducto> productos = rentabilidadProductoRepository
-                .obtenerProductosMasRentables(fechaInicio, fechaFin, limite);
+                .obtenerProductosMasRentables(fechaInicio, fechaFin);
 
         return productos.stream()
                 .limit(limite)
@@ -288,7 +288,7 @@ public class RentabilidadService {
             LocalDate fechaInicio, LocalDate fechaFin, int limite) {
         
         List<RentabilidadProducto> productos = rentabilidadProductoRepository
-                .obtenerProductosMenosRentables(fechaInicio, fechaFin, limite);
+                .obtenerProductosMenosRentables(fechaInicio, fechaFin);
 
         return productos.stream()
                 .limit(limite)
@@ -344,8 +344,8 @@ public class RentabilidadService {
                 : BigDecimal.ZERO;
 
         // Obtener extremos
-        List<RentabilidadVenta> masRentables = rentabilidadVentaRepository.obtenerVentasMasRentables(1);
-        List<RentabilidadVenta> menosRentables = rentabilidadVentaRepository.obtenerVentasMenosRentables(1);
+        List<RentabilidadVenta> masRentables = rentabilidadVentaRepository.obtenerVentasMasRentables().stream().limit(1).toList();
+        List<RentabilidadVenta> menosRentables = rentabilidadVentaRepository.obtenerVentasMenosRentables().stream().limit(1).toList();
 
         BigDecimal ventaMasRentable = !masRentables.isEmpty() 
                 ? masRentables.get(0).getUtilidadBruta() 
@@ -356,9 +356,9 @@ public class RentabilidadService {
 
         // Obtener productos extremos
         List<RentabilidadProducto> prodMasRentables = rentabilidadProductoRepository
-                .obtenerProductosMasRentables(fechaInicio, fechaFin, 1);
+                .obtenerProductosMasRentables(fechaInicio, fechaFin).stream().limit(1).toList();
         List<RentabilidadProducto> prodMenosRentables = rentabilidadProductoRepository
-                .obtenerProductosMenosRentables(fechaInicio, fechaFin, 1);
+                .obtenerProductosMenosRentables(fechaInicio, fechaFin).stream().limit(1).toList();
 
         String productoMasRentable = !prodMasRentables.isEmpty()
                 ? prodMasRentables.get(0).getSkuInterno()

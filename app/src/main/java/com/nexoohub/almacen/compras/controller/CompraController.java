@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ public class CompraController {
     private CompraService compraService;
 
     @PostMapping("/ingreso")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR', 'ALMACENISTA')")
     public ResponseEntity<Map<String, Object>> registrarIngreso(@Valid @RequestBody CompraRequestDTO request) {
         // Obtenemos el username de quien está logueado (el admin o el empleado)
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

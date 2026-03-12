@@ -308,7 +308,7 @@ class RentabilidadServiceTest {
         prod1.setMargenPromedioPorcentaje(new BigDecimal("50.00"));
         prod1.setNumeroVentas(10);
 
-        when(rentabilidadProductoRepository.obtenerProductosMasRentables(fechaInicio, fechaFin, limite))
+        when(rentabilidadProductoRepository.obtenerProductosMasRentables(fechaInicio, fechaFin))
                 .thenReturn(Arrays.asList(prod1));
 
         // When
@@ -365,17 +365,17 @@ class RentabilidadServiceTest {
 
         RentabilidadVenta masRentable = new RentabilidadVenta();
         masRentable.setUtilidadBruta(new BigDecimal("2000.00"));
-        when(rentabilidadVentaRepository.obtenerVentasMasRentables(1))
+        when(rentabilidadVentaRepository.obtenerVentasMasRentables())
                 .thenReturn(Arrays.asList(masRentable));
 
         RentabilidadVenta menosRentable = new RentabilidadVenta();
         menosRentable.setUtilidadBruta(new BigDecimal("-100.00"));
-        when(rentabilidadVentaRepository.obtenerVentasMenosRentables(1))
+        when(rentabilidadVentaRepository.obtenerVentasMenosRentables())
                 .thenReturn(Arrays.asList(menosRentable));
 
-        when(rentabilidadProductoRepository.obtenerProductosMasRentables(any(), any(), eq(1)))
+        when(rentabilidadProductoRepository.obtenerProductosMasRentables(any(), any()))
                 .thenReturn(Arrays.asList());
-        when(rentabilidadProductoRepository.obtenerProductosMenosRentables(any(), any(), eq(1)))
+        when(rentabilidadProductoRepository.obtenerProductosMenosRentables(any(), any()))
                 .thenReturn(Arrays.asList());
 
         // When

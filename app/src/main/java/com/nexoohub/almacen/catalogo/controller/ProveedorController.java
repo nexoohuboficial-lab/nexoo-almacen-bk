@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class ProveedorController {
     private ProveedorMapper mapper;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'ALMACENISTA')")
     public ResponseEntity<Page<ProveedorResponseDTO>> listarProveedores(
             @PageableDefault(size = 20, sort = "nombreEmpresa") Pageable pageable) {
         Page<Proveedor> proveedores = proveedorService.listarProveedores(pageable);
@@ -33,6 +35,7 @@ public class ProveedorController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     public ResponseEntity<Map<String, Object>> crearProveedor(@Valid @RequestBody Proveedor proveedor) {
         Proveedor guardado = proveedorService.crear(proveedor);
         
@@ -45,6 +48,7 @@ public class ProveedorController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     public ResponseEntity<Map<String, Object>> actualizarProveedor(@PathVariable("id") Integer id, @Valid @RequestBody Proveedor detalles) {
         return proveedorService.buscarPorId(id)
                 .map(prov -> {

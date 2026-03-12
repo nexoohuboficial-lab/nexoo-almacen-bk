@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,6 +23,7 @@ public class TipoClienteController {
     private TipoClienteMapper mapper;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'VENDEDOR', 'ALMACENISTA', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<Page<TipoClienteResponseDTO>> listarTiposCliente(
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
         // Devuelve la lista completa: [1: Público General, 2: Taller Mecánico, etc.]

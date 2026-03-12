@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class CompatibilidadController {
 
     // 1. ENLAZAR UN PRODUCTO CON UNA MOTO
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<Map<String, Object>> enlazarProductoConMoto(@Valid @RequestBody CompatibilidadProducto compatibilidad) {
         CompatibilidadProducto guardada = compatibilidadRepository.save(compatibilidad);
         
@@ -41,6 +43,7 @@ public class CompatibilidadController {
 
     // 2. VER A QUÉ MOTOS LE QUEDA UNA PIEZA (Búsqueda por SKU)
     @GetMapping("/producto/{sku}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Page<CompatibilidadResponseDTO>> buscarPorSku(
             @PathVariable("sku") String sku,
             @PageableDefault(size = 50) Pageable pageable) {
@@ -50,6 +53,7 @@ public class CompatibilidadController {
 
     // 3. VER QUÉ PIEZAS LE QUEDAN A UNA MOTO (Búsqueda por ID de Moto)
     @GetMapping("/moto/{motoId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Page<CompatibilidadResponseDTO>> buscarPorMoto(
             @PathVariable("motoId") Integer motoId,
             @PageableDefault(size = 50) Pageable pageable) {

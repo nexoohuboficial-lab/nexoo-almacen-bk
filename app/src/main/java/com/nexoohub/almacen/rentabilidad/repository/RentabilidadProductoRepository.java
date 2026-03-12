@@ -46,7 +46,6 @@ public interface RentabilidadProductoRepository extends JpaRepository<Rentabilid
      * 
      * @param periodoInicio Fecha de inicio
      * @param periodoFin Fecha de fin
-     * @param limite Número de resultados
      * @return Lista de productos más rentables
      */
     @Query("SELECT rp FROM RentabilidadProducto rp " +
@@ -54,8 +53,7 @@ public interface RentabilidadProductoRepository extends JpaRepository<Rentabilid
            "ORDER BY rp.utilidadTotalGenerada DESC")
     List<RentabilidadProducto> obtenerProductosMasRentables(
         @Param("periodoInicio") LocalDate periodoInicio,
-        @Param("periodoFin") LocalDate periodoFin,
-        @Param("limite") int limite
+        @Param("periodoFin") LocalDate periodoFin
     );
 
     /**
@@ -63,7 +61,6 @@ public interface RentabilidadProductoRepository extends JpaRepository<Rentabilid
      * 
      * @param periodoInicio Fecha de inicio
      * @param periodoFin Fecha de fin
-     * @param limite Número de resultados
      * @return Lista de productos menos rentables
      */
     @Query("SELECT rp FROM RentabilidadProducto rp " +
@@ -71,8 +68,7 @@ public interface RentabilidadProductoRepository extends JpaRepository<Rentabilid
            "ORDER BY rp.utilidadTotalGenerada ASC")
     List<RentabilidadProducto> obtenerProductosMenosRentables(
         @Param("periodoInicio") LocalDate periodoInicio,
-        @Param("periodoFin") LocalDate periodoFin,
-        @Param("limite") int limite
+        @Param("periodoFin") LocalDate periodoFin
     );
 
     /**

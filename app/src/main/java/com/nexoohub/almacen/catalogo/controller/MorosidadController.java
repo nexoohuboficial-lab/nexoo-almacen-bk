@@ -4,6 +4,7 @@ import com.nexoohub.almacen.catalogo.dto.ClienteBloqueadoDTO;
 import com.nexoohub.almacen.catalogo.entity.Cliente;
 import com.nexoohub.almacen.catalogo.repository.ClienteRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -39,6 +40,7 @@ public class MorosidadController {
      * @return lista de clientes bloqueados
      */
     @GetMapping("/bloqueados")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<ClienteBloqueadoDTO>> obtenerClientesBloqueados() {
         List<ClienteBloqueadoDTO> clientes = clienteRepository.obtenerClientesBloqueados();
         return ResponseEntity.ok(clientes);
@@ -50,6 +52,7 @@ public class MorosidadController {
      * @return lista de clientes morosos
      */
     @GetMapping("/morosos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<ClienteBloqueadoDTO>> obtenerClientesMorosos() {
         List<ClienteBloqueadoDTO> clientes = clienteRepository.obtenerClientesConSaldoPendiente();
         return ResponseEntity.ok(clientes);
@@ -63,6 +66,7 @@ public class MorosidadController {
      * @return cliente actualizado
      */
     @PostMapping("/{id}/bloquear")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Cliente> bloquearCliente(
             @PathVariable("id") Integer id,
             @RequestParam("motivo") String motivo) {
@@ -83,6 +87,7 @@ public class MorosidadController {
      * @return cliente actualizado
      */
     @PostMapping("/{id}/desbloquear")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Cliente> desbloquearCliente(@PathVariable("id") Integer id) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + id));
@@ -102,6 +107,7 @@ public class MorosidadController {
      * @return cliente actualizado
      */
     @PostMapping("/{id}/registrar-pago")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'CAJERO')")
     public ResponseEntity<Cliente> registrarPago(
             @PathVariable("id") Integer id,
             @RequestParam("monto") BigDecimal monto) {

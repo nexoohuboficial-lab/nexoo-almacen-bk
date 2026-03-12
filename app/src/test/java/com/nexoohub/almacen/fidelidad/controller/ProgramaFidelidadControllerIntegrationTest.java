@@ -10,10 +10,8 @@ import com.nexoohub.almacen.fidelidad.dto.CanjearPuntosRequestDTO;
 import com.nexoohub.almacen.fidelidad.entity.ProgramaFidelidad;
 import com.nexoohub.almacen.fidelidad.repository.MovimientoPuntoRepository;
 import com.nexoohub.almacen.fidelidad.repository.ProgramaFidelidadRepository;
-import com.nexoohub.almacen.common.config.JwtUtil;
-import com.nexoohub.almacen.common.entity.Usuario;
-import com.nexoohub.almacen.common.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,15 +57,8 @@ class ProgramaFidelidadControllerIntegrationTest {
     private TipoClienteRepository tipoClienteRepository;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
-    private String token;
     private Integer clienteId;
 
     @BeforeEach
@@ -76,16 +67,6 @@ class ProgramaFidelidadControllerIntegrationTest {
         movimientoRepository.deleteAll();
         clienteRepository.deleteAll();
         tipoClienteRepository.deleteAll();
-        usuarioRepository.deleteAll();
-
-        // Crear usuario
-        if (usuarioRepository.findByUsername("admin@nexoo.com").isEmpty()) {
-            Usuario usuario = new Usuario();
-            usuario.setUsername("admin@nexoo.com");
-            usuario.setPassword("$2a$10$test");
-            usuario.setRole("ROLE_ADMIN");
-            usuarioRepository.save(usuario);
-        }
 
         // Crear tipo de cliente
         TipoCliente tipoCliente = new TipoCliente();
@@ -99,16 +80,14 @@ class ProgramaFidelidadControllerIntegrationTest {
         cliente.setTelefono("5551234567");
         Cliente guardado = clienteRepository.save(cliente);
         clienteId = guardado.getId();
-
-        token = jwtUtil.generateToken("admin@nexoo.com");
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Crear programa de fidelidad exitosamente")
     void crearPrograma_Exitoso() throws Exception {
         mockMvc.perform(post("/api/v1/fidelidad/programa")
-                        .param("clienteId", clienteId.toString())
-                        .header("Authorization", "Bearer " + token))
+                        .param("clienteId", clienteId.toString()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.exitoso").value(true))
                 .andExpect(jsonPath("$.mensaje").value("Programa de fidelidad creado exitosamente"))
@@ -118,6 +97,7 @@ class ProgramaFidelidadControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("No permitir crear programa duplicado")
     void crearPrograma_YaExiste() throws Exception {
         // Crear programa primero
@@ -131,12 +111,12 @@ class ProgramaFidelidadControllerIntegrationTest {
 
         // Intentar crear duplicado
         mockMvc.perform(post("/api/v1/fidelidad/programa")
-                        .param("clienteId", clienteId.toString())
-                        .header("Authorization", "Bearer " + token))
+                        .param("clienteId", clienteId.toString()))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Consultar programa por cliente")
     void consultarPorCliente_Exitoso() throws Exception {
         // Crear programa
@@ -148,8 +128,7 @@ class ProgramaFidelidadControllerIntegrationTest {
         programa.setActivo(true);
         programaRepository.save(programa);
 
-        mockMvc.perform(get("/api/v1/fidelidad/programa/cliente/{clienteId}", clienteId)
-                        .header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/api/v1/fidelidad/programa/cliente/{clienteId}", clienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.clienteId").value(clienteId))
                 .andExpect(jsonPath("$.puntosAcumulados").value(150))
@@ -158,6 +137,7 @@ class ProgramaFidelidadControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Acumular puntos exitosamente")
     void acumularPuntos_Exitoso() throws Exception {
         // Crear programa
@@ -177,7 +157,6 @@ class ProgramaFidelidadControllerIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/fidelidad/acumular")
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -187,6 +166,7 @@ class ProgramaFidelidadControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Acumular puntos con monto insuficiente")
     void acumularPuntos_MontoInsuficiente() throws Exception {
         // Crear programa
@@ -206,13 +186,13 @@ class ProgramaFidelidadControllerIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/fidelidad/acumular")
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Canjear puntos exitosamente")
     void canjearPuntos_Exitoso() throws Exception {
         // Crear programa con puntos
@@ -232,7 +212,6 @@ class ProgramaFidelidadControllerIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/fidelidad/canjear")
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -242,6 +221,7 @@ class ProgramaFidelidadControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("No permitir canjear sin puntos suficientes")
     void canjearPuntos_InsuficientePuntos() throws Exception {
         // Crear programa con pocos puntos
@@ -261,13 +241,13 @@ class ProgramaFidelidadControllerIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/fidelidad/canjear")
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Consultar historial de movimientos")
     void obtenerHistorial_Exitoso() throws Exception {
         // Crear programa
@@ -279,28 +259,27 @@ class ProgramaFidelidadControllerIntegrationTest {
         programa.setActivo(true);
         programaRepository.save(programa);
 
-        mockMvc.perform(get("/api/v1/fidelidad/historial/cliente/{clienteId}", clienteId)
-                        .header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/api/v1/fidelidad/historial/cliente/{clienteId}", clienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", isA(java.util.List.class)));
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Calcular descuento por puntos")
     void calcularDescuento_Exitoso() throws Exception {
         mockMvc.perform(get("/api/v1/fidelidad/calcular-descuento")
-                        .param("puntos", "200")
-                        .header("Authorization", "Bearer " + token))
+                        .param("puntos", "200"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.puntos").value(200))
                 .andExpect(jsonPath("$.descuentoMXN").value(20.00)); // 200 puntos = $20 MXN
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Obtener estadísticas del sistema")
     void obtenerEstadisticas_Exitoso() throws Exception {
-        mockMvc.perform(get("/api/v1/fidelidad/estadisticas")
-                        .header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/api/v1/fidelidad/estadisticas"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalProgramasActivos").exists())
                 .andExpect(jsonPath("$.totalPuntosEnSistema").exists())
@@ -309,6 +288,7 @@ class ProgramaFidelidadControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Desactivar programa de fidelidad")
     void desactivarPrograma_Exitoso() throws Exception {
         // Crear programa
@@ -320,14 +300,14 @@ class ProgramaFidelidadControllerIntegrationTest {
         programa.setActivo(true);
         programaRepository.save(programa);
 
-        mockMvc.perform(patch("/api/v1/fidelidad/programa/cliente/{clienteId}/desactivar", clienteId)
-                        .header("Authorization", "Bearer " + token))
+        mockMvc.perform(patch("/api/v1/fidelidad/programa/cliente/{clienteId}/desactivar", clienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.exitoso").value(true))
                 .andExpect(jsonPath("$.mensaje").value("Programa de fidelidad desactivado"));
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     @DisplayName("Reactivar programa de fidelidad")
     void reactivarPrograma_Exitoso() throws Exception {
         // Crear programa inactivo
@@ -339,8 +319,7 @@ class ProgramaFidelidadControllerIntegrationTest {
         programa.setActivo(false);
         programaRepository.save(programa);
 
-        mockMvc.perform(patch("/api/v1/fidelidad/programa/cliente/{clienteId}/reactivar", clienteId)
-                        .header("Authorization", "Bearer " + token))
+        mockMvc.perform(patch("/api/v1/fidelidad/programa/cliente/{clienteId}/reactivar", clienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.exitoso").value(true))
                 .andExpect(jsonPath("$.mensaje").value("Programa de fidelidad reactivado"));

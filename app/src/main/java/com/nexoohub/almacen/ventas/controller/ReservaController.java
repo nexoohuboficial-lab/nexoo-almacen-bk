@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +57,7 @@ public class ReservaController {
      * @return Reserva creada con ID y fecha de vencimiento
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Map<String, Object>> crearReserva(@Valid @RequestBody ReservaRequestDTO request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         log.info("Usuario {} creando reserva para cliente {}", username, request.getClienteId());
@@ -76,6 +78,7 @@ public class ReservaController {
      * Obtiene una reserva por ID.
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<ReservaResponseDTO> obtenerReservaPorId(@PathVariable("id") Integer id) {
         ReservaResponseDTO reserva = reservaService.obtenerReservaPorId(id);
         return ResponseEntity.ok(reserva);
@@ -85,6 +88,7 @@ public class ReservaController {
      * Lista todas las reservas (paginado).
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<Page<ReservaResponseDTO>> listarReservas(
             @PageableDefault(size = 20, sort = "fechaCreacion") Pageable pageable) {
         Page<ReservaResponseDTO> reservas = reservaService.listarReservas(pageable);
@@ -95,6 +99,7 @@ public class ReservaController {
      * Lista reservas de un cliente específico.
      */
     @GetMapping("/cliente/{clienteId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Page<ReservaResponseDTO>> listarReservasPorCliente(
             @PathVariable("clienteId") Integer clienteId,
             @PageableDefault(size = 20) Pageable pageable) {
@@ -106,6 +111,7 @@ public class ReservaController {
      * Lista reservas por estado (PENDIENTE, NOTIFICADA, COMPLETADA, VENCIDA, CANCELADA).
      */
     @GetMapping("/estado/{estado}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<Page<ReservaResponseDTO>> listarReservasPorEstado(
             @PathVariable("estado") String estado,
             @PageableDefault(size = 20) Pageable pageable) {
@@ -118,6 +124,7 @@ public class ReservaController {
      * Útil para recordatorios.
      */
     @GetMapping("/proximas-vencer")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<List<ReservaResponseDTO>> listarReservasProximasAVencer() {
         List<ReservaResponseDTO> reservas = reservaService.listarReservasProximasAVencer();
         return ResponseEntity.ok(reservas);
@@ -130,6 +137,7 @@ public class ReservaController {
      * @param request Mapa con el motivo de cancelación
      */
     @PutMapping("/{id}/cancelar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<Map<String, Object>> cancelarReserva(
             @PathVariable("id") Integer id,
             @RequestBody Map<String, String> request) {
@@ -152,6 +160,7 @@ public class ReservaController {
      * @param request Mapa con el ID de la venta
      */
     @PutMapping("/{id}/completar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Map<String, Object>> completarReserva(
             @PathVariable("id") Integer id,
             @RequestBody Map<String, Integer> request) {
@@ -181,6 +190,7 @@ public class ReservaController {
      * <p>En producción, este endpoint debería protegerse o ejecutarse vía tarea programada.</p>
      */
     @PostMapping("/procesar-vencidas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Map<String, Object>> procesarReservasVencidas() {
         log.info("Procesando reservas vencidas manualmente");
         int procesadas = reservaService.procesarReservasVencidas();

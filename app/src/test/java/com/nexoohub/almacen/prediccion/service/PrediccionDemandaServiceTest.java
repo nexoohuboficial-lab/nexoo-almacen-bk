@@ -27,7 +27,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,6 +128,7 @@ class PrediccionDemandaServiceTest {
         assertThat(result).hasSize(1);
         
         // Capturar la predicción guardada
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<PrediccionDemanda>> captor = ArgumentCaptor.forClass(List.class);
         verify(prediccionRepository).saveAll(captor.capture());
         
@@ -174,6 +174,7 @@ class PrediccionDemandaServiceTest {
         // Then
         assertThat(result).isNotEmpty();
         
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<PrediccionDemanda>> captor = ArgumentCaptor.forClass(List.class);
         verify(prediccionRepository).saveAll(captor.capture());
         
@@ -214,6 +215,7 @@ class PrediccionDemandaServiceTest {
         // Then
         assertThat(result).isNotEmpty();
         
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<PrediccionDemanda>> captor = ArgumentCaptor.forClass(List.class);
         verify(prediccionRepository).saveAll(captor.capture());
         
@@ -284,6 +286,7 @@ class PrediccionDemandaServiceTest {
         // Then
         assertThat(result).isNotEmpty();
         
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<PrediccionDemanda>> captor = ArgumentCaptor.forClass(List.class);
         verify(prediccionRepository).saveAll(captor.capture());
         
@@ -325,6 +328,7 @@ class PrediccionDemandaServiceTest {
         // Then
         assertThat(result).isNotEmpty();
         
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<PrediccionDemanda>> captor = ArgumentCaptor.forClass(List.class);
         verify(prediccionRepository).saveAll(captor.capture());
         
@@ -363,6 +367,7 @@ class PrediccionDemandaServiceTest {
         List<PrediccionDemandaResponseDTO> result = service.generarPredicciones(request);
 
         // Then
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<PrediccionDemanda>> captor = ArgumentCaptor.forClass(List.class);
         verify(prediccionRepository).saveAll(captor.capture());
         
@@ -406,9 +411,10 @@ class PrediccionDemandaServiceTest {
         when(mapper.toDTO(any(), any(), any())).thenReturn(new PrediccionDemandaResponseDTO());
 
         // When
-        List<PrediccionDemandaResponseDTO> result = service.generarPredicciones(request);
+        service.generarPredicciones(request);
 
         // Then
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<PrediccionDemanda>> captor = ArgumentCaptor.forClass(List.class);
         verify(prediccionRepository).saveAll(captor.capture());
         
@@ -445,9 +451,10 @@ class PrediccionDemandaServiceTest {
         when(mapper.toDTO(any(), any(), any())).thenReturn(new PrediccionDemandaResponseDTO());
 
         // When
-        List<PrediccionDemandaResponseDTO> result = service.generarPredicciones(request);
+        service.generarPredicciones(request);
 
         // Then
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<PrediccionDemanda>> captor = ArgumentCaptor.forClass(List.class);
         verify(prediccionRepository).saveAll(captor.capture());
         

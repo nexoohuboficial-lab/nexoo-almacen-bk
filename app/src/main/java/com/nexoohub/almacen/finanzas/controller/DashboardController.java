@@ -3,6 +3,7 @@ package com.nexoohub.almacen.finanzas.controller;
 import com.nexoohub.almacen.finanzas.dto.DashboardDTO;
 import com.nexoohub.almacen.finanzas.service.DashboardService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -42,6 +43,7 @@ public class DashboardController {
      * @return DTO con métricas del dashboard
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     public ResponseEntity<DashboardDTO> obtenerDashboard() {
         DashboardDTO dashboard = dashboardService.generarDashboard();
         return ResponseEntity.ok(dashboard);

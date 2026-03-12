@@ -7,7 +7,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.DecimalMin;
 
 @Entity

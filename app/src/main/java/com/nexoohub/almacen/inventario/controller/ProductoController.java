@@ -17,6 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -101,6 +102,7 @@ public class ProductoController {
      */
     @GetMapping("/search")
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR', 'ALMACENISTA', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Page<ProductoMaestroResponseDTO>> buscarProductos(
             @RequestParam(value = "q", required = false) String q,
             @RequestParam(value = "categoriaId", required = false) Integer categoriaId,
@@ -135,6 +137,7 @@ public class ProductoController {
      * @return respuesta con SKU generado y mensaje de éxito
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<Map<String, Object>> crearProducto(@Valid @RequestBody ProductoMaestro producto) {
         ProductoMaestro guardado = productoRepository.save(producto);
         
@@ -155,6 +158,7 @@ public class ProductoController {
      */
     @GetMapping("/{sku}")
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR', 'ALMACENISTA', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<ApiResponse<ProductoMaestroResponseDTO>> obtenerPorSku(@PathVariable("sku") String sku) {
         log.info("Consultando producto con SKU: {}", sku);
         ProductoMaestro producto = repository.findById(sku)
@@ -174,6 +178,7 @@ public class ProductoController {
      */
     @PutMapping("/{sku}")
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<ApiResponse<ProductoMaestroResponseDTO>> actualizar(
             @PathVariable("sku") String sku, 
             @Valid @RequestBody ProductoMaestro detalles) {
@@ -201,6 +206,7 @@ public class ProductoController {
      */
     @DeleteMapping("/{sku}")
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable("sku") String sku) {
         log.info("Intento de eliminar producto: SKU {}", sku);
         ProductoMaestro producto = repository.findById(sku)
@@ -213,6 +219,7 @@ public class ProductoController {
 
     @GetMapping("/mostrador")
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<List<ProductoResumenDTO>> buscarParaMostrador(
             @RequestParam("q") String q,
             @RequestParam("sucursalId") Integer sucursalId) {

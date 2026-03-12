@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +44,7 @@ public class UsuarioController {
      * POST /api/v1/usuarios
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> crearUsuario(@Valid @RequestBody Usuario usuario) {
         
         // Verificar si el username ya existe
@@ -72,6 +74,7 @@ public class UsuarioController {
      * GET /api/v1/usuarios
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Page<UsuarioDTO>> listarUsuarios(
             @PageableDefault(size = 20, sort = "username") Pageable pageable) {
         Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
@@ -86,6 +89,7 @@ public class UsuarioController {
      * GET /api/v1/usuarios/{id}
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<?> obtenerUsuario(@PathVariable("id") Long id) {
         return usuarioRepository.findById(id)
                 .map(usuario -> ResponseEntity.ok(convertirADTO(usuario)))
@@ -97,6 +101,7 @@ public class UsuarioController {
      * PUT /api/v1/usuarios/{id}
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> actualizarUsuario(
             @PathVariable("id") Long id, 
             @Valid @RequestBody ActualizarUsuarioDTO dto) {
@@ -140,6 +145,7 @@ public class UsuarioController {
      * PUT /api/v1/usuarios/{id}/password
      */
     @PutMapping("/{id}/password")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<?> cambiarPassword(
             @PathVariable("id") Long id,
             @Valid @RequestBody CambiarPasswordDTO dto) {
@@ -172,6 +178,7 @@ public class UsuarioController {
      * DELETE /api/v1/usuarios/{id}
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> eliminarUsuario(@PathVariable("id") Long id) {
         return usuarioRepository.findById(id)
                 .map(usuario -> {

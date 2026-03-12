@@ -1,0 +1,561 @@
+openapi: 3.0.1
+info:
+  title: Métrica Inventario Controller API
+  description: |
+    API REST para análisis de métricas de inventario.
+    
+    **Responde:**
+    - ¿Cuánto capital tengo inmovilizado en inventario?
+    - ¿Rota bien mi inventario?
+    - ¿Qué productos requieren atención urgente?
+    
+    **Métricas clave:**
+    - Valor total del inventario (capital inmovilizado)
+    - Rotación de inventario y días de inventario
+    - Stock disponible, bajo mínimo, sin stock
+    - Productos próximos a caducar
+    - Cobertura y eficiencia operativa
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /api/v1/metricas/inventario/generar:
+    post:
+      tags:
+        - Métrica Inventario
+      summary: Generar análisis de inventario
+      description: |
+        Calcula métricas completas de inventario y opcionalmente guarda snapshot histórico.
+        
+        **Métricas calculadas:**
+        - Métricas de Stock: Total SKUs, Stock disponible, SKUs bajo mínimo, SKUs sin stock, Próximos a caducar
+        - Métricas de Valor: Valor total inventario, Costo promedio ponderado, Valor stock bajo
+        - Métricas de Rotación: Índice rotación, Días inventario, COGS del período
+        - Métricas de Eficiencia: Cobertura días, Tasa quiebre stock
+        - Clasificaciones: Salud inventario, Clasificación rotación
+      operationId: generarAnalisisInventario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisInventarioRequestDTO'
+            examples:
+              Consolidado:
+                summary: Análisis consolidado de todas las sucursales
+                value:
+                  fechaCorte: "2024-12-31"
+                  sucursalId: null
+                  guardarSnapshot: true
+                  diasPeriodoRotacion: 30
+              PorSucursal:
+                summary: Análisis de una sucursal específica
+                value:
+                  fechaCorte: "2024-12-31"
+                  sucursalId: 1
+                  guardarSnapshot: true
+                  diasPeriodoRotacion: 30
+              SinGuardar:
+                summary: Análisis sin guardar snapshot
+                value:
+                  fechaCorte: "2024-12-31"
+                  sucursalId: null
+                  guardarSnapshot: false
+                  diasPeriodoRotacion: 30
+      responses:
+        '201':
+          description: Análisis generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaInventarioResponseDTO'
+        '400':
+          description: Parámetros inválidos (fechaCorte null, diasPeriodo <= 0)
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/inventario:
+    get:
+      tags:
+        - Métrica Inventario
+      summary: Consultar métricas de inventario
+      description: |
+        Obtiene snapshot histórico si existe, o calcula métricas en tiempo real.
+        Si sucursalId es null, devuelve métricas consolidadas de todas las sucursales.
+      operationId: consultarMetricas
+      parameters:
+        - name: fechaCorte
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha de corte (formato YYYY-MM-DD)
+          example: "2024-12-31"
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de sucursal (null = consolidado)
+          example: 1
+      responses:
+        '200':
+          description: Métricas obtenidas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaInventarioResponseDTO'
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/inventario/valor-actual:
+    get:
+      tags:
+        - Métrica Inventario
+      summary: Valor actual del inventario
+      description: |
+        Calcula el valor total del inventario en tiempo real (sin guardar snapshot).
+        Valor = Suma(StockActual × CostoPromedioPonderado) por cada productoen inventario.
+      operationId: obtenerValorActual
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de sucursal (null = consolidado)
+          example: 1
+      responses:
+        '200':
+          description: Valor calculado exitosamente
+          content:
+            application/json:
+              schema:
+                type: number
+                format: decimal
+              example: 1500000.00
+        '401':
+          description: No autorizado
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/inventario/productos/bajo-stock:
+    get:
+      tags:
+        - Métrica Inventario
+      summary: Productos con stock bajo mínimo
+      description: Lista productos cuyo stock actual está por debajo del mínimo configurado
+      operationId: obtenerProductosBajoStock
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de sucursal (null = todas)
+          example: 1
+        - name: limite
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+          description: Número máximo de resultados
+          example: 50
+      responses:
+        '200':
+          description: Lista obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductoInventarioDTO'
+        '401':
+          description: No autorizado
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/inventario/productos/sin-stock:
+    get:
+      tags:
+        - Métrica Inventario
+      summary: Productos sin stock (quiebre)
+      description: Lista productos con stockActual = 0, indicando quiebre de stock
+      operationId: obtenerProductosSinStock
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de sucursal (null = todas)
+          example: 1
+        - name: limite
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+          description: Número máximo de resultados
+          example: 50
+      responses:
+        '200':
+          description: Lista obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductoInventarioDTO'
+        '401':
+          description: No autorizado
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/inventario/productos/proximos-caducar:
+    get:
+      tags:
+        - Métrica Inventario
+      summary: Productos próximos a caducar
+      description: Lista productos cuya fecha de caducidad está dentro del período de anticipación configurado
+      operationId: obtenerProductosProximosCaducar
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de sucursal (null = todas)
+          example: 1
+        - name: diasAnticipacion
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 30
+          description: Días de anticipación para alerta
+          example: 30
+        - name: limite
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+          description: Número máximo de resultados
+          example: 50
+      responses:
+        '200':
+          description: Lista obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductoInventarioDTO'
+        '401':
+          description: No autorizado
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/inventario/historico:
+    get:
+      tags:
+        - Métrica Inventario
+      summary: Histórico de métricas de inventario
+      description: |
+        Obtiene snapshots históricos ordenados por fecha descendente.
+        Útil para análisis de tendencias y comparación período a período.
+      operationId: obtenerHistoricoMetricas
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de sucursal (null = consolidado)
+          example: 1
+        - name: limite
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 12
+          description: Número máximo de snapshots a devolver
+          example: 12
+      responses:
+        '200':
+          description: Histórico obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricaInventarioResponseDTO'
+        '401':
+          description: No autorizado
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenido del endpoint /api/v1/auth/login
+
+  schemas:
+    AnalisisInventarioRequestDTO:
+      type: object
+      required:
+        - fechaCorte
+        - guardarSnapshot
+      properties:
+        fechaCorte:
+          type: string
+          format: date
+          description: Fecha de corte del análisis (formato YYYY-MM-DD)
+          example: "2024-12-31"
+        sucursalId:
+          type: integer
+          nullable: true
+          description: ID de sucursal (null = consolidado)
+          example: 1
+        guardarSnapshot:
+          type: boolean
+          description: Indica si se debe guardar el snapshot en la base de datos
+          example: true
+        diasPeriodoRotacion:
+          type: integer
+          description: Días del período para calcular rotación (default 30)
+          example: 30
+
+    MetricaInventarioResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID del snapshot (null si no se guardó)
+          example: 1
+        fechaCorte:
+          type: string
+          format: date
+          description: Fecha de corte del análisis
+          example: "2024-12-31"
+        sucursalId:
+          type: integer
+          nullable: true
+          description: ID de sucursal (null = consolidado)
+          example: 1
+        nombreSucursal:
+          type: string
+          description: Nombre de la sucursal o "CONSOLIDADO"
+          example: "Sucursal Centro"
+        
+        # Métricas de Stock
+        totalSkus:
+          type: integer
+          description: Cantidad total de SKUs en inventario
+          example: 1500
+        stockDisponibleTotal:
+          type: integer
+          description: Stock total disponible (suma de todas las unidades)
+          example: 25000
+        skusConStock:
+          type: integer
+          description: Cantidad de SKUs con stock > 0
+          example: 1425
+        skusBajoStock:
+          type: integer
+          description: SKUs con stock por debajo del mínimo
+          example: 120
+        skusSinStock:
+          type: integer
+          description: SKUs con stock = 0 (quiebre)
+          example: 75
+        skusProximosCaducar:
+          type: integer
+          description: SKUs que caducan dentro de los próximos 30 días
+          example: 35
+        porcentajeBajoStock:
+          type: number
+          format: decimal
+          description: Porcentaje de SKUs bajo stock
+          example: 8.00
+        porcentajeSinStock:
+          type: number
+          format: decimal
+          description: Porcentaje de SKUs sin stock
+          example: 5.00
+        porcentajeProximosCaducar:
+          type: number
+          format: decimal
+          description: Porcentaje de SKUs próximos a caducar
+          example: 2.33
+        
+        # Métricas de Valor
+        valorTotalInventario:
+          type: number
+          format: decimal
+          description: Valor total del inventario (capital inmovilizado)
+          example: 1500000.00
+        costoPromedioPonderado:
+          type: number
+          format: decimal
+          description: Costo promedio ponderado del inventario
+          example: 60.00
+        valorStockBajo:
+          type: number
+          format: decimal
+          description: Valor monetario del stock bajo mínimo
+          example: 45000.00
+        
+        # Métricas de Rotación
+        indiceRotacion:
+          type: number
+          format: decimal
+          description: Índice de rotación anual (veces que rota el inventario al año)
+          example: 8.50
+        diasInventario:
+          type: number
+          format: decimal
+          description: Días promedio que dura el inventario (365 / rotación)
+          example: 42.94
+        costoVentasPeriodo:
+          type: number
+          format: decimal
+          description: Costo de ventas (COGS) del período analizado
+          example: 350000.00
+        diasPeriodoRotacion:
+          type: integer
+          description: Días del período utilizado para calcular rotación
+          example: 30
+        
+        # Métricas de Eficiencia
+        coberturaDias:
+          type: number
+          format: decimal
+          nullable: true
+          description: Días de cobertura con el stock actual
+          example: 42.94
+        exactitudPorcentaje:
+          type: number
+          format: decimal
+          nullable: true
+          description: Exactitud del inventario (comparado con conteos físicos)
+          example: 98.50
+        tasaQuiebreStock:
+          type: number
+          format: decimal
+          description: Tasa de quiebre de stock (% de SKUs sin stock)
+          example: 5.00
+        
+        # Clasificaciones
+        saludInventario:
+          type: string
+          description: Clasificación de salud (SALUDABLE, ACEPTABLE, REQUIERE_ATENCION, CRITICA)
+          enum:
+            - SALUDABLE
+            - ACEPTABLE
+            - REQUIERE_ATENCION
+            - CRITICA
+          example: "SALUDABLE"
+        clasificacionRotacion:
+          type: string
+          description: Clasificación de rotación (ALTA, MEDIA, BAJA, MUY_BAJA)
+          enum:
+            - ALTA
+            - MEDIA
+            - BAJA
+            - MUY_BAJA
+          example: "MEDIA"
+        
+        # Auditoría
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del snapshot
+          example: "2024-12-31T23:59:59"
+        createdBy:
+          type: string
+          description: Usuario que creó el snapshot
+          example: "admin"
+
+    ProductoInventarioDTO:
+      type: object
+      properties:
+        skuInterno:
+          type: string
+          description: Código SKU del producto
+          example: "PROD-001"
+        nombreComercial:
+          type: string
+          description: Nombre comercial del producto
+          example: "Aceite Motor 20W-50"
+        marca:
+          type: string
+          description: Marca del producto
+          example: "Castrol"
+        categoria:
+          type: string
+          description: Categoría del producto
+          example: "Lubricantes"
+        sucursalId:
+          type: integer
+          description: ID de la sucursal
+          example: 1
+        nombreSucursal:
+          type: string
+          description: Nombre de la sucursal
+          example: "Sucursal Centro"
+        stockActual:
+          type: integer
+          description: Cantidad en stock
+          example: 15
+        stockMinimo:
+          type: integer
+          description: Stock mínimo configurado
+          example: 50
+        costoPromedioPonderado:
+          type: number
+          format: decimal
+          description: Costo promedio ponderado
+          example: 45.00
+        valorInventario:
+          type: number
+          format: decimal
+          description: Valor total del inventario (stock × costo)
+          example: 675.00
+        fechaCaducidad:
+          type: string
+          format: date
+          nullable: true
+          description: Fecha de caducidad del lote
+          example: "2025-06-30"
+        ubicacionPasillo:
+          type: string
+          nullable: true
+          description: Ubicación física en el almacén
+          example: "A-12-03"
+        estadoAlerta:
+          type: string
+          description: Estado de alerta
+          enum:
+            - OK
+            - BAJO_STOCK
+            - SIN_STOCK
+            - PROXIMO_CADUCAR
+          example: "BAJO_STOCK"

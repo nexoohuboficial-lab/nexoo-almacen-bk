@@ -2,7 +2,6 @@ package com.nexoohub.almacen.catalogo.service;
 
 import com.nexoohub.almacen.catalogo.entity.PrecioEspecial;
 import com.nexoohub.almacen.catalogo.repository.PrecioEspecialRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

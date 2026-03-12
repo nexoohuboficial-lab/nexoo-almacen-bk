@@ -81,4 +81,30 @@ public interface ComisionRepository extends JpaRepository<Comision, Integer> {
      */
     boolean existsByVendedorIdAndPeriodoAnioAndPeriodoMes(
             Integer vendedorId, Integer anio, Integer mes);
+
+    // ==================== MÉTODOS PARA MÉTRICAS FINANCIERAS ====================
+
+    /**
+     * Calcula el total de comisiones (gastos operativos) en un período de fechas.
+     * Utilizado para métricas financieras.
+     * 
+     * NOTA: Las comisiones se almacenan por mes completo (año/mes).
+     * Este método suma todas las comisiones cuyo período (año/mes) esté dentro 
+     * del rango de fechas especificado.
+     * 
+     * @param anioInicio Año de inicio del período
+     * @param mesInicio Mes de inicio del período (1-12)
+     * @param anioFin Año de fin del período
+     * @param mesFin Mes de fin del período (1-12)
+     * @return Suma total de comisiones en el período
+     */
+    @Query("SELECT COALESCE(SUM(c.totalComision), 0) FROM Comision c " +
+           "WHERE (c.periodoAnio * 12 + c.periodoMes) BETWEEN " +
+           "(:anioInicio * 12 + :mesInicio) AND (:anioFin * 12 + :mesFin)")
+    BigDecimal calcularComisionesTotalesPeriodo(
+        @Param("anioInicio") Integer anioInicio,
+        @Param("mesInicio") Integer mesInicio,
+        @Param("anioFin") Integer anioFin,
+        @Param("mesFin") Integer mesFin
+    );
 }

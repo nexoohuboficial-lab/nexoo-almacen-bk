@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,6 +50,7 @@ public class AlertaLentoMovimientoController {
      * @return Lista de alertas generadas/actualizadas
      */
     @PostMapping("/generar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     @Operation(
         summary = "Genera alertas de lento movimiento",
         description = "Detecta productos sin ventas en los últimos N días y crea/actualiza alertas. " +
@@ -70,6 +72,7 @@ public class AlertaLentoMovimientoController {
      * @return Lista de alertas no resueltas
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(
         summary = "Lista todas las alertas activas",
         description = "Retorna todas las alertas de lento movimiento que no han sido resueltas."
@@ -86,6 +89,7 @@ public class AlertaLentoMovimientoController {
      * @return Información de la alerta
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(
         summary = "Obtiene una alerta por ID",
         description = "Retorna la información completa de una alerta específica."
@@ -107,6 +111,7 @@ public class AlertaLentoMovimientoController {
      * @return Lista de alertas de la sucursal
      */
     @GetMapping("/sucursal/{sucursalId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(
         summary = "Lista alertas por sucursal",
         description = "Retorna todas las alertas activas de una sucursal específica."
@@ -124,6 +129,7 @@ public class AlertaLentoMovimientoController {
      * @return Lista de alertas críticas
      */
     @GetMapping("/criticas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(
         summary = "Lista alertas críticas",
         description = "Retorna solo las alertas con más de 60 días sin venta (estado CRITICO)."
@@ -140,6 +146,7 @@ public class AlertaLentoMovimientoController {
      * @return Lista de alertas del producto
      */
     @GetMapping("/producto/{skuInterno}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(
         summary = "Lista alertas por producto",
         description = "Retorna todas las alertas activas de un producto en todas las sucursales."
@@ -158,6 +165,7 @@ public class AlertaLentoMovimientoController {
      * @return DTO con métricas agregadas
      */
     @GetMapping("/costo-inmovilizado")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     @Operation(
         summary = "Calcula costo de inventario inmovilizado",
         description = "Retorna el costo total del inventario con bajo movimiento. " +
@@ -178,6 +186,7 @@ public class AlertaLentoMovimientoController {
      * @return Alerta resuelta
      */
     @PutMapping("/{id}/resolver")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     @Operation(
         summary = "Resuelve una alerta",
         description = "Marca una alerta como resuelta indicando la acción correctiva aplicada " +
@@ -202,6 +211,7 @@ public class AlertaLentoMovimientoController {
      * @return Respuesta sin contenido
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @Operation(
         summary = "Elimina una alerta",
         description = "Elimina permanentemente una alerta del sistema."

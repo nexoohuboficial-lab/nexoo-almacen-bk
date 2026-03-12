@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class EmpleadoController {
 
     // Dar de alta a un empleado nuevo
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Map<String, Object>> registrarEmpleado(@Valid @RequestBody Empleado empleado) {
         Empleado guardado = empleadoRepository.save(empleado);
         
@@ -41,6 +43,7 @@ public class EmpleadoController {
 
     // Ver a todos los empleados de una sucursal
     @GetMapping("/sucursal/{sucursalId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     public ResponseEntity<Page<EmpleadoResponseDTO>> obtenerEmpleadosPorSucursal(
             @PathVariable("sucursalId") Integer sucursalId,
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
@@ -50,6 +53,7 @@ public class EmpleadoController {
 
     // Dar de baja (borrado lógico)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Void> darDeBajaEmpleado(@PathVariable("id") Integer id) {
         return empleadoRepository.findById(id).map(empleado -> {
             empleado.setActivo(false); // No lo borramos de la BD para no perder el historial de ventas, solo lo desactivamos

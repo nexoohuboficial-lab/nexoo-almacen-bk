@@ -3,6 +3,7 @@ package com.nexoohub.almacen.inventario.controller;
 import com.nexoohub.almacen.inventario.dto.ProductoCaducidadDTO;
 import com.nexoohub.almacen.inventario.repository.InventarioSucursalRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -37,6 +38,7 @@ public class CaducidadController {
      * @return lista de productos próximos a caducar
      */
     @GetMapping("/proximos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'ALMACENISTA')")
     public ResponseEntity<List<ProductoCaducidadDTO>> obtenerProductosProximosCaducar(
             @RequestParam(defaultValue = "30") Integer dias) {
         LocalDate fechaLimite = LocalDate.now().plusDays(dias);
@@ -50,6 +52,7 @@ public class CaducidadController {
      * @return lista de productos caducados
      */
     @GetMapping("/vencidos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'ALMACENISTA')")
     public ResponseEntity<List<ProductoCaducidadDTO>> obtenerProductosCaducados() {
         List<ProductoCaducidadDTO> productos = inventarioRepository.obtenerProductosCaducados();
         return ResponseEntity.ok(productos);

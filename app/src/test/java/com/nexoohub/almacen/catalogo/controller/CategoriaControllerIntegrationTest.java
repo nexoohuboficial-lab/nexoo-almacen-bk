@@ -3,15 +3,13 @@ package com.nexoohub.almacen.catalogo.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexoohub.almacen.catalogo.entity.Categoria;
 import com.nexoohub.almacen.catalogo.repository.CategoriaRepository;
-import com.nexoohub.almacen.common.config.JwtUtil;
-import com.nexoohub.almacen.common.entity.Usuario;
-import com.nexoohub.almacen.common.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,40 +30,24 @@ class CategoriaControllerIntegrationTest {
     private CategoriaRepository categoriaRepository;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    private String token;
 
     @BeforeEach
     void setUp() {
         categoriaRepository.deleteAll();
-        usuarioRepository.deleteAll();
-        
-        Usuario usuario = new Usuario();
-        usuario.setUsername("admin@nexoo.com");
-        usuario.setPassword("$2a$10$test");
-        usuario.setRole("ROLE_ADMIN");
-        usuarioRepository.save(usuario);
-        
-        token = jwtUtil.generateToken("admin@nexoo.com");
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     void listarCategorias_SinDatos() throws Exception {
-        mockMvc.perform(get("/api/v1/categorias")
-                .header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/api/v1/categorias"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty())
                 .andExpect(jsonPath("$.totalElements").value(0));
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     void listarCategorias_ConDatos() throws Exception {
         Categoria c1 = new Categoria();
         c1.setNombre("Frenos");
@@ -77,8 +59,7 @@ class CategoriaControllerIntegrationTest {
         c2.setDescripcion("Filtros de aire y aceite");
         categoriaRepository.save(c2);
 
-        mockMvc.perform(get("/api/v1/categorias")
-                .header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/api/v1/categorias"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content.length()").value(2))
@@ -89,13 +70,13 @@ class CategoriaControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     void crearCategoria_Exitoso() throws Exception {
         Categoria categoria = new Categoria();
         categoria.setNombre("Suspensión");
         categoria.setDescripcion("Amortiguadores y resortes");
 
         mockMvc.perform(post("/api/v1/categorias")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoria)))
                 .andExpect(status().isCreated())
@@ -105,19 +86,20 @@ class CategoriaControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     void crearCategoria_NombreVacio() throws Exception {
         Categoria categoria = new Categoria();
         categoria.setNombre("");
         categoria.setDescripcion("Test");
 
         mockMvc.perform(post("/api/v1/categorias")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoria)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     void actualizarCategoria_Exitoso() throws Exception {
         Categoria existente = new Categoria();
         existente.setNombre("Frenos");
@@ -129,7 +111,6 @@ class CategoriaControllerIntegrationTest {
         actualizado.setDescripcion("Descripción actualizada");
 
         mockMvc.perform(put("/api/v1/categorias/" + existente.getId())
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(actualizado)))
                 .andExpect(status().isOk())
@@ -138,13 +119,13 @@ class CategoriaControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin@nexoo.com", roles = {"ADMIN"})
     void actualizarCategoria_NoExiste() throws Exception {
         Categoria categoria = new Categoria();
         categoria.setNombre("Test");
         categoria.setDescripcion("Test");
 
         mockMvc.perform(put("/api/v1/categorias/99999")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoria)))
                 .andExpect(status().isNotFound());

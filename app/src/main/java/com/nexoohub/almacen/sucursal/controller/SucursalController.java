@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -36,6 +37,7 @@ public class SucursalController {
 
     // 2. CREAR UNA NUEVA SUCURSAL
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> crearSucursal(@Valid @RequestBody Sucursal sucursal) {
         Sucursal guardada = sucursalRepository.save(sucursal);
         Map<String, Object> respuesta = new HashMap<>();
@@ -47,6 +49,7 @@ public class SucursalController {
 
     // 3. ACTUALIZAR UNA SUCURSAL EXISTENTE
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> actualizarSucursal(@PathVariable("id") Integer id, @Valid @RequestBody Sucursal detalles) {
         return sucursalRepository.findById(id)
                 .map(sucursalExistente -> {
@@ -66,6 +69,7 @@ public class SucursalController {
 
     // 4. BORRADO LÓGICO (Desactivar)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> desactivarSucursal(@PathVariable("id") Integer id) {
         return sucursalRepository.findById(id)
                 .map(sucursal -> {

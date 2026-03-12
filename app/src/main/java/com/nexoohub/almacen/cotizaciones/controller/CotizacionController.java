@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -60,6 +61,7 @@ public class CotizacionController {
      * @return cotización creada con folio generado
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<CotizacionResponseDTO> crearCotizacion(@Valid @RequestBody CotizacionRequestDTO request) {
         CotizacionResponseDTO cotizacion = cotizacionService.crearCotizacion(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(cotizacion);
@@ -75,6 +77,7 @@ public class CotizacionController {
      * @return cotización actualizada
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<CotizacionResponseDTO> actualizarCotizacion(
             @PathVariable Long id,
             @Valid @RequestBody CotizacionRequestDTO request) {
@@ -89,6 +92,7 @@ public class CotizacionController {
      * @return cotización con todos sus detalles
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'AUDITOR')")
     public ResponseEntity<CotizacionResponseDTO> obtenerCotizacion(@PathVariable Long id) {
         CotizacionResponseDTO cotizacion = cotizacionService.obtenerCotizacionPorId(id);
         return ResponseEntity.ok(cotizacion);
@@ -101,6 +105,7 @@ public class CotizacionController {
      * @return cotización con todos sus detalles
      */
     @GetMapping("/folio/{folio}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'AUDITOR')")
     public ResponseEntity<CotizacionResponseDTO> obtenerCotizacionPorFolio(@PathVariable String folio) {
         CotizacionResponseDTO cotizacion = cotizacionService.obtenerCotizacionPorFolio(folio);
         return ResponseEntity.ok(cotizacion);
@@ -119,6 +124,7 @@ public class CotizacionController {
      * @return página de cotizaciones
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'AUDITOR')")
     public ResponseEntity<Page<CotizacionResponseDTO>> listarCotizaciones(
             @RequestParam(required = false) Integer clienteId,
             @RequestParam(required = false) Integer sucursalId,
@@ -158,6 +164,7 @@ public class CotizacionController {
      * @return cotización con estado actualizado
      */
     @PutMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<CotizacionResponseDTO> cambiarEstado(
             @PathVariable Long id,
             @Valid @RequestBody CambiarEstadoRequestDTO request) {
@@ -182,6 +189,7 @@ public class CotizacionController {
      * @return ID de la venta creada
      */
     @PostMapping("/{id}/convertir-venta")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<Map<String, Object>> convertirAVenta(
             @PathVariable Long id,
             @Valid @RequestBody ConvertirVentaRequestDTO request) {
@@ -205,6 +213,7 @@ public class CotizacionController {
      * @return lista de cotizaciones próximas a vencer
      */
     @GetMapping("/vencimiento/proximas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<List<CotizacionResponseDTO>> obtenerProximasAVencer(
             @RequestParam(defaultValue = "7") int dias) {
         List<CotizacionResponseDTO> cotizaciones = cotizacionService.obtenerProximasAVencer(dias);
@@ -220,6 +229,7 @@ public class CotizacionController {
      * @return lista de cotizaciones listas para convertir
      */
     @GetMapping("/pendientes-conversion")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<List<CotizacionResponseDTO>> obtenerPendientesDeConversion() {
         List<CotizacionResponseDTO> cotizaciones = cotizacionService.obtenerPendientesDeConversion();
         return ResponseEntity.ok(cotizaciones);
@@ -240,6 +250,7 @@ public class CotizacionController {
      * @return estadísticas completas
      */
     @GetMapping("/estadisticas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<EstadisticasCotizacionDTO> obtenerEstadisticas() {
         EstadisticasCotizacionDTO estadisticas = cotizacionService.obtenerEstadisticas();
         return ResponseEntity.ok(estadisticas);
@@ -254,6 +265,7 @@ public class CotizacionController {
      * @return mensaje con cantidad de cotizaciones actualizadas
      */
     @PostMapping("/marcar-vencidas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Map<String, Object>> marcarCotizacionesVencidas() {
         int cantidadActualizadas = cotizacionService.marcarCotizacionesVencidas();
         
@@ -273,6 +285,7 @@ public class CotizacionController {
      * @return mensaje de confirmación
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<Map<String, String>> eliminarCotizacion(@PathVariable Long id) {
         cotizacionService.eliminarCotizacion(id);
         

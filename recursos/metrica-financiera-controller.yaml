@@ -1,0 +1,426 @@
+openapi: 3.0.1
+info:
+  title: Métrica Financiera Controller API
+  description: |
+    API REST para análisis de métricas financieras y salud del negocio.
+    
+    **Responde:**
+    - ¿Qué tan rentable es REALMENTE mi negocio?
+    - ¿Cuál es mi margen bruto y neto?
+    - ¿Cómo se comparan mis ventas con períodos anteriores?
+    
+    **Métricas clave:**
+    - Ventas totales, ticket promedio, clientes únicos
+    - Costo de ventas (COGS), utilidad bruta, margen bruto %
+    - Gastos operativos, utilidad neta, margen neto %
+    - Análisis de métodos de pago (Efectivo/Crédito)
+    - Top productos por ingresos
+    - Comparación de períodos con crecimiento %
+    - Clasificación automática de salud financiera
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /api/v1/metricas-financieras/analisis:
+    post:
+      tags:
+        - Métrica Financiera
+      summary: Generar análisis financiero completo
+      description: |
+        Calcula métricas financieras completas para un período y opcionalmente guarda snapshot histórico.
+        
+        **Métricas calculadas:**
+        - **Ventas:** Total ventas, ticket promedio, clientes únicos, número de transacciones
+        - **COGS:** Costo de ventas (materiales), utilidad bruta, margen bruto %
+        - **Utilidad Neta:** Gastos operativos, utilidad neta, margen neto %
+        - **Métodos de Pago:** Distribución efectivo/crédito, porcentajes
+        - **Top Productos:** 5 productos con mayores ingresos
+        - **Clasificación:** Salud financiera (EXCELENTE/BUENO/REGULAR/MALO/CRÍTICO)
+      operationId: generarAnalisisFinanciero
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisFinancieroRequestDTO'
+            examples:
+              ConsolidadoConSnapshot:
+                summary: Análisis consolidado guardando snapshot
+                value:
+                  fechaInicio: "2024-01-01"
+                  fechaFin: "2024-01-31"
+                  sucursalId: null
+                  guardarSnapshot: true
+              PorSucursal:
+                summary: Análisis de una sucursal específica
+                value:
+                  fechaInicio: "2024-01-01"
+                  fechaFin: "2024-01-31"
+                  sucursalId: 1
+                  guardarSnapshot: false
+      responses:
+        '201':
+          description: Análisis generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaFinancieraResponseDTO'
+        '400':
+          description: Parámetros inválidos (fechas null, fechaFin < fechaInicio)
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas-financieras:
+    get:
+      tags:
+        - Métrica Financiera
+      summary: Consultar métricas financieras de un período
+      description: |
+        Si existe un snapshot guardado, lo retorna. Si no existe, calcula las métricas en tiempo real.
+        
+        Útil para dashboards ejecutivos y reportes rápidos.
+      operationId: consultarMetricas
+      parameters:
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha de inicio del período
+          example: "2024-01-01"
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha de fin del período
+          example: "2024-01-31"
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de la sucursal (null = consolidado)
+          example: 1
+      responses:
+        '200':
+          description: Métricas financieras recuperadas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaFinancieraResponseDTO'
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+        '404':
+          description: No hay datos para el período especificado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas-financieras/comparacion:
+    post:
+      tags:
+        - Métrica Financiera
+      summary: Comparar métricas financieras entre dos períodos
+      description: |
+        Calcula métricas para dos períodos y genera comparación con porcentajes de crecimiento.
+        
+        **Comparaciones incluidas:**
+        - Ventas totales ($ y %)
+        - Ticket promedio ($ y %)
+        - Clientes únicos (# y %)
+        - Utilidad bruta ($ y %)
+        - Utilidad neta ($ y %)
+        - Margen bruto (% y puntos porcentuales)
+        - Margen neto (% y puntos porcentuales)
+      operationId: compararPeriodos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComparacionPeriodosRequestDTO'
+            examples:
+              ComparacionMensual:
+                summary: Comparar mes actual vs mes anterior
+                value:
+                  periodoActual:
+                    fechaInicio: "2024-02-01"
+                    fechaFin: "2024-02-29"
+                    sucursalId: null
+                  periodoAnterior:
+                    fechaInicio: "2024-01-01"
+                    fechaFin: "2024-01-31"
+                    sucursalId: null
+      responses:
+        '200':
+          description: Comparación generada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComparacionFinancieraResponseDTO'
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    AnalisisFinancieroRequestDTO:
+      type: object
+      required:
+        - fechaInicio
+        - fechaFin
+      properties:
+        fechaInicio:
+          type: string
+          format: date
+          description: Fecha de inicio del período a analizar
+          example: "2024-01-01"
+        fechaFin:
+          type: string
+          format: date
+          description: Fecha de fin del período a analizar
+          example: "2024-01-31"
+        sucursalId:
+          type: integer
+          nullable: true
+          description: ID de la sucursal (null = análisis consolidado de todas las sucursales)
+          example: 1
+        guardarSnapshot:
+          type: boolean
+          default: false
+          description: Si true, guarda las métricas calculadas en la BD para consultas históricas rápidas
+          example: true
+
+    MetricaFinancieraResponseDTO:
+      type: object
+      properties:
+        fechaInicio:
+          type: string
+          format: date
+          description: Fecha de inicio del período analizado
+          example: "2024-01-01"
+        fechaFin:
+          type: string
+          format: date
+          description: Fecha de fin del período analizado
+          example: "2024-01-31"
+        sucursalId:
+          type: integer
+          nullable: true
+          description: ID de la sucursal (null = consolidado)
+          example: null
+        nombreSucursal:
+          type: string
+          nullable: true
+          description: Nombre de la sucursal (null si es consolidado)
+          example: null
+        diasPeriodo:
+          type: integer
+          description: Duración del período en días
+          example: 31
+        metricasVentas:
+          $ref: '#/components/schemas/ResumenVentasDTO'
+        metricasCOGS:
+          $ref: '#/components/schemas/ResumenCOGSDTO'
+        metricasUtilidadNeta:
+          $ref: '#/components/schemas/ResumenUtilidadNetaDTO'
+        metodosPago:
+          $ref: '#/components/schemas/ResumenMetodosPagoDTO'
+        topProductos:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopProductoDTO'
+          description: 5 productos con mayores ingresos en el período
+        clasificacionSalud:
+          type: string
+          enum: [EXCELENTE, BUENO, REGULAR, MALO, CRITICO]
+          description: Clasificación automática de salud financiera basada en margen neto
+          example: "BUENO"
+
+    ResumenVentasDTO:
+      type: object
+      properties:
+        totalVentas:
+          type: number
+          format: decimal
+          description: Suma de todas las ventas del período
+          example: 150000.00
+        numeroTransacciones:
+          type: integer
+          description: Cantidad total de ventas realizadas
+          example: 245
+        ticketPromedio:
+          type: number
+          format: decimal
+          description: Venta promedio por transacción (totalVentas / numeroTransacciones)
+          example: 612.24
+        clientesUnicos:
+          type: integer
+          description: Cantidad de clientes diferentes que compraron
+          example: 128
+
+    ResumenCOGSDTO:
+      type: object
+      properties:
+        costoVentas:
+          type: number
+          format: decimal
+          description: Costo de los productos vendidos (COGS)
+          example: 90000.00
+        utilidadBruta:
+          type: number
+          format: decimal
+          description: Ingresos - COGS
+          example: 60000.00
+        margenBruto:
+          type: number
+          format: decimal
+          description: (utilidadBruta / totalVentas) * 100
+          example: 40.00
+
+    ResumenUtilidadNetaDTO:
+      type: object
+      properties:
+        gastosOperativos:
+          type: number
+          format: decimal
+          description: Suma de gastos fijos y variables del período
+          example: 25000.00
+        utilidadNeta:
+          type: number
+          format: decimal
+          description: Utilidad bruta - gastos operativos
+          example: 35000.00
+        margenNeto:
+          type: number
+          format: decimal
+          description: (utilidadNeta / totalVentas) * 100
+          example: 23.33
+
+    ResumenMetodosPagoDTO:
+      type: object
+      properties:
+        ventasEfectivo:
+          type: number
+          format: decimal
+          description: Total de ventas pagadas en efectivo
+          example: 90000.00
+        ventasCredito:
+          type: number
+          format: decimal
+          description: Total de ventas a crédito
+          example: 60000.00
+        porcentajeEfectivo:
+          type: number
+          format: decimal
+          description: (ventasEfectivo / totalVentas) * 100
+          example: 60.00
+        porcentajeCredito:
+          type: number
+          format: decimal
+          description: (ventasCredito / totalVentas) * 100
+          example: 40.00
+
+    TopProductoDTO:
+      type: object
+      properties:
+        skuProducto:
+          type: string
+          description: SKU interno del producto
+          example: "PROD-001"
+        nombreProducto:
+          type: string
+          description: Nombre del producto
+          example: "Aceite Premium 10W-40"
+        ingresoTotal:
+          type: number
+          format: decimal
+          description: Suma de ingresos generados por este producto
+          example: 12500.00
+        unidadesVendidas:
+          type: integer
+          description: Cantidad de unidades vendidas
+          example: 85
+        porcentajeIngresos:
+          type: number
+          format: decimal
+          description: (ingresoTotal / totalVentas) * 100
+          example: 8.33
+
+    ComparacionPeriodosRequestDTO:
+      type: object
+      required:
+        - periodoActual
+        - periodoAnterior
+      properties:
+        periodoActual:
+          $ref: '#/components/schemas/AnalisisFinancieroRequestDTO'
+        periodoAnterior:
+          $ref: '#/components/schemas/AnalisisFinancieroRequestDTO'
+
+    ComparacionFinancieraResponseDTO:
+      type: object
+      properties:
+        periodoActual:
+          $ref: '#/components/schemas/MetricaFinancieraResponseDTO'
+        periodoAnterior:
+          $ref: '#/components/schemas/MetricaFinancieraResponseDTO'
+        crecimientoVentas:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento en ventas totales
+          example: 15.50
+        crecimientoTicketPromedio:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento en ticket promedio
+          example: 8.20
+        crecimientoClientesUnicos:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento en clientes únicos
+          example: 12.30
+        crecimientoUtilidadBruta:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento en utilidad bruta
+          example: 18.75
+        crecimientoUtilidadNeta:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento en utilidad neta
+          example: 22.40
+        variacionMargenBruto:
+          type: number
+          format: decimal
+          description: Diferencia en puntos porcentuales del margen bruto
+          example: 2.50
+        variacionMargenNeto:
+          type: number
+          format: decimal
+          description: Diferencia en puntos porcentuales del margen neto
+          example: 3.10
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtenido del endpoint /api/v1/auth/login

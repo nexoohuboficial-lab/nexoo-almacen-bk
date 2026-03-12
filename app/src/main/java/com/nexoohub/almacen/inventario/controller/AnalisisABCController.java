@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -42,6 +43,7 @@ public class AnalisisABCController {
      * @return Lista de productos analizados con clasificación ABC
      */
     @PostMapping("/generar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     @Operation(summary = "Generar análisis ABC", 
                description = "Genera análisis ABC clasificando productos según el principio de Pareto (80/20). " +
                            "Clase A: productos de alto valor (~80% ventas), B: valor medio (~15%), C: bajo valor (~5%)")
@@ -64,6 +66,7 @@ public class AnalisisABCController {
      * @return Lista de productos del último análisis
      */
     @GetMapping("/sucursal/{sucursalId}/ultimo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Obtener último análisis", 
                description = "Retorna el análisis ABC más reciente generado para la sucursal especificada")
     public ResponseEntity<List<AnalisisABCResponseDTO>> obtenerUltimoAnalisis(
@@ -86,6 +89,7 @@ public class AnalisisABCController {
      * @return Lista de productos filtrados por clasificación
      */
     @GetMapping("/sucursal/{sucursalId}/clasificacion/{clasificacion}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Obtener productos por clasificación ABC", 
                description = "Filtra productos del último análisis por clasificación: A (alta rotación y valor), B (importancia media), C (bajo valor)")
     public ResponseEntity<List<AnalisisABCResponseDTO>> obtenerPorClasificacion(
@@ -112,6 +116,7 @@ public class AnalisisABCController {
      * @return Resumen con estadísticas agregadas y top productos de clase A
      */
     @GetMapping("/sucursal/{sucursalId}/resumen")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Obtener resumen estadístico", 
                description = "Retorna estadísticas agregadas del último análisis ABC: totales por clasificación, valores, rotación e indicadores clave")
     public ResponseEntity<AnalisisABCResumenDTO> obtenerResumen(

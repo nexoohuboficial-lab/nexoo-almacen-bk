@@ -5,6 +5,7 @@ import com.nexoohub.almacen.fidelidad.service.ProgramaFidelidadService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -44,6 +45,7 @@ public class ProgramaFidelidadController {
      * @return programa creado
      */
     @PostMapping("/programa")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<Map<String, Object>> crearPrograma(@RequestParam Integer clienteId) {
         ProgramaFidelidadResponseDTO programa = fidelidadService.crearPrograma(clienteId);
 
@@ -62,6 +64,7 @@ public class ProgramaFidelidadController {
      * @return información del programa
      */
     @GetMapping("/programa/cliente/{clienteId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<ProgramaFidelidadResponseDTO> consultarPorCliente(@PathVariable Integer clienteId) {
         ProgramaFidelidadResponseDTO programa = fidelidadService.consultarPorCliente(clienteId);
         return ResponseEntity.ok(programa);
@@ -74,6 +77,7 @@ public class ProgramaFidelidadController {
      * @return programa actualizado
      */
     @PostMapping("/acumular")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Map<String, Object>> acumularPuntos(@Valid @RequestBody AcumularPuntosRequestDTO request) {
         ProgramaFidelidadResponseDTO programa = fidelidadService.acumularPuntos(request);
 
@@ -92,6 +96,7 @@ public class ProgramaFidelidadController {
      * @return programa actualizado
      */
     @PostMapping("/canjear")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Map<String, Object>> canjearPuntos(@Valid @RequestBody CanjearPuntosRequestDTO request) {
         ProgramaFidelidadResponseDTO programa = fidelidadService.canjearPuntos(request);
 
@@ -110,6 +115,7 @@ public class ProgramaFidelidadController {
      * @return lista de movimientos
      */
     @GetMapping("/historial/cliente/{clienteId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<List<MovimientoPuntoResponseDTO>> obtenerHistorial(@PathVariable Integer clienteId) {
         List<MovimientoPuntoResponseDTO> historial = fidelidadService.obtenerHistorial(clienteId);
         return ResponseEntity.ok(historial);
@@ -122,6 +128,7 @@ public class ProgramaFidelidadController {
      * @return descuento en MXN
      */
     @GetMapping("/calcular-descuento")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Map<String, Object>> calcularDescuento(@RequestParam Integer puntos) {
         BigDecimal descuento = fidelidadService.calcularDescuentoPorPuntos(puntos);
 
@@ -138,6 +145,7 @@ public class ProgramaFidelidadController {
      * @return estadísticas del sistema
      */
     @GetMapping("/estadisticas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<EstadisticasFidelidadDTO> obtenerEstadisticas() {
         EstadisticasFidelidadDTO estadisticas = fidelidadService.obtenerEstadisticas();
         return ResponseEntity.ok(estadisticas);
@@ -150,6 +158,7 @@ public class ProgramaFidelidadController {
      * @return respuesta de éxito
      */
     @PatchMapping("/programa/cliente/{clienteId}/desactivar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Map<String, Object>> desactivarPrograma(@PathVariable Integer clienteId) {
         fidelidadService.desactivarPrograma(clienteId);
 
@@ -167,6 +176,7 @@ public class ProgramaFidelidadController {
      * @return respuesta de éxito
      */
     @PatchMapping("/programa/cliente/{clienteId}/reactivar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Map<String, Object>> reactivarPrograma(@PathVariable Integer clienteId) {
         fidelidadService.reactivarPrograma(clienteId);
 

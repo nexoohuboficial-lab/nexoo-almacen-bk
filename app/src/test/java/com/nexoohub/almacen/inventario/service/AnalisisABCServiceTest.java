@@ -195,6 +195,7 @@ class AnalisisABCServiceTest {
         when(analisisRepository.existsBySucursalIdAndFechaAnalisis(anyInt(), any(LocalDate.class)))
             .thenReturn(false);
         
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<AnalisisABC>> captor = ArgumentCaptor.forClass(List.class);
         when(analisisRepository.saveAll(captor.capture())).thenAnswer(i -> i.getArgument(0));
         
@@ -254,6 +255,7 @@ class AnalisisABCServiceTest {
         when(analisisRepository.existsBySucursalIdAndFechaAnalisis(anyInt(), any(LocalDate.class)))
             .thenReturn(false);
         
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<AnalisisABC>> captor = ArgumentCaptor.forClass(List.class);
         when(analisisRepository.saveAll(captor.capture())).thenAnswer(i -> i.getArgument(0));
         when(mapper.toDTO(any(AnalisisABC.class), any(), any())).thenReturn(new AnalisisABCResponseDTO());

@@ -1,0 +1,645 @@
+openapi: 3.0.1
+info:
+  title: Métrica Operativa Controller API
+  description: |
+    API REST para análisis de métricas operacionales y eficiencia de procesos.
+    
+    **Responde:**
+    - ¿Cuánto movimiento hay entre sucursales?
+    - ¿Qué tan frecuentes son nuestras compras?
+    - ¿Cuál es la velocidad de rotación del inventario?
+    
+    **Métricas clave:**
+    - Traspasos entre sucursales (entrada/salida/neto)
+    - Compras a proveedores (total, unidades, gasto)
+    - Ventas a clientes (total, unidades, ingresos)
+    - Ratios de eficiencia (entrada/salida, productividad)
+    - Clasificaciones automáticas (actividad, balance)
+    - Comparación con períodos anteriores
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /api/v1/metricas/operativas/analisis:
+    post:
+      tags:
+        - Métrica Operativa
+      summary: Análisis operativo personalizado
+      description: |
+        Genera métricas operacionales para un período específico con opciones de configuración.
+        
+        **Métricas calculadas:**
+        - **Traspasos:** Total traspasos, unidades entrada/salida, balance neto, promedio unidades/traspaso, tendencia
+        - **Compras:** Total compras, unidades compradas, gasto total, compra promedio, frecuencia (compras/día)
+        - **Ventas:** Total ventas, unidades vendidas, ingresos totales, venta promedio, frecuencia (ventas/día)
+        - **Eficiencia:** Ratio entrada/salida, productividad diaria, tasa rotación, operaciones/día, clasificación actividad, balance operacional
+        - **Comparación:** Si se solicita, compara con período anterior mostrando crecimientos % y tendencias
+        - **Detalle Sucursales:** Si se solicita, incluye métricas individuales de cada sucursal
+      operationId: generarAnalisisOperativo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisOperativoRequestDTO'
+            examples:
+              ConsolidadoSimple:
+                summary: Análisis consolidado básico
+                value:
+                  fechaInicio: "2024-01-01"
+                  fechaFin: "2024-01-31"
+                  sucursalId: null
+                  tipoPeriodo: "MENSUAL"
+                  incluirDetalleSucursales: false
+                  compararPeriodoAnterior: false
+              ConsolidadoCompleto:
+                summary: Análisis consolidado con comparación y detalle
+                value:
+                  fechaInicio: "2024-01-01"
+                  fechaFin: "2024-01-31"
+                  sucursalId: null
+                  tipoPeriodo: "MENSUAL"
+                  incluirDetalleSucursales: true
+                  compararPeriodoAnterior: true
+                  limitTopSucursales: 5
+              PorSucursal:
+                summary: Análisis de una sucursal específica
+                value:
+                  fechaInicio: "2024-01-01"
+                  fechaFin: "2024-01-31"
+                  sucursalId: 1
+                  tipoPeriodo: "MENSUAL"
+                  incluirDetalleSucursales: false
+                  compararPeriodoAnterior: true
+      responses:
+        '200':
+          description: Análisis generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaOperativaResponseDTO'
+        '400':
+          description: Parámetros inválidos (fechas null, fechaFin < fechaInicio)
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/operativas/mes-actual:
+    get:
+      tags:
+        - Métrica Operativa
+      summary: Análisis del mes actual
+      description: |
+        Genera análisis operativo consolidado del mes en curso con comparación automática vs mes anterior.
+        
+        Útil para dashboards operativos que necesitan acceso rápido a métricas del período vigente.
+      operationId: analizarMesActual
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de la sucursal (null = consolidado)
+          example: null
+      responses:
+        '200':
+          description: Métricas del mes actual generadas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaOperativaResponseDTO'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/operativas/mes-anterior:
+    get:
+      tags:
+        - Métrica Operativa
+      summary: Análisis del mes anterior
+      description: |
+        Genera análisis operativo consolidado del mes pasado.
+        
+        Útil para reportes mensuales y análisis retrospectivos.
+      operationId: analizarMesAnterior
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de la sucursal (null = consolidado)
+          example: null
+      responses:
+        '200':
+          description: Métricas del mes anterior generadas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaOperativaResponseDTO'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/operativas/ultimos-7-dias:
+    get:
+      tags:
+        - Métrica Operativa
+      summary: Análisis de los últimos 7 días
+      description: |
+        Genera análisis operativo de la última semana con comparación vs 7 días anteriores.
+        
+        Ideal para monitoreo semanal de operaciones y detección temprana de anomalías.
+      operationId: analizarUltimos7Dias
+      parameters:
+        - name: sucursalId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID de la sucursal (null = consolidado)
+          example: null
+      responses:
+        '200':
+          description: Métricas de la última semana generadas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaOperativaResponseDTO'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/operativas/por-sucursal/{id}:
+    post:
+      tags:
+        - Métrica Operativa
+      summary: Análisis de una sucursal específica
+      description: |
+        Genera análisis operativo para una sucursal en particular, ideal para gerentes de sucursal.
+      operationId: analizarPorSucursal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la sucursal a analizar
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisOperativoRequestDTO'
+      responses:
+        '200':
+          description: Análisis de sucursal generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaOperativaResponseDTO'
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+        '404':
+          description: Sucursal no encontrada
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/operativas/generar-guardar:
+    post:
+      tags:
+        - Métrica Operativa
+      summary: Generar y guardar snapshot
+      description: |
+        Genera análisis operativo y guarda un snapshot en la base de datos para consultas históricas rápidas.
+        
+        Útil para reportes mensuales automatizados que se guardan para auditoría.
+      operationId: generarYGuardarSnapshot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisOperativoRequestDTO'
+      responses:
+        '201':
+          description: Snapshot generado y guardado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaOperativaResponseDTO'
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+        '409':
+          description: Ya existe un snapshot para este período y sucursal
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/operativas/consolidado:
+    get:
+      tags:
+        - Métrica Operativa
+      summary: Obtener snapshot consolidado guardado
+      description: |
+        Recupera un snapshot previamente guardado de métricas consolidadas.
+        
+        Retorna 404 si no existe snapshot para el período especificado.
+      operationId: obtenerSnapshotConsolidado
+      parameters:
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha de inicio del período
+          example: "2024-01-01"
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha de fin del período
+          example: "2024-01-31"
+      responses:
+        '200':
+          description: Snapshot recuperado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaOperativaResponseDTO'
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+        '404':
+          description: No existe snapshot para el período especificado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+  /api/v1/metricas/operativas/historial:
+    get:
+      tags:
+        - Métrica Operativa
+      summary: Obtener historial de snapshots
+      description: |
+        Retorna los últimos snapshots consolidados hasta una fecha específica.
+        
+        Útil para gráficos de tendencias históricas.
+      operationId: obtenerHistorialSnapshots
+      parameters:
+        - name: fechaHasta
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Fecha límite para recuperar snapshots
+          example: "2024-12-31"
+        - name: limite
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Cantidad máxima de snapshots a retornar
+          example: 10
+      responses:
+        '200':
+          description: Historial recuperado exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricaOperativaResponseDTO'
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    AnalisisOperativoRequestDTO:
+      type: object
+      required:
+        - fechaInicio
+        - fechaFin
+        - tipoPeriodo
+      properties:
+        fechaInicio:
+          type: string
+          format: date
+          description: Fecha de inicio del período a analizar
+          example: "2024-01-01"
+        fechaFin:
+          type: string
+          format: date
+          description: Fecha de fin del período a analizar
+          example: "2024-01-31"
+        sucursalId:
+          type: integer
+          nullable: true
+          description: ID de la sucursal (null = análisis consolidado)
+          example: null
+        tipoPeriodo:
+          type: string
+          enum: [DIARIO, SEMANAL, MENSUAL, TRIMESTRAL, ANUAL, PERSONALIZADO]
+          description: Tipo de período para clasificación
+          example: "MENSUAL"
+        incluirDetalleSucursales:
+          type: boolean
+          default: false
+          description: Si true, incluye métricas individuales de cada sucursal
+          example: false
+        compararPeriodoAnterior:
+          type: boolean
+          default: false
+          description: Si true, compara con período anterior del mismo tamaño
+          example: false
+        limitTopSucursales:
+          type: integer
+          default: 5
+          description: Cantidad de sucursales top a incluir en detalle
+          example: 5
+
+    MetricaOperativaResponseDTO:
+      type: object
+      properties:
+        periodoInicio:
+          type: string
+          format: date
+          description: Fecha de inicio del período analizado
+          example: "2024-01-01"
+        periodoFin:
+          type: string
+          format: date
+          description: Fecha de fin del período analizado
+          example: "2024-01-31"
+        tipoPeriodo:
+          type: string
+          enum: [DIARIO, SEMANAL, MENSUAL, TRIMESTRAL, ANUAL, PERSONALIZADO]
+          description: Tipo de período
+          example: "MENSUAL"
+        diasPeriodo:
+          type: integer
+          description: Duración del período en días
+          example: 31
+        sucursalId:
+          type: integer
+          nullable: true
+          description: ID de la sucursal (null = consolidado)
+          example: null
+        nombreSucursal:
+          type: string
+          nullable: true
+          description: Nombre de la sucursal (null si es consolidado)
+          example: null
+        traspasos:
+          $ref: '#/components/schemas/ResumenTraspasosDTO'
+        compras:
+          $ref: '#/components/schemas/ResumenComprasDTO'
+        ventas:
+          $ref: '#/components/schemas/ResumenVentasOperativasDTO'
+        eficiencia:
+          $ref: '#/components/schemas/IndicadoresEficienciaDTO'
+        comparacion:
+          $ref: '#/components/schemas/ComparacionPeriodoDTO'
+          nullable: true
+          description: Comparación con período anterior (null si no se solicitó)
+        detalleSucursales:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleSucursalDTO'
+          nullable: true
+          description: Métricas individuales por sucursal (null si no se solicitó)
+
+    ResumenTraspasosDTO:
+      type: object
+      properties:
+        totalTraspasos:
+          type: integer
+          description: Total de traspasos entre sucursales
+          example: 45
+        unidadesEntrada:
+          type: integer
+          description: Unidades recibidas de otras sucursales
+          example: 320
+        unidadesSalida:
+          type: integer
+          description: Unidades enviadas a otras sucursales
+          example: 280
+        unidadesNeto:
+          type: integer
+          description: Balance neto (entrada - salida)
+          example: 40
+        promedioUnidadesPorTraspaso:
+          type: number
+          format: decimal
+          description: Promedio de unidades por traspaso
+          example: 13.33
+        tendenciaTraspaso:
+          type: string
+          enum: [ENTRADA_NETA, SALIDA_NETA, EQUILIBRADO]
+          description: Clasificación del balance de traspasos
+          example: "ENTRADA_NETA"
+
+    ResumenComprasDTO:
+      type: object
+      properties:
+        totalCompras:
+          type: integer
+          description: Cantidad total de compras a proveedores
+          example: 28
+        unidadesCompradas:
+          type: integer
+          description: Total de unidades adquiridas
+          example: 1250
+        gastoTotal:
+          type: number
+          format: decimal
+          description: Monto total invertido en compras
+          example: 85000.00
+        compraPromedio:
+          type: number
+          format: decimal
+          description: Gasto promedio por compra
+          example: 3035.71
+        frecuenciaCompras:
+          type: number
+          format: decimal
+          description: Compras por día (totalCompras / diasPeriodo)
+          example: 0.90
+
+    ResumenVentasOperativasDTO:
+      type: object
+      properties:
+        totalVentas:
+          type: integer
+          description: Cantidad total de ventas realizadas
+          example: 456
+        unidadesVendidas:
+          type: integer
+          description: Total de unidades vendidas
+          example: 1850
+        ingresoTotal:
+          type: number
+          format: decimal
+          description: Ingresos totales generados
+          example: 125000.00
+        ventaPromedio:
+          type: number
+          format: decimal
+          description: Ingreso promedio por venta
+          example: 274.12
+        frecuenciaVentas:
+          type: number
+          format: decimal
+          description: Ventas por día (totalVentas / diasPeriodo)
+          example: 14.71
+
+    IndicadoresEficienciaDTO:
+      type: object
+      properties:
+        ratioEntradaSalida:
+          type: number
+          format: decimal
+          description: "(compras + traspasoEntrada) / (ventas + traspasoSalida)"
+          example: 1.15
+        productividadDiariaVentas:
+          type: number
+          format: decimal
+          description: Ingresos por día (ingresoTotal / diasPeriodo)
+          example: 4032.26
+        tasaRotacionInventario:
+          type: number
+          format: decimal
+          description: Unidades vendidas / total unidades
+          example: 0.85
+        totalOperaciones:
+          type: integer
+          description: Suma de traspasos + compras + ventas
+          example: 529
+        operacionesPromedioDia:
+          type: number
+          format: decimal
+          description: Operaciones por día (totalOperaciones / diasPeriodo)
+          example: 17.06
+        clasificacionActividad:
+          type: string
+          enum: [ALTO, MEDIO, BAJO]
+          description: "ALTO: >75 ops/día, MEDIO: 25-75, BAJO: <25"
+          example: "BAJO"
+        balanceOperacional:
+          type: string
+          enum: [POSITIVO, NEGATIVO, EQUILIBRADO]
+          description: "POSITIVO: ratio >1.1 (acumulando), NEGATIVO: <0.9 (reduciendo), EQUILIBRADO: 0.9-1.1"
+          example: "POSITIVO"
+
+    ComparacionPeriodoDTO:
+      type: object
+      properties:
+        operacionesPeriodoAnterior:
+          type: integer
+          description: Total operaciones del período anterior
+          example: 485
+        operacionesPeriodoActual:
+          type: integer
+          description: Total operaciones del período actual
+          example: 529
+        crecimientoOperaciones:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento en operaciones
+          example: 9.07
+        crecimientoVentas:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento en ventas
+          example: 12.50
+        crecimientoCompras:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento en compras
+          example: 7.69
+        tendenciaCrecimiento:
+          type: string
+          enum: [CRECIMIENTO, DECRECIMIENTO, ESTABLE]
+          description: "CRECIMIENTO: >10%, DECRECIMIENTO: <-10%, ESTABLE: -10% a 10%"
+          example: "CRECIMIENTO"
+
+    DetalleSucursalDTO:
+      type: object
+      properties:
+        sucursalId:
+          type: integer
+          description: ID de la sucursal
+          example: 1
+        nombreSucursal:
+          type: string
+          description: Nombre de la sucursal
+          example: "Sucursal Centro"
+        totalOperaciones:
+          type: integer
+          description: Total de operaciones de esta sucursal
+          example: 156
+        totalVentas:
+          type: integer
+          description: Total de ventas realizadas
+          example: 128
+        totalCompras:
+          type: integer
+          description: Total de compras recibidas
+          example: 12
+        totalTraspasos:
+          type: integer
+          description: Total de traspasos (enviados + recibidos)
+          example: 16
+        ingresoTotalVentas:
+          type: number
+          format: decimal
+          description: Ingresos generados por ventas
+          example: 35000.00
+        clasificacionActividad:
+          type: string
+          enum: [ALTO, MEDIO, BAJO]
+          description: Clasificación de actividad de esta sucursal
+          example: "MEDIO"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtenido del endpoint /api/v1/auth/login

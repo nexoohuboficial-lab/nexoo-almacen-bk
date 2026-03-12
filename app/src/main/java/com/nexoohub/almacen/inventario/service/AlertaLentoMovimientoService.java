@@ -3,11 +3,7 @@ package com.nexoohub.almacen.inventario.service;
 import com.nexoohub.almacen.common.exception.ResourceNotFoundException;
 import com.nexoohub.almacen.inventario.dto.*;
 import com.nexoohub.almacen.inventario.entity.AlertaLentoMovimiento;
-import com.nexoohub.almacen.inventario.entity.InventarioSucursal;
-import com.nexoohub.almacen.inventario.entity.ProductoMaestro;
 import com.nexoohub.almacen.inventario.repository.AlertaLentoMovimientoRepository;
-import com.nexoohub.almacen.inventario.repository.InventarioSucursalRepository;
-import com.nexoohub.almacen.inventario.repository.ProductoMaestroRepository;
 import com.nexoohub.almacen.sucursal.entity.Sucursal;
 import com.nexoohub.almacen.sucursal.repository.SucursalRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -47,18 +43,12 @@ import java.util.List;
 public class AlertaLentoMovimientoService {
 
     private final AlertaLentoMovimientoRepository alertaRepository;
-    private final InventarioSucursalRepository inventarioRepository;
-    private final ProductoMaestroRepository productoRepository;
     private final SucursalRepository sucursalRepository;
 
     public AlertaLentoMovimientoService(
             AlertaLentoMovimientoRepository alertaRepository,
-            InventarioSucursalRepository inventarioRepository,
-            ProductoMaestroRepository productoRepository,
             SucursalRepository sucursalRepository) {
         this.alertaRepository = alertaRepository;
-        this.inventarioRepository = inventarioRepository;
-        this.productoRepository = productoRepository;
         this.sucursalRepository = sucursalRepository;
     }
 

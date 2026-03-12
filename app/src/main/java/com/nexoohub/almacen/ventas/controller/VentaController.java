@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +57,7 @@ public class VentaController {
      * @throws StockInsuficienteException si no hay suficiente inventario
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<VentaResponseDTO> realizarVenta(@Valid @RequestBody VentaRequestDTO request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Venta ventaRealizada = ventaService.procesarVenta(request, username);

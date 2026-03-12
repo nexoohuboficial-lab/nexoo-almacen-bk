@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ public class TraspasoController {
     private TraspasoService traspasoService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR', 'ALMACENISTA')")
     public ResponseEntity<Map<String, Object>> realizarTraspaso(@Valid @RequestBody TraspasoRequestDTO request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         

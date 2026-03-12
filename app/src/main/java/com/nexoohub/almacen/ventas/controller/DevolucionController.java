@@ -6,6 +6,7 @@ import com.nexoohub.almacen.ventas.service.DevolucionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,6 +58,7 @@ public class DevolucionController {
      * @return devolución procesada con código 201 (Created)
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'CAJERO')")
     public ResponseEntity<DevolucionResponseDTO> procesarDevolucion(@Valid @RequestBody DevolucionRequestDTO request) {
         DevolucionResponseDTO response = devolucionService.procesarDevolucion(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -69,6 +71,7 @@ public class DevolucionController {
      * @return devolución encontrada
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<DevolucionResponseDTO> obtenerDevolucionPorId(@PathVariable("id") Integer id) {
         DevolucionResponseDTO response = devolucionService.obtenerDevolucionPorId(id);
         return ResponseEntity.ok(response);
@@ -81,6 +84,7 @@ public class DevolucionController {
      * @return lista de devoluciones
      */
     @GetMapping("/venta/{ventaId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<List<DevolucionResponseDTO>> obtenerDevolucionesPorVenta(@PathVariable("ventaId") Integer ventaId) {
         List<DevolucionResponseDTO> response = devolucionService.obtenerDevolucionesPorVenta(ventaId);
         return ResponseEntity.ok(response);

@@ -1,12 +1,10 @@
 package com.nexoohub.almacen.ventas.scheduled;
 
 import com.nexoohub.almacen.ventas.dto.ReservaResponseDTO;
-import com.nexoohub.almacen.ventas.entity.Reserva;
 import com.nexoohub.almacen.ventas.service.ReservaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

@@ -4,6 +4,7 @@ import com.nexoohub.almacen.finanzas.dto.AuditoriaPrecioDTO;
 import com.nexoohub.almacen.finanzas.repository.HistorialPrecioRepository;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,7 @@ public class AuditoriaPrecioController {
      * @return historial de cambios
      */
     @GetMapping("/producto/{skuInterno}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<AuditoriaPrecioDTO>> obtenerHistorialProducto(
             @PathVariable("skuInterno") String skuInterno) {
         List<AuditoriaPrecioDTO> historial = historialPrecioRepository.obtenerHistorialPorProducto(skuInterno);
@@ -46,6 +48,7 @@ public class AuditoriaPrecioController {
      * @return cambios en el rango
      */
     @GetMapping("/periodo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<AuditoriaPrecioDTO>> obtenerCambiosPorPeriodo(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin) {
@@ -60,6 +63,7 @@ public class AuditoriaPrecioController {
      * @return cambios significativos
      */
     @GetMapping("/significativos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<AuditoriaPrecioDTO>> obtenerCambiosSignificativos(
             @RequestParam(defaultValue = "10.0") Double porcentaje) {
         List<AuditoriaPrecioDTO> cambios = historialPrecioRepository.obtenerCambiosSignificativos(

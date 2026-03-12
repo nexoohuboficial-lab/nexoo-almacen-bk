@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -27,6 +28,7 @@ public class MotoController {
     private MotoMapper mapper;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'VENDEDOR', 'ALMACENISTA', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<Page<MotoResponseDTO>> listarMotos(
             @PageableDefault(size = 50, sort = "marca") Pageable pageable) {
         Page<Moto> motos = motoRepository.findAll(pageable);
@@ -34,6 +36,7 @@ public class MotoController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<Map<String, Object>> crearMoto(@Valid @RequestBody Moto moto) {
         Moto guardada = motoRepository.save(moto);
         
@@ -46,6 +49,7 @@ public class MotoController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<Map<String, Object>> actualizarMoto(@PathVariable("id") Integer id, @Valid @RequestBody Moto detalles) {
         return motoRepository.findById(id)
                 .map(motoExistente -> {

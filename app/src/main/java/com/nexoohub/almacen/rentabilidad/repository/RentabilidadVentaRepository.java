@@ -90,18 +90,34 @@ public interface RentabilidadVentaRepository extends JpaRepository<RentabilidadV
     /**
      * Obtiene las N ventas más rentables.
      * 
-     * @param limite Número máximo de resultados
      * @return Lista de ventas más rentables
      */
     @Query("SELECT rv FROM RentabilidadVenta rv ORDER BY rv.utilidadBruta DESC")
-    List<RentabilidadVenta> obtenerVentasMasRentables(@Param("limite") int limite);
+    List<RentabilidadVenta> obtenerVentasMasRentables();
 
     /**
      * Obtiene las N ventas menos rentables (incluye pérdidas).
      * 
-     * @param limite Número máximo de resultados
      * @return Lista de ventas menos rentables
      */
     @Query("SELECT rv FROM RentabilidadVenta rv ORDER BY rv.utilidadBruta ASC")
-    List<RentabilidadVenta> obtenerVentasMenosRentables(@Param("limite") int limite);
+    List<RentabilidadVenta> obtenerVentasMenosRentables();
+
+    // ==================== MÉTODOS PARA MÉTRICAS FINANCIERAS ====================
+
+    /**
+     * Calcula el costo total de ventas (COGS) en un período.
+     * Utilizado para métricas financieras.
+     * 
+     * @param fechaInicio Fecha de inicio
+     * @param fechaFin Fecha de fin
+     * @return Suma total de costos
+     */
+    @Query("SELECT COALESCE(SUM(rv.costoTotal), 0) FROM RentabilidadVenta rv " +
+           "WHERE rv.id IN (SELECT rv2.id FROM RentabilidadVenta rv2 " +
+           "JOIN rv2.venta v WHERE v.fechaVenta BETWEEN :fechaInicio AND :fechaFin)")
+    BigDecimal calcularCostoTotalPeriodo(
+        @Param("fechaInicio") java.time.LocalDate fechaInicio, 
+        @Param("fechaFin") java.time.LocalDate fechaFin
+    );
 }

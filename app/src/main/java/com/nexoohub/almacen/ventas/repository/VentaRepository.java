@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -74,5 +75,110 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
         @Param("vendedorId") Integer vendedorId,
         @Param("inicio") LocalDateTime inicio,
         @Param("fin") LocalDateTime fin
+    );
+
+    // ==================== MÉTODOS PARA MÉTRICAS FINANCIERAS ====================
+
+    /**
+     * Obtiene ventas del período (para métricas financieras)
+     * Retorna Object[] con: [ventaId, total, fechaVenta]
+     */
+    @Query("SELECT v.id, v.total, v.fechaVenta FROM Venta v " +
+           "WHERE v.fechaVenta BETWEEN :inicio AND :fin")
+    List<Object[]> findVentasEnPeriodo(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin
+    );
+
+    /**
+     * Obtiene ventas del período por sucursal
+     */
+    @Query("SELECT v.id, v.total, v.fechaVenta FROM Venta v " +
+           "WHERE v.sucursalId = :sucursalId " +
+           "AND v.fechaVenta BETWEEN :inicio AND :fin")
+    List<Object[]> findVentasEnPeriodoPorSucursal(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin,
+        @Param("sucursalId") Integer sucursalId
+    );
+
+    /**
+     * Calcula el total de ventas en un período
+     */
+    @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v " +
+           "WHERE v.fechaVenta BETWEEN :inicio AND :fin")
+    BigDecimal calcularVentasTotalesPeriodo(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin
+    );
+
+    /**
+     * Cuenta ventas en un período
+     */
+    @Query("SELECT COUNT(v) FROM Venta v " +
+           "WHERE v.fechaVenta BETWEEN :inicio AND :fin")
+    Long contarVentasPeriodo(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin
+    );
+
+    /**
+     * Cuenta clientes únicos en un período
+     */
+    @Query("SELECT COUNT(DISTINCT v.clienteId) FROM Venta v " +
+           "WHERE v.fechaVenta BETWEEN :inicio AND :fin")
+    Long contarClientesUnicosPeriodo(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin
+    );
+
+    /**
+     * Calcula el total de ventas en un período por sucursal
+     */
+    @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v " +
+           "WHERE v.sucursalId = :sucursalId " +
+           "AND v.fechaVenta BETWEEN :inicio AND :fin")
+    BigDecimal calcularVentasTotalesPeriodoPorSucursal(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin,
+        @Param("sucursalId") Integer sucursalId
+    );
+
+    /**
+     * Cuenta ventas en un período por sucursal
+     */
+    @Query("SELECT COUNT(v) FROM Venta v " +
+           "WHERE v.sucursalId = :sucursalId " +
+           "AND v.fechaVenta BETWEEN :inicio AND :fin")
+    Long contarVentasPeriodoPorSucursal(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin,
+        @Param("sucursalId") Integer sucursalId
+    );
+
+    /**
+     * Cuenta clientes únicos en un período por sucursal
+     */
+    @Query("SELECT COUNT(DISTINCT v.clienteId) FROM Venta v " +
+           "WHERE v.sucursalId = :sucursalId " +
+           "AND v.fechaVenta BETWEEN :inicio AND :fin")
+    Long contarClientesUnicosPeriodoPorSucursal(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin,
+        @Param("sucursalId") Integer sucursalId
+    );
+
+    /**
+     * Calcula ventas por método de pago en un período
+     */
+    @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v " +
+           "WHERE v.fechaVenta BETWEEN :inicio AND :fin " +
+           "AND v.metodoPago = :metodoPago " +
+           "AND (:sucursalId IS NULL OR v.sucursalId = :sucursalId)")
+    BigDecimal calcularVentasPorMetodoPago(
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin,
+        @Param("metodoPago") String metodoPago,
+        @Param("sucursalId") Integer sucursalId
     );
 }

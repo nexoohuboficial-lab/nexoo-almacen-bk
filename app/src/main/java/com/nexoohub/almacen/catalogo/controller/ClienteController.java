@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class ClienteController {
      * @return página de clientes en formato DTO
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO', 'AUDITOR')")
     public ResponseEntity<Page<ClienteResponseDTO>> listarClientes(
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable) {
         Page<Cliente> clientes = clienteRepository.findAll(pageable);
@@ -61,6 +63,7 @@ public class ClienteController {
      * @return respuesta con ID generado y mensaje de éxito
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Map<String, Object>> crearCliente(@Valid @RequestBody Cliente cliente) {
         Cliente guardado = clienteRepository.save(cliente);
         
@@ -82,6 +85,7 @@ public class ClienteController {
      * @return respuesta de éxito o 404 si no existe
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<Map<String, Object>> actualizarCliente(@PathVariable("id") Integer id, @Valid @RequestBody Cliente detalles) {
         return clienteRepository.findById(id)
                 .map(clienteExistente -> {

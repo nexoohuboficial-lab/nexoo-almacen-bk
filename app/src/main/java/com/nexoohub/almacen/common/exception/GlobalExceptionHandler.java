@@ -166,14 +166,14 @@ public class GlobalExceptionHandler {
 
     /**
      * Maneja cualquier BusinessException no capturada específicamente.
-     * HTTP 500 INTERNAL SERVER ERROR - Error de lógica de negocio genérico.
+     * HTTP 400 BAD REQUEST - Errores de validación de lógica de negocio.
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusinessException(BusinessException ex) {
-        log.error("Error de negocio: {} (Código: {})", ex.getMessage(), ex.getErrorCode(), ex);
+        log.warn("Error de validación de negocio: {} (Código: {})", ex.getMessage(), ex.getErrorCode());
         
         return buildErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR, 
+            HttpStatus.BAD_REQUEST, 
             ex.getErrorCode(), 
             ex.getMessage(), 
             null

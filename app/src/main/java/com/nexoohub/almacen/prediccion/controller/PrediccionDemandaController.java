@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,6 +48,7 @@ public class PrediccionDemandaController {
         summary = "Generar predicciones de demanda",
         description = "Analiza histórico de ventas y genera predicciones para un periodo futuro"
     )
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     public ResponseEntity<List<PrediccionDemandaResponseDTO>> generarPredicciones(
             @Valid @RequestBody GenerarPrediccionRequestDTO request) {
         List<PrediccionDemandaResponseDTO> predicciones = prediccionService
@@ -63,6 +65,7 @@ public class PrediccionDemandaController {
         summary = "Obtener predicción por ID",
         description = "Devuelve los detalles de una predicción específica"
     )
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     public ResponseEntity<PrediccionDemandaResponseDTO> obtenerPrediccion(
             @Parameter(description = "ID de la predicción") @PathVariable Integer id) {
         PrediccionDemandaResponseDTO prediccion = prediccionService.obtenerPrediccion(id);
@@ -74,6 +77,7 @@ public class PrediccionDemandaController {
         summary = "Obtener predicciones de un producto",
         description = "Devuelve todas las predicciones de un producto en una sucursal"
     )
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     public ResponseEntity<List<PrediccionDemandaResponseDTO>> obtenerPrediccionesProducto(
             @Parameter(description = "SKU del producto") @PathVariable String skuProducto,
             @Parameter(description = "ID de la sucursal") @RequestParam Integer sucursalId) {
@@ -91,6 +95,7 @@ public class PrediccionDemandaController {
         summary = "Obtener recomendaciones de compra",
         description = "Devuelve lista de productos que necesitan reorden para un periodo"
     )
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     public ResponseEntity<RecomendacionCompraDTO> obtenerRecomendacionesCompra(
             @Parameter(description = "ID de la sucursal") @RequestParam Integer sucursalId,
             @Parameter(description = "Año del periodo") @RequestParam Integer anio,

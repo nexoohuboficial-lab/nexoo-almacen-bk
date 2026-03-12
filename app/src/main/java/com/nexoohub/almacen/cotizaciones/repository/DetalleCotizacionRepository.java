@@ -48,16 +48,17 @@ public interface DetalleCotizacionRepository extends JpaRepository<DetalleCotiza
     Long countByCotizacion_Id(Long cotizacionId);
     
     /**
-     * Obtener productos más cotizados en un periodo
+     * Obteneproductos más cotizados en un periodo
      * Retorna: [sku_interno, nombre_producto, cantidad_total_cotizada, veces_cotizado]
      */
-    @Query("SELECT d.skuInterno, d.producto.nombreComercial, " +
-           "SUM(d.cantidad), COUNT(DISTINCT d.cotizacion.id) " +
+    @Query("SELECT d.skuInterno, p.nombreComercial, " +
+           "SUM(d.cantidad), COUNT(DISTINCT d.cotizacionId) " +
            "FROM DetalleCotizacion d " +
-           "JOIN d.cotizacion c " +
+           "JOIN ProductoMaestro p ON p.skuInterno = d.skuInterno " +
+           "JOIN Cotizacion c ON c.id = d.cotizacionId " +
            "WHERE c.fechaCotizacion BETWEEN :fechaInicio AND :fechaFin " +
            "AND c.estado IN ('ENVIADA', 'ACEPTADA', 'CONVERTIDA') " +
-           "GROUP BY d.skuInterno, d.producto.nombreComercial " +
+           "GROUP BY d.skuInterno, p.nombreComercial " +
            "ORDER BY SUM(d.cantidad) DESC")
     List<Object[]> obtenerProductosMasCotizados(
         @Param("fechaInicio") java.time.LocalDateTime fechaInicio,
@@ -68,13 +69,14 @@ public interface DetalleCotizacionRepository extends JpaRepository<DetalleCotiza
      * Obtener valor total cotizado por producto
      * Retorna: [sku_interno, nombre_producto, valor_total]
      */
-    @Query("SELECT d.skuInterno, d.producto.nombreComercial, " +
+    @Query("SELECT d.skuInterno, p.nombreComercial, " +
            "SUM(d.precioUnitario * d.cantidad - d.descuentoEspecial) " +
            "FROM DetalleCotizacion d " +
-           "JOIN d.cotizacion c " +
+           "JOIN ProductoMaestro p ON p.skuInterno = d.skuInterno " +
+           "JOIN Cotizacion c ON c.id = d.cotizacionId " +
            "WHERE c.fechaCotizacion BETWEEN :fechaInicio AND :fechaFin " +
            "AND c.estado IN ('ENVIADA', 'ACEPTADA', 'CONVERTIDA') " +
-           "GROUP BY d.skuInterno, d.producto.nombreComercial " +
+           "GROUP BY d.skuInterno, p.nombreComercial " +
            "ORDER BY SUM(d.precioUnitario * d.cantidad - d.descuentoEspecial) DESC")
     List<Object[]> obtenerValorCotizadoPorProducto(
         @Param("fechaInicio") java.time.LocalDateTime fechaInicio,
@@ -85,13 +87,13 @@ public interface DetalleCotizacionRepository extends JpaRepository<DetalleCotiza
      * Calcular el descuento total aplicado en una cotización
      */
     @Query("SELECT COALESCE(SUM(d.descuentoEspecial), 0) FROM DetalleCotizacion d " +
-           "WHERE d.cotizacion.id = :cotizacionId")
+           "WHERE d.cotizacionId = :cotizacionId")
     java.math.BigDecimal calcularDescuentoTotalCotizacion(@Param("cotizacionId") Long cotizacionId);
     
     /**
      * Obtener cantidad total de items en una cotización
      */
     @Query("SELECT COALESCE(SUM(d.cantidad), 0) FROM DetalleCotizacion d " +
-           "WHERE d.cotizacion.id = :cotizacionId")
+           "WHERE d.cotizacionId = :cotizacionId")
     Integer calcularCantidadTotalItems(@Param("cotizacionId") Long cotizacionId);
 }

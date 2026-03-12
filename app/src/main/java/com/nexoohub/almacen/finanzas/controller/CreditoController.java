@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -53,6 +54,7 @@ public class CreditoController {
     // ==================== GESTIÓN DE LÍMITES ====================
 
     @PostMapping("/limites")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR')")
     @Operation(summary = "Crear límite de crédito", 
                description = "Configura el límite de crédito para un cliente")
     @ApiResponses(value = {
@@ -69,6 +71,7 @@ public class CreditoController {
     }
 
     @PutMapping("/limites/cliente/{clienteId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @Operation(summary = "Actualizar límite de crédito",
                description = "Modifica el límite de crédito de un cliente existente")
     @ApiResponses(value = {
@@ -87,6 +90,7 @@ public class CreditoController {
     }
 
     @GetMapping("/limites/cliente/{clienteId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Consultar límite de crédito",
                description = "Obtiene el límite de crédito de un cliente con saldo y disponibilidad")
     @ApiResponses(value = {
@@ -103,6 +107,7 @@ public class CreditoController {
     }
 
     @GetMapping("/limites")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Listar todos los límites de crédito",
                description = "Obtiene la lista completa de límites de crédito configurados")
     @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente")
@@ -113,6 +118,7 @@ public class CreditoController {
     }
 
     @GetMapping("/limites/estado/{estado}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Listar límites por estado",
                description = "Filtra límites de crédito por estado: ACTIVO, BLOQUEADO, SUSPENDIDO, INACTIVO")
     @ApiResponse(responseCode = "200", description = "Lista filtrada obtenida")
@@ -125,6 +131,7 @@ public class CreditoController {
     }
 
     @GetMapping("/limites/activos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Listar créditos activos",
                description = "Obtiene todos los clientes con crédito activo")
     public ResponseEntity<List<LimiteCreditoResponseDTO>> listarActivos() {
@@ -134,6 +141,7 @@ public class CreditoController {
     }
 
     @GetMapping("/limites/bloqueados")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     @Operation(summary = "Listar créditos bloqueados",
                description = "Obtiene todos los clientes con crédito bloqueado")
     public ResponseEntity<List<LimiteCreditoResponseDTO>> listarBloqueados() {
@@ -143,6 +151,7 @@ public class CreditoController {
     }
 
     @GetMapping("/limites/riesgo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     @Operation(summary = "Listar clientes en riesgo",
                description = "Obtiene clientes con utilización >= 80% de su límite de crédito")
     @ApiResponse(responseCode = "200", description = "Lista de clientes en riesgo")
@@ -153,6 +162,7 @@ public class CreditoController {
     }
 
     @GetMapping("/limites/sobregiro")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     @Operation(summary = "Listar clientes en sobregiro",
                description = "Obtiene clientes que excedieron su límite de crédito")
     @ApiResponse(responseCode = "200", description = "Lista de clientes en sobregiro")
@@ -165,6 +175,7 @@ public class CreditoController {
     // ==================== VALIDACIÓN ====================
 
     @GetMapping("/validar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'VENDEDOR', 'CAJERO')")
     @Operation(summary = "Validar crédito disponible",
                description = "Verifica si un cliente tiene crédito disponible para un monto específico. " +
                            "Usar ANTES de crear una venta a crédito.")
@@ -185,6 +196,7 @@ public class CreditoController {
     // ==================== MOVIMIENTOS ====================
 
     @PostMapping("/abonos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'CAJERO')")
     @Operation(summary = "Registrar abono/pago",
                description = "Registra un pago del cliente que reduce su saldo de crédito")
     @ApiResponses(value = {
@@ -209,6 +221,7 @@ public class CreditoController {
     // ==================== BLOQUEO/DESBLOQUEO ====================
 
     @PutMapping("/limites/cliente/{clienteId}/bloquear")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @Operation(summary = "Bloquear crédito",
                description = "Bloquea el crédito de un cliente por morosidad u otro motivo")
     @ApiResponses(value = {
@@ -230,6 +243,7 @@ public class CreditoController {
     }
 
     @PutMapping("/limites/cliente/{clienteId}/desbloquear")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @Operation(summary = "Desbloquear crédito",
                description = "Reactiva el crédito de un cliente previamente bloqueado")
     @ApiResponses(value = {
@@ -248,6 +262,7 @@ public class CreditoController {
     }
 
     @PutMapping("/limites/cliente/{clienteId}/suspender")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @Operation(summary = "Suspender crédito",
                description = "Suspende temporalmente el crédito de un cliente")
     @ApiResponses(value = {
@@ -271,6 +286,7 @@ public class CreditoController {
     // ==================== HISTORIAL ====================
 
     @GetMapping("/historial/{clienteId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Consultar historial de crédito",
                description = "Obtiene el historial completo de movimientos (cargos y abonos) de un cliente")
     @ApiResponse(responseCode = "200", description = "Historial obtenido exitosamente")
@@ -285,6 +301,7 @@ public class CreditoController {
     }
 
     @GetMapping("/historial/{clienteId}/cargos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Consultar cargos del cliente",
                description = "Obtiene solo los cargos (ventas a crédito) de un cliente")
     @ApiResponse(responseCode = "200", description = "Cargos obtenidos exitosamente")
@@ -299,6 +316,7 @@ public class CreditoController {
     }
 
     @GetMapping("/historial/{clienteId}/abonos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Consultar abonos del cliente",
                description = "Obtiene solo los abonos (pagos) de un cliente")
     @ApiResponse(responseCode = "200", description = "Abonos obtenidos exitosamente")
@@ -313,6 +331,7 @@ public class CreditoController {
     }
 
     @GetMapping("/historial/{clienteId}/rango")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'AUDITOR')")
     @Operation(summary = "Consultar historial por rango de fechas",
                description = "Obtiene movimientos de un cliente en un período específico")
     @ApiResponse(responseCode = "200", description = "Historial filtrado obtenido")

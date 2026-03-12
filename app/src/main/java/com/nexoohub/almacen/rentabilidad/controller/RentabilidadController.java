@@ -5,6 +5,7 @@ import com.nexoohub.almacen.rentabilidad.service.RentabilidadService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -37,6 +38,7 @@ public class RentabilidadController {
      * @return Análisis de rentabilidad generado
      */
     @PostMapping("/venta/{ventaId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<RentabilidadVentaResponseDTO> calcularRentabilidadVenta(
             @PathVariable Integer ventaId) {
         RentabilidadVentaResponseDTO resultado = rentabilidadService.calcularRentabilidadVenta(ventaId);
@@ -52,6 +54,7 @@ public class RentabilidadController {
      * @return Análisis de rentabilidad
      */
     @GetMapping("/venta/{ventaId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<RentabilidadVentaResponseDTO> consultarRentabilidadVenta(
             @PathVariable Integer ventaId) {
         RentabilidadVentaResponseDTO resultado = rentabilidadService.consultarPorVenta(ventaId);
@@ -75,6 +78,7 @@ public class RentabilidadController {
      * @return Lista de análisis por producto
      */
     @PostMapping("/productos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<List<RentabilidadProductoResponseDTO>> generarAnalisisPorProducto(
             @Valid @RequestBody AnalisisRentabilidadRequestDTO request) {
         List<RentabilidadProductoResponseDTO> resultado = 
@@ -93,6 +97,7 @@ public class RentabilidadController {
      * @return Lista de productos más rentables
      */
     @GetMapping("/productos/mas-rentables")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<RentabilidadProductoResponseDTO>> obtenerProductosMasRentables(
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin,
@@ -113,6 +118,7 @@ public class RentabilidadController {
      * @return Lista de productos menos rentables
      */
     @GetMapping("/productos/menos-rentables")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<RentabilidadProductoResponseDTO>> obtenerProductosMenosRentables(
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin,
@@ -132,6 +138,7 @@ public class RentabilidadController {
      * @return Lista de ventas con pérdida
      */
     @GetMapping("/ventas/bajo-costo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<List<RentabilidadVentaResponseDTO>> obtenerVentasBajoCosto() {
         List<RentabilidadVentaResponseDTO> resultado = rentabilidadService.obtenerVentasBajoCosto();
         return ResponseEntity.ok(resultado);
@@ -147,6 +154,7 @@ public class RentabilidadController {
      * @return Estadísticas agregadas
      */
     @GetMapping("/estadisticas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'AUDITOR')")
     public ResponseEntity<EstadisticasRentabilidadDTO> obtenerEstadisticas(
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin) {

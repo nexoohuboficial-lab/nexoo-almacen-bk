@@ -4,6 +4,7 @@ import com.nexoohub.almacen.finanzas.entity.ConfiguracionFinanciera;
 import com.nexoohub.almacen.finanzas.service.ConfiguracionFinancieraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -18,6 +19,7 @@ public class ConfiguracionFinancieraController {
 
     // 1. OBTENER LOS PARÁMETROS ACTUALES (Para mostrarlos en la pantalla de ajustes)
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<ConfiguracionFinanciera> obtenerParametros() {
         // Asumimos que la configuración global maestra es el registro con ID 1
         return configuracionService.obtenerParametros()
@@ -27,6 +29,7 @@ public class ConfiguracionFinancieraController {
 
     // 2. ACTUALIZAR LAS "PALANCAS" FINANCIERAS
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> actualizarParametros(@RequestBody ConfiguracionFinanciera detalles) {
         return configuracionService.obtenerParametros()
                 .map(config -> {

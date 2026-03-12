@@ -1,0 +1,637 @@
+openapi: 3.0.3
+info:
+  title: API de Métricas de Ventas y Clientes - NexooHub Almacén
+  description: |
+    API REST para consultar y gestionar métricas consolidadas de ventas, clientes y vendedores.
+    
+    **Responde a:**
+    - ¿Cómo está el rendimiento del equipo de ventas?
+    - ¿Qué clientes compran más?
+    - ¿Cuál es la tasa de retención de clientes?
+    - ¿Quiénes son los vendedores top?
+    
+    **Funcionalidades:**
+    - Análisis de ventas por período (día, semana, mes, etc.)
+    - Métricas de comportamiento de clientes
+    - Rendimiento de vendedores y equipo
+    - Comparación entre períodos
+    - Segmentación de clientes (VIP, Frecuente, Regular, Ocasional)
+    - Clasificación de vendedores (TOP, BUENO, REGULAR, BAJO)
+    
+  version: 1.0.0
+  contact:
+    name: NexooHub Development Team
+    email: dev@nexoohub.com
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo
+  - url: https://api.nexoohub.com
+    description: Servidor de producción
+
+tags:
+  - name: Métricas Ventas y Clientes
+    description: Endpoints para análisis de ventas, clientes y vendedores
+
+paths:
+  /api/metricas/ventas-clientes/analisis:
+    post:
+      tags:
+        - Métricas Ventas y Clientes
+      summary: Generar análisis completo de ventas y clientes
+      description: |
+        Genera un análisis detallado de ventas, clientes y vendedores para un período específico.
+        Incluye:
+        - Resumen de ventas (total, transacciones, ticket promedio)
+        - Resumen de clientes (activos, nuevos, recurrentes, retención)
+        - Resumen de vendedores (top vendedor, promedio por vendedor)
+        - Distribución por método de pago
+        - Detalle de top vendedores (opcional)
+        - Detalle de top clientes (opcional)
+        - Comparación con período anterior (opcional)
+      operationId: generarAnalisis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisVentaClienteRequest'
+            examples:
+              mensual:
+                summary: Análisis mensual con comparación
+                value:
+                  fechaInicio: "2024-01-01"
+                  fechaFin: "2024-01-31"
+                  tipoPeriodo: "MENSUAL"
+                  compararPeriodoAnterior: true
+                  incluirDetalleVendedores: true
+                  incluirDetalleClientes: true
+                  limitTopVendedores: 5
+                  limitTopClientes: 10
+              semanal:
+                summary: Análisis semanal sin comparación
+                value:
+                  fechaInicio: "2024-01-15"
+                  fechaFin: "2024-01-21"
+                  tipoPeriodo: "SEMANAL"
+                  compararPeriodoAnterior: false
+                  incluirDetalleVendedores: true
+                  incluirDetalleClientes: false
+                  limitTopVendedores: 3
+      responses:
+        '200':
+          description: Análisis generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaVentaClienteResponse'
+        '400':
+          description: Datos de entrada inválidos
+        '500':
+          description: Error interno del servidor
+
+  /api/metricas/ventas-clientes/consolidado:
+    get:
+      tags:
+        - Métricas Ventas y Clientes
+      summary: Obtener métrica consolidada guardada
+      description: Recupera una métrica consolidada previamente guardada para un período específico
+      operationId: obtenerMetricaConsolidada
+      parameters:
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-01-01"
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-01-31"
+      responses:
+        '200':
+          description: Métrica encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaVentaClienteEntity'
+        '404':
+          description: Métrica no encontrada
+
+  /api/metricas/ventas-clientes/historial:
+    get:
+      tags:
+        - Métricas Ventas y Clientes
+      summary: Obtener historial de métricas consolidadas
+      description: Recupera el historial de métricas guardadas para un tipo de período
+      operationId: obtenerHistorial
+      parameters:
+        - name: tipoPeriodo
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [DIARIO, SEMANAL, MENSUAL, TRIMESTRAL, ANUAL]
+            default: MENSUAL
+        - name: fechaHasta
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2024-12-31"
+      responses:
+        '200':
+          description: Lista de métricas históricas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricaVentaClienteEntity'
+
+  /api/metricas/ventas-clientes/generar-guardar:
+    post:
+      tags:
+        - Métricas Ventas y Clientes
+      summary: Generar y guardar análisis
+      description: Genera un análisis completo y lo guarda en la base de datos para consultas futuras
+      operationId: generarYGuardar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisVentaClienteRequest'
+      responses:
+        '201':
+          description: Métrica creada y guardada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaVentaClienteEntity'
+
+  /api/metricas/ventas-clientes/mes-actual:
+    get:
+      tags:
+        - Métricas Ventas y Clientes
+      summary: Análisis rápido del mes actual
+      description: Genera análisis del mes en curso con todos los detalles
+      operationId: analizarMesActual
+      responses:
+        '200':
+          description: Análisis del mes actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaVentaClienteResponse'
+
+  /api/metricas/ventas-clientes/mes-anterior:
+    get:
+      tags:
+        - Métricas Ventas y Clientes
+      summary: Análisis rápido del mes anterior
+      description: Genera análisis del mes pasado con todos los detalles
+      operationId: analizarMesAnterior
+      responses:
+        '200':
+          description: Análisis del mes anterior
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaVentaClienteResponse'
+
+  /api/metricas/ventas-clientes/ultimos-7-dias:
+    get:
+      tags:
+        - Métricas Ventas y Clientes
+      summary: Análisis de los últimos 7 días
+      description: Genera análisis semanal de los últimos 7 días
+      operationId: analizarUltimos7Dias
+      responses:
+        '200':
+          description: Análisis de la última semana
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaVentaClienteResponse'
+
+  /api/metricas/ventas-clientes/por-sucursal/{sucursalId}:
+    post:
+      tags:
+        - Métricas Ventas y Clientes
+      summary: Análisis por sucursal específica
+      description: Genera análisis de una sucursal en particular
+      operationId: analizarPorSucursal
+      parameters:
+        - name: sucursalId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalisisVentaClienteRequest'
+      responses:
+        '200':
+          description: Análisis de la sucursal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricaVentaClienteResponse'
+
+components:
+  schemas:
+    AnalisisVentaClienteRequest:
+      type: object
+      required:
+        - fechaInicio
+        - fechaFin
+      properties:
+        fechaInicio:
+          type: string
+          format: date
+          description: Fecha de inicio del período
+          example: "2024-01-01"
+        fechaFin:
+          type: string
+          format: date
+          description: Fecha de fin del período
+          example: "2024-01-31"
+        sucursalId:
+          type: integer
+          nullable: true
+          description: ID de sucursal (null = consolidado de todas)
+          example: 1
+        tipoPeriodo:
+          type: string
+          enum: [DIARIO, SEMANAL, MENSUAL, TRIMESTRAL, ANUAL]
+          default: MENSUAL
+          description: Tipo de período analizado
+        compararPeriodoAnterior:
+          type: boolean
+          default: true
+          description: Incluir comparación con período anterior
+        incluirDetalleVendedores:
+          type: boolean
+          default: true
+          description: Incluir detalle de vendedores
+        incluirDetalleClientes:
+          type: boolean
+          default: true
+          description: Incluir detalle de clientes
+        limitTopVendedores:
+          type: integer
+          default: 5
+          description: Número de top vendedores a incluir
+        limitTopClientes:
+          type: integer
+          default: 10
+          description: Número de top clientes a incluir
+
+    MetricaVentaClienteResponse:
+      type: object
+      properties:
+        periodoInicio:
+          type: string
+          format: date
+        periodoFin:
+          type: string
+          format: date
+        tipoPeriodo:
+          type: string
+        sucursalId:
+          type: integer
+          nullable: true
+        nombreSucursal:
+          type: string
+        fechaGeneracion:
+          type: string
+          format: date-time
+        resumenVentas:
+          $ref: '#/components/schemas/ResumenVentas'
+        resumenClientes:
+          $ref: '#/components/schemas/ResumenClientes'
+        resumenVendedores:
+          $ref: '#/components/schemas/ResumenVendedores'
+        metodosPago:
+          $ref: '#/components/schemas/MetodosPago'
+        comparacion:
+          $ref: '#/components/schemas/ComparacionPeriodo'
+        topVendedores:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleVendedor'
+        topClientes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleCliente'
+
+    ResumenVentas:
+      type: object
+      properties:
+        totalVentas:
+          type: number
+          format: decimal
+          example: 150000.00
+        numeroTransacciones:
+          type: integer
+          example: 75
+        ticketPromedio:
+          type: number
+          format: decimal
+          example: 2000.00
+        ventaPromedioDia:
+          type: number
+          format: decimal
+          example: 5000.00
+        diasPeriodo:
+          type: integer
+          example: 31
+
+    ResumenClientes:
+      type: object
+      properties:
+        totalClientesActivos:
+          type: integer
+          example: 45
+        clientesNuevos:
+          type: integer
+          example: 12
+        clientesRecurrentes:
+          type: integer
+          example: 33
+        clientesInactivos:
+          type: integer
+          example: 8
+        tasaRetencion:
+          type: number
+          format: decimal
+          example: 73.33
+        valorVidaCliente:
+          type: number
+          format: decimal
+          example: 3333.33
+        frecuenciaCompra:
+          type: number
+          format: decimal
+          example: 1.67
+
+    ResumenVendedores:
+      type: object
+      properties:
+        totalVendedores:
+          type: integer
+          example: 5
+        topVendedorId:
+          type: integer
+          example: 200
+        topVendedorNombre:
+          type: string
+          example: "Juan Pérez"
+        topVendedorVentas:
+          type: number
+          format: decimal
+          example: 45000.00
+        topVendedorTransacciones:
+          type: integer
+          example: 25
+        ventaPromedioVendedor:
+          type: number
+          format: decimal
+          example: 30000.00
+
+    MetodosPago:
+      type: object
+      properties:
+        ventasEfectivo:
+          type: number
+          format: decimal
+        ventasTarjeta:
+          type: number
+          format: decimal
+        ventasCredito:
+          type: number
+          format: decimal
+        porcentajeEfectivo:
+          type: number
+          format: decimal
+        porcentajeTarjeta:
+          type: number
+          format: decimal
+        porcentajeCredito:
+          type: number
+          format: decimal
+
+    ComparacionPeriodo:
+      type: object
+      properties:
+        ventasAnterior:
+          type: number
+          format: decimal
+        ventasActual:
+          type: number
+          format: decimal
+        crecimiento:
+          type: number
+          format: decimal
+          description: Porcentaje de crecimiento (positivo o negativo)
+        tendencia:
+          type: string
+          enum: [CRECIMIENTO, DECRECIMIENTO, ESTABLE]
+        transaccionesAnterior:
+          type: integer
+        transaccionesActual:
+          type: integer
+
+    DetalleVendedor:
+      type: object
+      properties:
+        vendedorId:
+          type: integer
+        nombre:
+          type: string
+        apellidos:
+          type: string
+        nombreCompleto:
+          type: string
+        puesto:
+          type: string
+        sucursalId:
+          type: integer
+        nombreSucursal:
+          type: string
+        totalVentas:
+          type: number
+          format: decimal
+        numeroTransacciones:
+          type: integer
+        ticketPromedio:
+          type: number
+          format: decimal
+        porcentajeVentasTotal:
+          type: number
+          format: decimal
+        ranking:
+          type: integer
+        clasificacion:
+          type: string
+          enum: [TOP, BUENO, REGULAR, BAJO]
+        clientesAtendidos:
+          type: integer
+        comisionEstimada:
+          type: number
+          format: decimal
+        porcentajeComision:
+          type: number
+          format: decimal
+
+    DetalleCliente:
+      type: object
+      properties:
+        clienteId:
+          type: integer
+        nombre:
+          type: string
+        rfc:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        bloqueado:
+          type: boolean
+        saldoPendiente:
+          type: number
+          format: decimal
+        estadoCliente:
+          type: string
+          enum: [ACTIVO, BLOQUEADO, CON_DEUDA]
+        fechaRegistro:
+          type: string
+          format: date
+        fechaUltimaCompra:
+          type: string
+          format: date
+        numeroCompras:
+          type: integer
+        totalCompras:
+          type: number
+          format: decimal
+        ticketPromedio:
+          type: number
+          format: decimal
+        diasDesdeUltimaCompra:
+          type: integer
+        frecuenciaCompra:
+          type: number
+          format: decimal
+        segmento:
+          type: string
+          enum: [VIP, FRECUENTE, REGULAR, OCASIONAL, NUEVO]
+        ranking:
+          type: integer
+        porcentajeTotalVentas:
+          type: number
+          format: decimal
+        valorVidaTotal:
+          type: number
+          format: decimal
+        valorVidaPeriodo:
+          type: number
+          format: decimal
+        mesesComoCliente:
+          type: integer
+        metodoPagoPreferido:
+          type: string
+
+    MetricaVentaClienteEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        periodoInicio:
+          type: string
+          format: date
+        periodoFin:
+          type: string
+          format: date
+        tipoPeriodo:
+          type: string
+        sucursalId:
+          type: integer
+          nullable: true
+        nombreSucursal:
+          type: string
+        totalVentas:
+          type: number
+          format: decimal
+        numeroTransacciones:
+          type: integer
+        ticketPromedio:
+          type: number
+          format: decimal
+        ventaPromedioDia:
+          type: number
+          format: decimal
+        crecimientoVsAnterior:
+          type: number
+          format: decimal
+        totalClientesActivos:
+          type: integer
+        clientesNuevos:
+          type: integer
+        clientesRecurrentes:
+          type: integer
+        clientesInactivos:
+          type: integer
+        tasaRetencion:
+          type: number
+          format: decimal
+        valorVidaCliente:
+          type: number
+          format: decimal
+        frecuenciaCompra:
+          type: number
+          format: decimal
+        totalVendedores:
+          type: integer
+        topVendedorId:
+          type: integer
+        topVendedorNombre:
+          type: string
+        topVendedorVentas:
+          type: number
+          format: decimal
+        topVendedorTransacciones:
+          type: integer
+        ventaPromedioVendedor:
+          type: number
+          format: decimal
+        ventasEfectivo:
+          type: number
+          format: decimal
+        ventasTarjeta:
+          type: number
+          format: decimal
+        ventasCredito:
+          type: number
+          format: decimal
+        porcentajeEfectivo:
+          type: number
+          format: decimal
+        fechaCreacion:
+          type: string
+          format: date-time
+        fechaActualizacion:
+          type: string
+          format: date-time
