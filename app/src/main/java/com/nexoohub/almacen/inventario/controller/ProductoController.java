@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.data.domain.Page;
@@ -65,7 +66,7 @@ public class ProductoController {
 
     /**
      * Motor de búsqueda omnicanal avanzado de productos.
-     * 
+     *
      * <p>Permite búsqueda dinámica con múltiples criterios:</p>
      * <ul>
      *   <li><b>q:</b> Búsqueda por texto en producto (SKU, nombre, descripción, marca)</li>
@@ -78,54 +79,49 @@ public class ProductoController {
      *   <li><b>modeloMoto:</b> Búsqueda por modelo de moto (CBR, YZF, etc.)</li>
      *   <li><b>cilindrada:</b> Filtro por cilindrada específica (150, 200, 250, etc.)</li>
      *   <li><b>anio:</b> Filtro por año de compatibilidad</li>
+     *   <li><b>soloActivos:</b> Si true, devuelve solo productos activos</li>
+     *   <li><b>conStock:</b> Si true, devuelve solo productos con stock &gt; 0 en la sucursal indicada</li>
+     *   <li><b>sucursalIdStock:</b> Sucursal en la que verificar disponibilidad de stock</li>
+     *   <li><b>precioMin:</b> Precio mínimo de venta al público</li>
+     *   <li><b>precioMax:</b> Precio máximo de venta al público</li>
+     *   <li><b>clasificacionAbc:</b> Clasificación ABC (A, B o C)</li>
      * </ul>
-     * 
-     * <p><b>Ejemplos de uso:</b></p>
-     * <ul>
-     *   <li>Buscar aceites para Honda: ?marcaMoto=Honda&amp;nombreCategoria=Aceite</li>
-     *   <li>Buscar productos de un proveedor: ?nombreProveedor=Motul</li>
-     *   <li>Buscar para moto 250cc del 2020: ?cilindrada=250&amp;anio=2020</li>
-     * </ul>
-     * 
-     * @param q texto de búsqueda en producto
-     * @param categoriaId ID de categoría
-     * @param nombreCategoria nombre de categoría
-     * @param proveedorId ID de proveedor
-     * @param nombreProveedor nombre de proveedor
-     * @param motoId ID de moto
-     * @param marcaMoto marca de moto
-     * @param modeloMoto modelo de moto
-     * @param cilindrada cilindrada de moto
-     * @param anio año de compatibilidad
-     * @param pageable configuración de paginación (default: 20 items)
+     *
      * @return página de productos en formato DTO
      */
     @GetMapping("/search")
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR', 'ALMACENISTA', 'VENDEDOR', 'CAJERO')")
     public ResponseEntity<Page<ProductoMaestroResponseDTO>> buscarProductos(
-            @RequestParam(value = "q", required = false) String q,
-            @RequestParam(value = "categoriaId", required = false) Integer categoriaId,
-            @RequestParam(value = "nombreCategoria", required = false) String nombreCategoria,
-            @RequestParam(value = "proveedorId", required = false) Integer proveedorId,
-            @RequestParam(value = "nombreProveedor", required = false) String nombreProveedor,
-            @RequestParam(value = "motoId", required = false) Integer motoId,
-            @RequestParam(value = "marcaMoto", required = false) String marcaMoto,
-            @RequestParam(value = "modeloMoto", required = false) String modeloMoto,
-            @RequestParam(value = "cilindrada", required = false) Integer cilindrada,
-            @RequestParam(value = "anio", required = false) Integer anio,
+            @RequestParam(value = "q",                required = false) String q,
+            @RequestParam(value = "categoriaId",      required = false) Integer categoriaId,
+            @RequestParam(value = "nombreCategoria",  required = false) String nombreCategoria,
+            @RequestParam(value = "proveedorId",      required = false) Integer proveedorId,
+            @RequestParam(value = "nombreProveedor",  required = false) String nombreProveedor,
+            @RequestParam(value = "motoId",           required = false) Integer motoId,
+            @RequestParam(value = "marcaMoto",        required = false) String marcaMoto,
+            @RequestParam(value = "modeloMoto",       required = false) String modeloMoto,
+            @RequestParam(value = "cilindrada",       required = false) Integer cilindrada,
+            @RequestParam(value = "anio",             required = false) Integer anio,
+            // --- Nuevos filtros SRCH-01 ---
+            @RequestParam(value = "soloActivos",      required = false) Boolean soloActivos,
+            @RequestParam(value = "conStock",         required = false) Boolean conStock,
+            @RequestParam(value = "sucursalIdStock",  required = false) Integer sucursalIdStock,
+            @RequestParam(value = "precioMin",        required = false) java.math.BigDecimal precioMin,
+            @RequestParam(value = "precioMax",        required = false) java.math.BigDecimal precioMax,
+            @RequestParam(value = "clasificacionAbc", required = false) String clasificacionAbc,
             @PageableDefault(size = 20, page = 0) Pageable pageable) {
-        
-        // El Cerebro arma la consulta SQL dinámicamente con todos los filtros
+
+        log.info("Búsqueda de productos: q={}, soloActivos={}, conStock={}, sucursal={}, precioMin={}, precioMax={}, abc={}",
+                q, soloActivos, conStock, sucursalIdStock, precioMin, precioMax, clasificacionAbc);
+
         Specification<ProductoMaestro> spec = ProductoMaestroSpecification.busquedaDinamica(
             q, categoriaId, nombreCategoria, proveedorId, nombreProveedor,
-            motoId, marcaMoto, modeloMoto, cilindrada, anio
+            motoId, marcaMoto, modeloMoto, cilindrada, anio,
+            soloActivos, conStock, sucursalIdStock, precioMin, precioMax, clasificacionAbc
         );
-        
-        // El Repositorio ejecuta la consulta con los límites de paginación
+
         Page<ProductoMaestro> resultados = productoRepository.findAll(spec, pageable);
-        
-        // Convertimos a DTO antes de devolver
         Page<ProductoMaestroResponseDTO> dtos = resultados.map(mapper::toResponseDTO);
         return ResponseEntity.ok(dtos);
     }
