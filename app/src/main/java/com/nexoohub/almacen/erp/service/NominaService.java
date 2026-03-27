@@ -2,7 +2,10 @@ package com.nexoohub.almacen.erp.service;
 
 import com.nexoohub.almacen.common.exception.ResourceNotFoundException;
 import com.nexoohub.almacen.erp.dto.*;
-import com.nexoohub.almacen.erp.entity.*;
+import com.nexoohub.almacen.empleados.entity.Empleado;
+import com.nexoohub.almacen.erp.entity.NominaPeriodo;
+import com.nexoohub.almacen.erp.entity.ReciboNomina;
+import com.nexoohub.almacen.erp.entity.ReciboNominaDetalle;
 import com.nexoohub.almacen.erp.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,7 +196,7 @@ public class NominaService {
         d.setSalarioDiario(e.getSalarioDiario());
         d.setFechaIngreso(e.getFechaIngreso());
         d.setEstatus(e.getEstatus());
-        d.setCreatedAt(e.getCreatedAt());
+        d.setCreatedAt(e.getFechaCreacion());
         return d;
     }
 

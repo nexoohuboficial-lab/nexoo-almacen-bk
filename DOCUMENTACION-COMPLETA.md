@@ -623,6 +623,98 @@ Margen % = (Utilidad Bruta / Ingreso Total) × 100
 ROI = (Utilidad Bruta / Costo Total) × 100
 ```
 
+### 🤝 14. Módulo CRM (Garantías, Pipeline B2B y Marketing)
+
+**Controllers**:
+- `GarantiaController` - Gestión de tickets de garantía
+- `PipelineController` - Embudo de ventas B2B
+- `InteraccionCrmController` - Seguimientos y notas B2B
+- `MarketingCampanaController` - Automatización de campañas
+- `NpsController` - Encuestas de satisfacción
+
+**Funcionalidades Core**:
+- ✅ **Tickets de Garantía** vinculados con SKU, número de serie y la venta original, con tiempos de respuesta.
+- ✅ **Embudo de Ventas (Pipeline)** B2B, permitiendo crear prospectos, oportunidades y registrar llamadas/visitas.
+- ✅ **Marketing Automatizado** para enviar campañas masivas (SMS, Email) a segmentos de clientes con integración a Twilio/SendGrid.
+- ✅ **Encuestas NPS** enviadas automáticamente a clientes tras la venta para clasificar Promotores, Pasivos y Detractores.
+
+### 📊 15. Módulo Analítica Avanzada (RFM)
+
+**Controller**: `RfmController`
+
+**Funcionalidades Core**:
+- ✅ **Segmentación RFM**: Calcula la Recencia, Frecuencia y Monto gastado por todos los clientes.
+- ✅ **Asignación de Segmentos** en base a sus scores, detectando: `CAMPEON`, `LEAL`, `EN_RIESGO`, etc.
+
+### 🛒 16. Módulo Analítica - Canasta de Compra (Market Basket)
+
+**Controller**: `MarketBasketController`
+
+**Funcionalidades Core**:
+- ✅ **Algoritmo Apriori**: Procesa matemáticamente el historial de ventas para descubrir qué artículos se compran juntos con mayor frecuencia.
+- ✅ **Recomendaciones de Venta Cruzada (Cross-Selling)**: Dado un producto que el cliente quiere llevar, sugiere los top 5 productos complementarios (Ej: "Quien lleva Aceite, también lleva Filtro el 85% de las veces").
+- ✅ **Métricas Estadísticas**: Soporte, Confianza y Lift almacenados para dar precisión a la recomendación.
+
+### 🔮 17. Módulo Analítica - Predicción de Churn (Riesgo de Abandono)
+
+**Controller**: `ChurnPredictionController`
+
+**Funcionalidades Core**:
+- ✅ **Cálculo de Riesgo**: Algoritmo matemático que evalúa la recencia (días desde última compra) frente a la frecuencia histórica del cliente.
+- ✅ **Ponderado de Montos**: Asigna mayor riesgo si la última compra tuvo un ticket promedio 30% inferior al histórico reciente del cliente.
+- ✅ **Score y Endpoint para Retargeting**: Califica clientes de 0 a 100 y lista los que superan un score de 70 para ser abordados por los vendedores telefónicos.
+
+### 🕵️ 18. Módulo de Compras Inteligentes - Comparador (SUP-01)
+
+**Controller**: `ComparadorPreciosController`
+
+**Funcionalidades Core**:
+- ✅ **Catálogo Unificado de Proveedores**: Consulta de todos los proveedores que ofrecen un producto específico.
+- ✅ **Comparador Automático**: Evaluación y ordenamiento de opciones de compra de mejor a peor precio.
+- ✅ **Proyección Inteligente de Venta Sugerida**: Cálculo estandarizado de precio técnico con margen e IVA aplicado.
+- ✅ **Rentabilidad Estimada**: Simulaciones financieras en tiempo real previas a la compra.
+
+### 📈 19. Módulo de Actualización Masiva de Precios (SUP-02)
+
+**Controller**: `ActualizacionPreciosController`
+
+**Funcionalidades Core**:
+- ✅ **Actualización en Lote o Individual**: Modifica el costo de múltiples artículos a la vez a partir de listas de proveedores.
+- ✅ **Alertas por Variación de Costos**: Sistema automatizado que inyecta una advertencia de negocio si el precio supera el 10% de alza en relación al costo anterior.
+- ✅ **Historial de Precios Auditado**: Trazabilidad absoluta de cuándo cambió el costo, por qué y en qué porcentaje.
+
+### 🛒 20. Módulo de Control de Abastecimiento (SUP-03)
+
+**Controller**: `OrdenCompraController`
+
+**Funcionalidades Core**:
+- ✅ **Carrito de Compras Universal**: Permite agregar productos de distintos proveedores simultáneamente.
+- ✅ **Generación y Desglose de Órdenes**: Fragmenta el carrito en Órdenes de Compra (OC) individuales por proveedor y previene errores manuales.
+- ✅ **Exportación en Excel Automatizada**: Transforma las OCs en reportes XLSX estandarizados mediante Apache POI.
+- ✅ **Cruce Automático con Almacén Físico**: Integra una OC recibida directamente contra el inventario real y dispara las actualizaciones financieras del Costo Promedio Ponderado.
+
+---
+
+### 🔔 21. Módulo de Notificaciones y Alertas (WebSockets)
+
+**Controller**: `AlertaController`
+
+**Funcionalidades Core**:
+- ✅ **Server-Sent Events (SSE) / WebSockets**: Infraestructura reactiva para empujar notificaciones desde el backend al frontend en tiempo real.
+- ✅ **Alertas de Sistema y Negocio**: Emisión de eventos distribuidos de Stock Bajo, Riesgo de Churn, Descuentos No Autorizados y Calificaciones NPS Críticas.
+- ✅ **Gestión de Lectura**: Endpoints para listar alertas no leídas, marcar como leídas, o archivar notificaciones a nivel de empleado.
+- ✅ **Integración Intramódulo**: El `AlertaService` actúa como un bus de eventos (Observer Pattern) consumido por Inventory y CRM.
+
+### 🎯 22. Módulo de Rendimiento de Personal y Metas
+
+**Controller**: `RendimientoPersonalController`
+
+**Funcionalidades Core**:
+- ✅ **Cálculo de Productividad (KPIs):** Análisis de Tickets Promedio, Total Vendido y Tasa de Retención por empleado.
+- ✅ **Sistema de Metas Dinámicas:** Configuración de cuotas mensuales de venta y su seguimiento porcentual hacia la obtención de bonos.
+- ✅ **Ranking Multi-Sucursal:** Generación de posiciones ("Leaderboard") para fomentar sana competencia en base a efectividad transaccional.
+- ✅ **Endpoints Protegidos por Jerarquía:** Configurado mediante Data Access Security (RBAC con Spring Security `@PreAuthorize("hasRole('GERENTE')")`) asegurando que los vendedores solo vean sus métricas y los gerentes las de su equipo.
+
 ---
 
 ## 6. API REST - Endpoints
@@ -859,6 +951,58 @@ GET    /rentabilidad/categoria/{id}   # Por categoría
 GET    /rentabilidad/sucursal/{id}    # Por sucursal
 GET    /rentabilidad/top-productos    # Top rentables
 GET    /rentabilidad/analisis-margenes  # Análisis de márgenes
+```
+
+### 🤝 CRM y Atención a Clientes
+
+```
+# Garantías
+POST   /crm/garantias                 # Crear ticket garantía
+GET    /crm/garantias/cliente/{id}    # Historial cliente
+PATCH  /crm/garantias/{id}/resolucion # Resolver (Cambio, Devolución, etc)
+
+# Pipeline B2B
+POST   /crm/prospectos                # Registrar prospecto
+POST   /crm/oportunidades             # Crear oportunidad
+PATCH  /crm/oportunidades/{id}/etapa  # Avanzar (NUEVA -> NEGOCIACION -> GANADA)
+POST   /crm/interacciones             # Registrar llamada/visita
+
+# Marketing Automatizado
+POST   /marketing/campanas            # Crear campaña SMS/Email
+POST   /marketing/campanas/{id}/ejecutar # Enviar
+GET    /marketing/campanas/{id}/metricas # Logs de envío y fallos
+
+# Encuestas NPS
+POST   /crm/nps/encuestas             # Generar token para venta
+POST   /crm/nps/respuestas            # Cliente envía su evaluación
+GET    /crm/nps/dashboard             # Puntuación global NPS
+```
+
+### 🕵️ Compras Inteligentes - Catálogo, Precios y Abastecimiento
+
+```
+GET    /sup/comparador/producto/{sku}         # Comparar precios de proveedores por producto (SUP-01)
+PUT    /comparador/catalogo/{id}/precio       # Actualizar un precio y recalcular margen (SUP-02)
+POST   /comparador/catalogo/actualizar-masivo # Actualizar precios en lote (SUP-02)
+GET    /comparador/catalogo/{id}/historial    # Historial de cambios de precio (SUP-02)
+
+# Endpoints de Abastecimiento (SUP-03)
+POST   /oc/carrito/agregar                    # Agregar al carrito universal
+GET    /oc/carrito                            # Ver el carrito agrupado
+DELETE /oc/carrito/{sesionId}                 # Quitar item del carrito
+POST   /oc/generar                            # Convertir carrito en Órdenes de Compra
+GET    /oc                                    # Listar Órdenes de Compra histórcias
+PATCH  /oc/{id}/estado                        # Cambiar estado manual a una OC
+POST   /oc/{id}/recibir                       # Confirmar ingreso físico de la OC a inventario
+GET    /oc/{id}/exportar-excel                # Descargar reporte formal en XLSX
+```
+
+### 📈 Analítica RFM
+
+```
+POST   /analitica/rfm/calcular        # (CRON) Generar segmentación
+GET    /analitica/rfm/segmentos       # Población por cada segmento (Ej. 100 Campeones)
+GET    /analitica/rfm/cliente/{id}    # Consultar segmentación de un cliente
 ```
 
 **Documentación Interactiva**: Todos los endpoints están documentados en **Swagger UI** disponible en `http://localhost:8080/swagger-ui.html`
@@ -2326,3 +2470,22 @@ Este proyecto es propiedad de **NexooHub Development Team**.
 **Última actualización**: Marzo 12, 2026  
 **Versión del documento**: 1.0.0  
 **Responsable**: NexooHub Development Team
+
+---
+# Anexo Técnico (V3)
+## Arquitectura Consolidada: Adquisiciones (SUP) & Seguridad (PRO)
+
+### Catálogos y Compras Inteligentes
+1. **Comparador (SUP-01):** \ComparadorPreciosService\ analiza el margen_estimado vs el precio_costo actual. 
+2. **Proceso de CSV/Excel Masivo (SUP-02):** Uso intenso de Apache POI o integradores \List<CompletableFuture>\ para insert mapping en \historial_precio_proveedor\.
+3. **Flujo de Recepción OC (SUP-03):** Se maneja un \enum EstadoOC (BORRADOR, RECIBIDA, ENTREGADA)\. Al transicionar, el sistema liquida y sumerge el inventario en el stock, invocando colateralmente a \CompraService\.
+
+### Motor de Seguridad Avanzada (Role-Based Access Control)
+4. El Login (\JwtAuthenticationFilter\) cruza a CustomUserDetailsService.
+5. Se cargan \List<GrantedAuthority>\ desdoblando las capacidades atómicas guardadas en las tablas ol y permiso. 
+6. Funciones críticas de inventarios y RRHH se decoran con \@PreAuthorize("hasAuthority('ELIMINAR_COMPRAS')")\.
+
+### Módulo de RH y Analíticas 
+- El cálculo en \RendimientoPersonalService\ intercepta los \VentaRepository\ acotado por \echaInicio\ y \sucursal_id\.
+- Para Metas (PRO-02), el cálculo es de escalera o de escalón (*Tiered Commission*). 
+- El sistema de Alertas (PRO-01) maneja Jobs Asíncronos o eventos @EventListener que persisten notificaciones para ser consumidas leida=false visualmente.

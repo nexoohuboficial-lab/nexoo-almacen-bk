@@ -1,0 +1,48 @@
+openapi: 3.0.1
+info:
+  title: API de Pipeline y Oportunidades (CRM)
+  description: Endpoints para gestionar prospectos y su avance en el embudo de ventas.
+  version: 1.0.0
+paths:
+  /api/v1/crm/prospectos:
+    post:
+      tags:
+        - CRM Pipeline B2B
+      summary: Registrar un nuevo prospecto B2B
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Prospecto registrado
+  /api/v1/crm/oportunidades:
+    post:
+      tags:
+        - CRM Pipeline B2B
+      summary: Crear una oportunidad de venta
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Oportunidad creada
+  /api/v1/crm/oportunidades/{id}/etapa:
+    patch:
+      tags:
+        - CRM Pipeline B2B
+      summary: Avanzar de etapa una oportunidad
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Oportunidad avanzada
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -33,6 +33,23 @@ spring:
     locations: classpath:db/migration
     validate-on-migrate: true
 
+  # ─────────────── MÓDULO PRO-01: Notificaciones (Gmail SMTP) ─────────────────
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:nexoohub.erp@gmail.com}
+    password: ${MAIL_PASSWORD:}          # App Password de Gmail (16 caracteres)
+    from: ${MAIL_FROM:nexoohub.erp@gmail.com}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        transport:
+          protocol: smtp
+
 management:
   endpoints:
     web:
@@ -73,3 +90,9 @@ jwt:
   secret: ${JWT_SECRET:NexooHubSuperSecretKeyParaFirmaDeTokens2026!}
   # Tiempo de vida del token en milisegundos (Ej. 8 horas = 28800000)
   expiration: 3600000
+
+# Telegram Bot API (opcional). Solo activo si TELEGRAM_ENABLED=true en el entorno.
+alertas:
+  telegram:
+    enabled: ${TELEGRAM_ENABLED:false}
+    bot-token: ${TELEGRAM_BOT_TOKEN:}   # Token del bot (formato: 123456:ABC-...)

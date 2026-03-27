@@ -43,4 +43,26 @@ public class Usuario extends AuditableEntity {
 
     public Integer getEmpleadoId() { return empleadoId; }
     public void setEmpleadoId(Integer empleadoId) { this.empleadoId = empleadoId; }
+
+    @ManyToMany(fetch = jakarta.persistence.FetchType.EAGER)
+    @JoinTable(
+        name = "usuario_rol",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "rol_id")
+    )
+    private java.util.Set<Rol> roles = new java.util.HashSet<>();
+
+    @ManyToMany(fetch = jakarta.persistence.FetchType.LAZY)
+    @JoinTable(
+        name = "usuario_sucursal",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "sucursal_id")
+    )
+    private java.util.Set<com.nexoohub.almacen.sucursal.entity.Sucursal> sucursalesPermitidas = new java.util.HashSet<>();
+
+    public java.util.Set<Rol> getRoles() { return roles; }
+    public void setRoles(java.util.Set<Rol> roles) { this.roles = roles; }
+
+    public java.util.Set<com.nexoohub.almacen.sucursal.entity.Sucursal> getSucursalesPermitidas() { return sucursalesPermitidas; }
+    public void setSucursalesPermitidas(java.util.Set<com.nexoohub.almacen.sucursal.entity.Sucursal> sucursalesPermitidas) { this.sucursalesPermitidas = sucursalesPermitidas; }
 }

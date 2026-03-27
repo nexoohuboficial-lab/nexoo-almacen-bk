@@ -50,6 +50,10 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
     // 1. El motor principal de Spring Security (ESTA ES LA QUE FALTA)
     implementation("org.springframework.boot:spring-boot-starter-security")
+    // PRO-01: Motor de Alertas — envío de email vía Gmail SMTP
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    // SUP-03: Generación de Excels para Órdenes de Compra
+    implementation("org.apache.poi:poi-ooxml:5.2.5")
 }
 
 tasks.test{

@@ -16,4 +16,7 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Integer> {
     
     // Versión con paginación
     Page<Empleado> findBySucursalIdAndActivoTrue(Integer sucursalId, Pageable pageable);
+
+    // ANA-04: obtener todos los empleados activos (sin filtro de sucursal)
+    List<Empleado> findByActivoTrue();
 }

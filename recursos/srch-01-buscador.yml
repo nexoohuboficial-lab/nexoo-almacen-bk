@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: NexooHub Almacén - Módulo de Búsqueda Global Inteligente (SRCH-01)
+  description: API REST para escanear y filtrar universalmente información a través de los catálogos del sistema mediante una única caja de búsqueda (Omnibox).
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1/search
+    description: Servidor de Búsqueda
+
+paths:
+  /omnibox:
+    get:
+      summary: Buscador Omnibox / Global
+      tags:
+        - Búsqueda
+      description: Recibe una cadena de texto libre y busca concurrencias difusas en Productos, Clientes, Citas de Taller, Catálogos de Proveedores y Marcas. Retorna resultados clasificados y limitados por top.
+      parameters:
+        - name: query
+          in: query
+          description: Termino de búsqueda libre ej. "Filtro Aceite" o "Juan Perez"
+          required: true
+          schema:
+            type: string
+        - name: sucursalId
+          in: query
+          description: Contextualiza el costo y el inventario a una sucursal en específico (opcional)
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Resultados de Búsqueda Multipropósito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalSearchResponse'
+
+components:
+  schemas:
+    GlobalSearchResponse:
+      type: object
+      properties:
+        tiempoEjecucionMs:
+          type: integer
+          example: 45
+        productosCount:
+          type: integer
+          example: 2
+        productos:
+          type: array
+          items:
+            type: object
+        clientesCount:
+          type: integer
+          example: 0
+        clientes:
+          type: array
+          items:
+            type: object
+        proveedoresCount:
+          type: integer
+          example: 1
+        proveedores:
+          type: array
+          items:
+            type: object

@@ -1866,3 +1866,90 @@ echo "✅ Limpieza completada"
 ---
 
 **© 2026 NexooHub Development Team**
+
+---
+
+## Módulos de Proveedores y Compras (SUP)
+
+### Comparación de Precios de Proveedores (SUP-01)
+``bash
+curl -X GET 'http://localhost:8080/api/v1/adquisiciones/comparador?skuInterno=MOT-001&sucursalId=1' \
+  -H 'Authorization: Bearer <TOKEN>'
+``
+
+### Actualización Masiva de Precios (SUP-02)
+``bash
+curl -X PATCH 'http://localhost:8080/api/v1/adquisiciones/precios/masivo/excel' \
+  -H 'Authorization: Bearer <TOKEN>' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@"/ruta/al/catalogo_proveedor.xlsx"'
+``
+
+### Carrito de Compras de Proveedor y Generar OC Excel (SUP-03)
+``bash
+curl -X POST 'http://localhost:8080/api/v1/adquisiciones/carrito/agregar' \
+  -H 'Authorization: Bearer <TOKEN>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "catalogoId": 5,
+    "cantidad": 100
+  }'
+
+curl -X POST 'http://localhost:8080/api/v1/adquisiciones/ordenes-compra/generar?sucursalId=1&proveedorId=2' \
+  -H 'Authorization: Bearer <TOKEN>'
+``
+
+## Módulos RH y Seguridad (PRO)
+
+### Asignar Regla de Comisión y Metas (PRO-02)
+``bash
+curl -X POST 'http://localhost:8080/api/v1/rh/metas' \
+  -H 'Authorization: Bearer <TOKEN>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "empleadoId": 12,
+    "mes": 3,
+    "anio": 2026,
+    "metaMonto": 50000.00
+  }'
+``
+
+### Roles de Seguridad RBAC - Crear Rol (PRO-03)
+``bash
+curl -X POST 'http://localhost:8080/api/v1/admin/roles' \
+  -H 'Authorization: Bearer <TOKEN>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "nombre": "GERENTE_VENTAS",
+    "descripcion": "Acceso a indicadores",
+    "permisos": ["LEER_VENTAS", "CREAR_VENTAS", "APROBAR_DEVOLUCION"]
+  }'
+``
+
+## Módulo Analítico y Rendimiento (ANA-01)
+```bash
+curl -X GET 'http://localhost:8080/api/v1/rh/metricas/ranking?fechaInicio=2026-03-01' \
+  -H 'Authorization: Bearer <TOKEN>'
+```
+
+## Módulo de Centro de Notificaciones y Alertas (PRO-01)
+
+### Suscribirse al Canal de Alertas (SSE / WebSockets)
+```bash
+curl -N -H "Accept: text/event-stream" \
+  -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:8080/api/v1/alertas/stream/SSE
+```
+
+### Consultar Alertas No Leídas del Empleado
+```bash
+curl -X GET 'http://localhost:8080/api/v1/alertas/mis-alertas/1' \
+  -H 'Authorization: Bearer <TOKEN>'
+```
+
+### Marcar Alerta como Leída
+```bash
+curl -X PUT 'http://localhost:8080/api/v1/alertas/1/leida' \
+  -H 'Authorization: Bearer <TOKEN>'
+```
+

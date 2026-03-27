@@ -1,0 +1,157 @@
+openapi: "3.0.3"
+info:
+  title: NexooHub Almacén API - Actualización Masiva de Precios (SUP-02)
+  version: "1.0.0"
+  description: API interna para la actualización masiva e individual de precios de proveedores, y su historial de cambios.
+servers:
+  - url: http://localhost:8080/api/v1/comparador/catalogo
+    description: Servidor Local
+
+paths:
+  /{id}/precio:
+    put:
+      summary: Actualiza el precio de un artículo específico
+      description: Reemplaza el costo actual del proveedor, almacenado en el catálogo y genera registro en el historial. Retorna la rentabilidad actualizada.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID interno del registro en el catálogo del proveedor (CatalogoProveedorProducto ID)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualizarPrecioRequest'
+      responses:
+        '200':
+          description: Precio actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpcionCompraProveedorDTO'
+
+  /actualizar-masivo:
+    post:
+      summary: Actualiza en lote múltiples artículos de diferentes proveedores
+      description: Procesa una lista de cambios de precios, guardando el historial de cada uno y emitiendo alertas si sobrepasan el 10% de alza.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualizacionMasivaRequest'
+      responses:
+        '200':
+          description: Lote procesado con métricas de errores y éxitos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoActualizacionResponse'
+
+  /{id}/historial:
+    get:
+      summary: Consulta el historial de cambios de costo
+      description: Lista todas las modificaciones de precio de un artículo catalogado, ordenado de más reciente a más antiguo.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Historial de precios listado exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistorialPrecioProveedor'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    ActualizarPrecioRequest:
+      type: object
+      required:
+        - precioCostoNuevo
+      properties:
+        precioCostoNuevo:
+          type: number
+          format: double
+        motivo:
+          type: string
+          description: Razón de la modificación (ej. incremento anual)
+          
+    ItemActualizacionMasiva:
+      type: object
+      properties:
+        catalogoId:
+          type: integer
+        precioCostoNuevo:
+          type: number
+          format: double
+        motivoEspecifico:
+          type: string
+
+    ActualizacionMasivaRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemActualizacionMasiva'
+        motivoGeneral:
+          type: string
+          description: Razón global si los artículos no tienen motivo específico
+          
+    ErrorDetalle:
+      type: object
+      properties:
+        catalogoId:
+          type: integer
+        mensajeError:
+          type: string
+
+    ResultadoActualizacionResponse:
+      type: object
+      properties:
+        totalProcesados:
+          type: integer
+        actualizadosExitosamente:
+          type: integer
+        fallidos:
+          type: integer
+        errores:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetalle'
+
+    HistorialPrecioProveedor:
+      type: object
+      properties:
+        id:
+          type: integer
+        precioCostoAnterior:
+          type: number
+        precioCostoNuevo:
+          type: number
+        variacionPorcentual:
+          type: number
+        motivo:
+          type: string
+        fechaActualizacion:
+          type: string
+          format: date-time
+        usuarioActualizacion:
+          type: string

@@ -1,0 +1,54 @@
+openapi: 3.0.1
+info:
+  title: API de Garantías (CRM)
+  description: Endpoints para gestionar tickets de garantía de los clientes.
+  version: 1.0.0
+paths:
+  /api/v1/crm/garantias:
+    post:
+      tags:
+        - CRM Garantías
+      summary: Crear nuevo ticket de garantía
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Ticket creado exitosamente
+  /api/v1/crm/garantias/cliente/{id}:
+    get:
+      tags:
+        - CRM Garantías
+      summary: Obtener historial de garantías de un cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de garantías del cliente
+  /api/v1/crm/garantias/{id}/resolucion:
+    patch:
+      tags:
+        - CRM Garantías
+      summary: Resolver un ticket de garantía
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Ticket resuelto
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

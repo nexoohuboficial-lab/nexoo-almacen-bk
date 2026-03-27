@@ -1,0 +1,187 @@
+openapi: 3.0.3
+info:
+  title: NexooHub Almacén API - Módulo SUP-03 (Carrito y Órdenes de Compra)
+  description: Endpoints para la gestión privada (ADMIN) del carrito de compras multis-proveedor, orquestación, exportación a Excel y recepción de Órdenes de Compra (OC).
+  version: 1.0.0
+tags:
+  - name: OrdenesDeCompra
+    description: Recepción y Creación masiva de OC por proveedor.
+paths:
+  /api/v1/oc/carrito/agregar:
+    post:
+      summary: "Agregar producto al carrito"
+      description: "Añade un artículo del catálogo del proveedor al carrito de compras del usuario autenticado actual."
+      tags: [OrdenesDeCompra]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                catalogoId:
+                  type: integer
+                  description: "ID de la opción del catálogo del proveedor a comprar"
+                  example: 54
+                cantidad:
+                  type: integer
+                  description: "Cantidad de unidades que se solicitan"
+                  example: 10
+      responses:
+        "200":
+          description: "Producto agregado exitosamente"
+        "400":
+          description: "Inventario inactivo o validaciones fallidas"
+  
+  /api/v1/oc/carrito/{sesionId}:
+    delete:
+      summary: "Quitar producto del carrito"
+      description: "Remueve un item previamente insertado en el carrito."
+      tags: [OrdenesDeCompra]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sesionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: "Elemento borrado"
+          
+  /api/v1/oc/carrito:
+    get:
+      summary: "Consultar carrito de compras"
+      description: "Devuelve todos los productos del usuario autenticado agrupados en forma de OC previas por cada Proveedor distintivo."
+      tags: [OrdenesDeCompra]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "Listado agrupado del carrito"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalArticulos:
+                    type: integer
+                  totalEstimadoGlobal:
+                    type: number
+                    format: double
+                  gruposPorProveedor:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        proveedorId:
+                          type: integer
+                        nombreProveedor:
+                          type: string
+                        subtotalProveedor:
+                          type: number
+                        items:
+                          type: array
+
+  /api/v1/oc/generar:
+    post:
+      summary: "Generar OC a partir del carrito"
+      description: "Desglosa y crea las Órdenes de Compra reales basándose en el carrito actual. Tras generar N Órdenes, el carrito se vacía."
+      tags: [OrdenesDeCompra]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "O.C. generadas devueltas como lista"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrdenCompraResponse'
+
+  /api/v1/oc/{id}/estado:
+    patch:
+      summary: "Cambiar estado manual a una O.C."
+      tags: [OrdenesDeCompra]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: estado
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [BORRADOR, ENVIADA, CANCELADA]
+      responses:
+        "200":
+          description: "O.C. actualizada"
+
+  /api/v1/oc/{id}/recibir:
+    post:
+      summary: "Recibir O.C. (Cruce de Inventario Real)"
+      description: "Invocado cuando los palets físicos llegan a la bodega. Acopla el `CompraService` para afectar los contables, el inventario, el Historial del Precio Real del proveedor y el CPP."
+      tags: [OrdenesDeCompra]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "Recibo final configurado al estado RECIBIDA"
+          
+  /api/v1/oc/{id}/exportar-excel:
+    get:
+      summary: "Exportar OC en XLSX"
+      description: "Descarga un archivo MS Excel validado con Apache POI conteniendo un reporte formateado listo para envío al Proveedor."
+      tags: [OrdenesDeCompra]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "Archivo binario de excel"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+components:
+  schemas:
+    OrdenCompraResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        folio:
+          type: string
+        nombreProveedor:
+          type: string
+        estado:
+          type: string
+        totalEstimado:
+          type: number
+        fechaCreacion:
+          type: string
+          format: date-time
+        fechaEnvio:
+          type: string
+          format: date-time

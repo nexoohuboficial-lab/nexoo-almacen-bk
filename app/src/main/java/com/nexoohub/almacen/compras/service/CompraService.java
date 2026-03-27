@@ -14,6 +14,7 @@ import com.nexoohub.almacen.inventario.entity.InventarioSucursal;
 import com.nexoohub.almacen.inventario.entity.InventarioSucursalId;
 import com.nexoohub.almacen.inventario.entity.ProductoMaestro;
 import com.nexoohub.almacen.inventario.repository.InventarioSucursalRepository;
+import com.nexoohub.almacen.adquisiciones.repository.CatalogoProveedorProductoRepository;
 import com.nexoohub.almacen.inventario.repository.ProductoMaestroRepository;
 import com.nexoohub.almacen.ventas.service.ReservaService;
 import org.slf4j.Logger;
@@ -50,6 +51,7 @@ public class CompraService {
     private final ConfiguracionFinancieraRepository finanzasRepository;
     private final HistorialPrecioRepository historialPrecioRepository;
     private final ReservaService reservaService;
+    private final CatalogoProveedorProductoRepository catalogoProveedorProductoRepository;
 
     /**
      * Constructor con inyección de dependencias.
@@ -69,7 +71,8 @@ public class CompraService {
             ProductoMaestroRepository productoRepository,
             ConfiguracionFinancieraRepository finanzasRepository,
             HistorialPrecioRepository historialPrecioRepository,
-            ReservaService reservaService) {
+            ReservaService reservaService,
+            CatalogoProveedorProductoRepository catalogoProveedorProductoRepository) {
         this.compraRepository = compraRepository;
         this.detalleCompraRepository = detalleCompraRepository;
         this.inventarioRepository = inventarioRepository;
@@ -77,6 +80,7 @@ public class CompraService {
         this.finanzasRepository = finanzasRepository;
         this.historialPrecioRepository = historialPrecioRepository;
         this.reservaService = reservaService;
+        this.catalogoProveedorProductoRepository = catalogoProveedorProductoRepository;
     }
 
     /**
@@ -230,6 +234,16 @@ public class CompraService {
             detalle.setCantidad(item.getCantidad());
             detalle.setCostoUnitarioCompra(costoLimpio);
             detalleCompraRepository.save(detalle);
+
+            // --- F) ACTUALIZAR CATALOGO PROVEEDOR (SUP-01 / SUP-03) ---
+            com.nexoohub.almacen.adquisiciones.entity.CatalogoProveedorProducto cat =
+                    catalogoProveedorProductoRepository.findByProveedorIdAndProductoSkuInterno(
+                            Long.valueOf(request.getProveedorId()), item.getSkuInterno());
+            if (cat != null) {
+                cat.setUltimaCompraCosto(costoLimpio);
+                cat.setUltimaCompraFecha(java.time.LocalDateTime.now());
+                catalogoProveedorProductoRepository.save(cat);
+            }
 
             // Acumulamos el total de la factura
             BigDecimal subtotalRenglon = costoLimpio.multiply(new BigDecimal(item.getCantidad()));

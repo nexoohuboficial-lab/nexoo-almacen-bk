@@ -1,0 +1,74 @@
+openapi: "3.0.3"
+info:
+  title: NexooHub Almacén API - Comparador de Precios (SUP-01)
+  version: "1.0.0"
+  description: API interna para el módulo comparador de precios de proveedores. Permite evaluar y simular el precio sugerido de venta.
+servers:
+  - url: http://localhost:8080/api/sup/comparador
+    description: Servidor Local
+
+paths:
+  /producto/{sku}:
+    get:
+      summary: Compara precios para un SKU
+      description: Obtiene las opciones de compra ordenadas por precio, marcando la de menor costo y proyectando precio de venta sugerido.
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+          description: SKU interno del producto
+      responses:
+        '200':
+          description: Lista de opciones de compra exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpcionCompraProveedorDTO'
+        '404':
+          description: No se encontró la configuración financiera o el producto no cuenta con proveedores disponibles
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    OpcionCompraProveedorDTO:
+      type: object
+      properties:
+        proveedorId:
+          type: integer
+          description: ID interno del proveedor
+        nombreProveedor:
+          type: string
+          description: Razón social o nombre comercial
+        codigoArticuloProveedor:
+          type: string
+          description: SKU que el proveedor maneja para este artículo
+        precioCompraCotizado:
+          type: number
+          format: double
+          description: Precio costo actual del proveedor
+        moneda:
+          type: string
+          description: Moneda de la cotización (ej. MXN, USD)
+        tiempoEstimadoEntregaDias:
+          type: integer
+          description: Días estimados de entrega para este proveedor
+        precioSugeridoVenta:
+          type: number
+          format: double
+          description: Precio de venta proyectado al público (calculado con fórmula interna y margen)
+        mejorOpcion:
+          type: boolean
+          description: Bandera que indica si esta es la opción más económica
+        ultimaActualizacion:
+          type: string
+          format: date-time
+          description: Fecha de la última actualización del precio de este proveedor

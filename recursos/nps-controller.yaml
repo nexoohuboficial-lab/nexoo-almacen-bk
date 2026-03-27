@@ -1,0 +1,42 @@
+openapi: 3.0.1
+info:
+  title: API de Encuestas NPS (CRM)
+  description: Endpoints para gestionar encuestas de satisfacción.
+  version: 1.0.0
+paths:
+  /api/v1/crm/nps/encuestas:
+    post:
+      tags:
+        - CRM NPS
+      summary: Enviar encuesta post-venta
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Encuesta enviada/generada
+  /api/v1/crm/nps/respuestas:
+    post:
+      tags:
+        - CRM NPS
+      summary: Registrar respuesta del cliente
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Respuesta registrada
+  /api/v1/crm/nps/dashboard:
+    get:
+      tags:
+        - CRM NPS
+      summary: Dashboard con cálculo Promotores vs Detractores
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Resultados globales NPS
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

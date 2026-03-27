@@ -56,6 +56,9 @@ class CompraServiceTest {
     @Mock
     private HistorialPrecioRepository historialPrecioRepository;
 
+    @Mock
+    private com.nexoohub.almacen.adquisiciones.repository.CatalogoProveedorProductoRepository catalogoProveedorProductoRepository;
+
     @InjectMocks
     private CompraService compraService;
 

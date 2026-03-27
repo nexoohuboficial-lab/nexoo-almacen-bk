@@ -1,0 +1,165 @@
+openapi: 3.0.3
+info:
+  title: NexooHub Almacén - Módulo de Metas y Comisiones (PRO-02)
+  description: API REST para la asignación de metas de ventas y el cálculo en tiempo real de comisiones escalonadas (OKR).
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Servidor de Desarrollo Local
+
+paths:
+  /rh/metas:
+    post:
+      summary: Asignar o Actualizar Meta Mensual a un Empleado
+      tags:
+        - Metas y Comisiones
+      security:
+        - bearerAuth: []
+      description: Fija una cuota de ventas para un vendedor en un mes específico.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AsignarMetaRequest'
+      responses:
+        '201':
+          description: Meta asignada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_CreatedMeta'
+        '403':
+          description: No autorizado (Requiere ADMIN o GERENTE)
+        '404':
+          description: Empleado no encontrado
+
+  /rh/metas/{empleadoId}/progreso:
+    get:
+      summary: Obtener el progreso de ventas y cálculo de comisión
+      tags:
+        - Metas y Comisiones
+      security:
+        - bearerAuth: []
+      description: Cruza dinámicamente las ventas del mes contra la meta del empleado para determinar en qué Tier cayó y calcular su comisión en dinero.
+      parameters:
+        - name: empleadoId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del Empleado Vendedor
+        - name: mes
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Mes del año (1-12). Si se omite, toma el mes actual.
+        - name: anio
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Año. Si se omite, toma el actual.
+      responses:
+        '200':
+          description: Cálculo exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Progreso'
+        '404':
+          description: Empleado no encontrado o Meta no asignada
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AsignarMetaRequest:
+      type: object
+      required:
+        - empleadoId
+        - mes
+        - anio
+        - montoMeta
+      properties:
+        empleadoId:
+          type: integer
+          example: 15
+        mes:
+          type: integer
+          example: 10
+        anio:
+          type: integer
+          example: 2026
+        montoMeta:
+          type: number
+          format: double
+          example: 500000.00
+          description: Meta en moneda local que el vendedor debe alcanzar.
+
+    ProgresoMetaResponse:
+      type: object
+      properties:
+        empleadoId:
+          type: integer
+          example: 15
+        nombreEmpleado:
+          type: string
+          example: "Juan Pérez"
+        mes:
+          type: integer
+          example: 10
+        anio:
+          type: integer
+          example: 2026
+        montoMeta:
+          type: number
+          format: double
+          example: 500000.00
+        montoVentasAcumuladas:
+          type: number
+          format: double
+          example: 520000.00
+        porcentajeLogro:
+          type: number
+          format: double
+          example: 104.00
+        porcentajeComisionAplicable:
+          type: number
+          format: double
+          example: 3.5
+          description: Tier comisional alcanzado (Ej. > 100% da 3.5%)
+        comisionProyectadaVentas:
+          type: number
+          format: double
+          example: 18200.00
+        tierLogrado:
+          type: string
+          example: "Sobrecumplimiento Plus"
+        fechaUltimoCalculo:
+          type: string
+          format: date-time
+
+    ApiResponse_CreatedMeta:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: "Meta de ventas asignada exitosamente al empleado"
+        data:
+          type: integer
+          example: 4
+
+    ApiResponse_Progreso:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: "Progreso de ventas y comisión proyectada calculado con éxito"
+        data:
+          $ref: '#/components/schemas/ProgresoMetaResponse'

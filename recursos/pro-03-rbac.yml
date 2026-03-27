@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: NexooHub Almacén - Módulo de Control de Accesos (PRO-03)
+  description: API REST para la administración y control granular de Permisos y Sucursales en el esquema de seguridad (RBAC).
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Servidor de Desarrollo Local
+
+paths:
+  /admin/roles:
+    post:
+      summary: Crear nuevo Rol de Sistema
+      tags:
+        - Seguridad y Permisos
+      security:
+        - bearerAuth: []
+      description: Declara un nuevo rol en base de datos vinculándole N permisos atómicos de forma transaccional.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrearRolRequest'
+      responses:
+        '201':
+          description: Rol Creado Exitosamente
+
+  /admin/usuarios/{id}/roles:
+    post:
+      summary: Asignar Roles y Sucursales a Usuario
+      tags:
+        - Seguridad y Permisos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: El ID del Usuario (Login)
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AsignarAccesosUsuarioRequest'
+      responses:
+        '200':
+          description: Autorización Guardada Exitosamente
+
+  /admin/usuarios/{id}/permisos:
+    get:
+      summary: Consultar Permisos Finales del Usuario
+      tags:
+        - Seguridad y Permisos
+      security:
+        - bearerAuth: []
+      description: Despliega la suma plana y sin duplicados de los permisos atómicos conferidos sumando todos sus roles activos. Útil para renderizar el UI del frontend de manera granular.
+      parameters:
+        - name: id
+          in: path
+          description: El ID del Usuario
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Lista de permisos listada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: "Permisos efectivos"
+                  data:
+                    type: array
+                    items:
+                      type: string
+                    example: ["LEER_VENTA", "CREAR_VENTA", "CONFIGURAR_ALMACEN"]
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CrearRolRequest:
+      type: object
+      required:
+        - nombre
+      properties:
+        nombre:
+          type: string
+          example: "GERENTE_ZONA"
+        descripcion:
+          type: string
+          example: "Gerente encargado de supervisión de zona metropolitana."
+        permisos:
+          type: array
+          items:
+            type: string
+          example: ["LEER_VENTA", "CREAR_VENTA", "LEER_REPORTES"]
+
+    AsignarAccesosUsuarioRequest:
+      type: object
+      properties:
+        rolesIds:
+          type: array
+          items:
+            type: integer
+          example: [2, 5]
+        sucursalesIds:
+          type: array
+          items:
+            type: integer
+          example: [1, 3]
+          description: Los ids (PK) de las sucursales sobre los cuales sus operaciones atómicas de permisos tendrán jurisdicción en código.

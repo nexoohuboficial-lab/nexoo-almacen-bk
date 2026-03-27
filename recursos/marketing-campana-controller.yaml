@@ -1,0 +1,54 @@
+openapi: 3.0.1
+info:
+  title: API de Marketing Automatizado (CRM)
+  description: Endpoints para control de campañas por SMS/Email.
+  version: 1.0.0
+paths:
+  /api/v1/marketing/campanas:
+    post:
+      tags:
+        - CRM Marketing
+      summary: Crear campaña de marketing
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Campaña creada
+  /api/v1/marketing/campanas/{id}/ejecutar:
+    post:
+      tags:
+        - CRM Marketing
+      summary: Iniciar el envío masivo de la campaña
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Envío iniciado
+  /api/v1/marketing/campanas/{id}/metricas:
+    get:
+      tags:
+        - CRM Marketing
+      summary: Consultar resultados del envío (Entregados, Fallidos)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Métricas de campaña
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

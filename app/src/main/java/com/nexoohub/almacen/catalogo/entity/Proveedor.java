@@ -24,6 +24,14 @@ public class Proveedor extends AuditableEntity {
     private String email;
     private String direccion;
 
+    @Column(name = "condiciones_pago")
+    private String condicionesPago;
+
+    @Column(name = "dias_entrega_estimado")
+    private Integer diasEntregaEstimado;
+
+    private Boolean activo = true;
+
     // ==========================================
     // GETTERS Y SETTERS
     // ==========================================
@@ -47,4 +55,13 @@ public class Proveedor extends AuditableEntity {
 
     public String getDireccion() { return direccion; }
     public void setDireccion(String direccion) { this.direccion = direccion; }
+
+    public String getCondicionesPago() { return condicionesPago; }
+    public void setCondicionesPago(String condicionesPago) { this.condicionesPago = condicionesPago; }
+
+    public Integer getDiasEntregaEstimado() { return diasEntregaEstimado; }
+    public void setDiasEntregaEstimado(Integer diasEntregaEstimado) { this.diasEntregaEstimado = diasEntregaEstimado; }
+
+    public Boolean getActivo() { return activo; }
+    public void setActivo(Boolean activo) { this.activo = activo; }
 }

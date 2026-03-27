@@ -3,6 +3,8 @@ package com.nexoohub.almacen.erp.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.nexoohub.almacen.empleados.entity.Empleado;
 import java.util.ArrayList;
 import java.util.List;
 

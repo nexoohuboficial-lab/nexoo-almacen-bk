@@ -1,0 +1,49 @@
+openapi: 3.0.1
+info:
+  title: API de RFM (Analítica Avanzada)
+  description: Endpoints para calcular y consultar la segmentación RFM de los clientes.
+  version: 1.0.0
+paths:
+  /api/v1/analitica/rfm/calcular:
+    post:
+      tags:
+        - Analítica RFM
+      summary: Calcular segmentos RFM
+      description: Procesa las ventas e inventarios para clasificar a los clientes en segmentos RFM.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Cálculo exitoso
+  /api/v1/analitica/rfm/segmentos:
+    get:
+      tags:
+        - Analítica RFM
+      summary: Obtener estadísticas de segmentos
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Estadísticas recuperadas
+  /api/v1/analitica/rfm/cliente/{id}:
+    get:
+      tags:
+        - Analítica RFM
+      summary: Consultar score individual
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Score del cliente
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

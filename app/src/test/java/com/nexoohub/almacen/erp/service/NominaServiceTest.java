@@ -3,7 +3,7 @@ package com.nexoohub.almacen.erp.service;
 import com.nexoohub.almacen.erp.dto.EmpleadoDTO;
 import com.nexoohub.almacen.erp.dto.NominaPeriodoRequest;
 import com.nexoohub.almacen.erp.dto.NominaPeriodoResponse;
-import com.nexoohub.almacen.erp.entity.Empleado;
+import com.nexoohub.almacen.empleados.entity.Empleado;
 import com.nexoohub.almacen.erp.entity.NominaPeriodo;
 import com.nexoohub.almacen.erp.entity.ReciboNomina;
 import com.nexoohub.almacen.erp.repository.ErpEmpleadoRepository;

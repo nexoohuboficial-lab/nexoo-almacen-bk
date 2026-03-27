@@ -181,4 +181,36 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
         @Param("metodoPago") String metodoPago,
         @Param("sucursalId") Integer sucursalId
     );
+
+    // ==================== ANALÍTICA ANA-04: RENDIMIENTO DE PERSONAL ====================
+
+    /**
+     * Obtiene las ventas de un vendedor en un periodo (sin detalles, para cálculo de KPIs).
+     */
+    @Query("SELECT v FROM Venta v " +
+           "WHERE v.vendedorId = :vendedorId " +
+           "AND v.fechaVenta BETWEEN :inicio AND :fin " +
+           "ORDER BY v.fechaVenta ASC")
+    List<Venta> findVentasByVendedorAndPeriodo(
+        @Param("vendedorId") Integer vendedorId,
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin
+    );
+
+    /**
+     * Calcula la hora del día con más ventas para un vendedor en un periodo.
+     * Retorna Object[]: [hora (0-23), conteo de ventas en esa hora]
+     * La primera fila tendrá la hora pico (mayor conteo).
+     */
+    @Query("SELECT FUNCTION('HOUR', v.fechaVenta), COUNT(v) " +
+           "FROM Venta v " +
+           "WHERE v.vendedorId = :vendedorId " +
+           "AND v.fechaVenta BETWEEN :inicio AND :fin " +
+           "GROUP BY FUNCTION('HOUR', v.fechaVenta) " +
+           "ORDER BY COUNT(v) DESC")
+    List<Object[]> findHoraPicoByVendedorAndPeriodo(
+        @Param("vendedorId") Integer vendedorId,
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fin") LocalDateTime fin
+    );
 }

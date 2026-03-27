@@ -1,0 +1,38 @@
+openapi: 3.0.1
+info:
+  title: API de Interacciones B2B (CRM)
+  description: Endpoints para gestionar registros de llamadas y visitas a prospectos.
+  version: 1.0.0
+paths:
+  /api/v1/crm/interacciones:
+    post:
+      tags:
+        - CRM Interacciones
+      summary: Registrar una nueva llamada o visita
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Interacción registrada
+  /api/v1/crm/interacciones/prospecto/{id}:
+    get:
+      tags:
+        - CRM Interacciones
+      summary: Consultar historial de un prospecto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Historial de interacciones
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

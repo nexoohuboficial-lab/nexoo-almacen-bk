@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Size;
 public class ProductoMaestro extends AuditableEntity {
 
     @Id
+    @Column(name = "sku_interno")
     @NotBlank(message = "El SKU interno es obligatorio")
     @Size(min = 3, max = 50, message = "El SKU interno debe tener entre 3 y 50 caracteres")
     private String skuInterno;

@@ -1,0 +1,80 @@
+openapi: 3.0.3
+info:
+  title: NexooHub Almacén - Módulo de Analítica de Rendimiento (ANA-01)
+  description: API REST de uso gerencial para la medición estadística del rendimiento de ventas por empleado cruzado contra datos duros de sucursal.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1/rh/metricas
+    description: Servidor Local Gerencial
+
+paths:
+  /ranking:
+    get:
+      summary: Obtener Ranking de Empleados
+      tags:
+        - Analítica RH
+      description: Despliega el top de empleados en base a facturación neta durante un rango de fechas. Retorna también la cantidad de tickets operados y su valor de retención.
+      parameters:
+        - name: sucursalId
+          in: query
+          description: Filtra métricas de una sucursal en particular. Si se omite asume modo global.
+          required: false
+          schema:
+            type: integer
+        - name: fechaInicio
+          in: query
+          description: Rango ISO format
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Ranking tabulado.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RankingEmpleadoResponse'
+
+  /rendimiento/{empleadoId}:
+    get:
+      summary: Análisis de Rendimiento 360 Individual
+      tags:
+        - Analítica RH
+      description: Entrega un desglose que cruza ventas concretadas, devoluciones, penalones de asistencia y porcentaje de meta superada.
+      parameters:
+        - name: empleadoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Métrica tridimensional devuelta
+
+components:
+  schemas:
+    RankingEmpleadoResponse:
+      type: object
+      properties:
+        empleadoId:
+          type: integer
+          example: 15
+        nombreCompleto:
+          type: string
+          example: "Ricardo Silva"
+        puesto:
+          type: string
+          example: "Asesor Comercial Sr"
+        totalVentasNetas:
+          type: number
+          format: double
+          example: 145000.50
+        totalTickets:
+          type: integer
+          example: 345
+        posicionRanking:
+          type: integer
+          example: 1

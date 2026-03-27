@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: NexooHub Almacén - Módulo de Alertas (PRO-01)
+  description: API REST para la gestión de alertas internas, notificaciones asíncronas, y configuración de canales (Email, Push, SMS) para los empleados.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1/alertas
+    description: Servidor de Desarrollo Local
+
+paths:
+  /:
+    get:
+      summary: Obtener Alertas Activas del Usuario
+      tags:
+        - Alertas
+      description: Recupera la bandeja de entrada de alertas de un usuario. Permite filtrar por estado de lectura y ordenarlas descendentemente por fecha.
+      parameters:
+        - name: leida
+          in: query
+          description: Filtrar por alertas leídas (true) o no leídas (false)
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Lista de alertas retornada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertaResponse'
+
+  /{id}/marcar-leida:
+    patch:
+      summary: Marcar una Alerta como Leída
+      tags:
+        - Alertas
+      description: Actualiza el estado de la alerta a leida=true, quitándola de las notificaciones visuales urgentes.
+      parameters:
+        - name: id
+          in: path
+          description: ID de la alerta numérica
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: La alerta se marcó como leída exitosamente.
+
+  /configuracion:
+    get:
+      summary: Obtener Configuración de Canales
+      tags:
+        - Configuración de Alertas
+      description: Recupera qué canales (EMAIL, SMS, PUSH, APP) tiene activados el empleado para recibir sus alertas.
+      responses:
+        '200':
+          description: Configuración listada.
+
+    patch:
+      summary: Actualizar Canales de Notificación
+      tags:
+        - Configuración de Alertas
+      description: Permite al usuario mutar qué avisos quiere recibir y por qué medio.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                canal:
+                  type: string
+                  example: "EMAIL"
+                activo:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Configuración registrada.
+
+components:
+  schemas:
+    AlertaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1205
+        tipo:
+          type: string
+          example: "STOCK_BAJO"
+        mensaje:
+          type: string
+          example: "El producto Aceite Motul 5W30 ha caído por debajo de su stock mínimo en Sucursal Norte."
+        severidad:
+          type: string
+          example: "ALTA"
+        fechaCreacion:
+          type: string
+          format: date-time
+          example: "2026-03-27T10:30:00Z"
+        leida:
+          type: boolean
+          example: false

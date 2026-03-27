@@ -113,6 +113,17 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        log.warn("Acceso denegado: {}", ex.getMessage());
+        return buildErrorResponse(
+            HttpStatus.FORBIDDEN, 
+            "Acceso Denegado", 
+            "No tienes permisos suficientes para realizar esta acción", 
+            null
+        );
+    }
+
     /**
      * Maneja excepciones de stock insuficiente.
      * HTTP 409 CONFLICT - El cliente intenta realizar una operación que no puede completarse.
