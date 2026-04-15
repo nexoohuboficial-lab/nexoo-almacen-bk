@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # -----------------------------------
+  # 1. EL LADO DE LA BASE DE DATOS
+  # -----------------------------------
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: nexoohub_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: nexoohub_almacen
+      POSTGRES_USER: nexoohub_user
+      # ---> CAMBIO 1: Aquí le dices a Postgres cuál será su contraseña
+      POSTGRES_PASSWORD: MiClaveSecreta999 
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - red-interna
+
+  # -----------------------------------
+  # 2. EL LADO DE JAVA (SPRING BOOT)
+  # -----------------------------------
+  java-backend:
+    build: .
+    container_name: nexoohub_java_app
+    restart: always
+    depends_on:
+      - postgres-db
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=jdbc:postgresql://postgres-db:5432/nexoohub_almacen
+      - DB_USER=nexoohub_user
+      # ---> CAMBIO 2: Aquí le inyectas la misma contraseña a Spring Boot
+      - DB_PASSWORD=MiClaveSecreta999 
+    ports:
+      - "8080:8080"
+    networks:
+      - red-interna
+
+# ... (resto del archivo igual: volumes y networks)
+
+# Definición del volumen para la persistencia
+volumes:
+  pgdata:
+
+# Definición de la red para que los contenedores se hablen entre sí
+networks:
+  red-interna:
+    driver: bridge

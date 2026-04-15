@@ -7,7 +7,7 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -21,7 +21,9 @@ spring:
   
   # Desactivar Flyway en desarrollo (H2 usa create-drop de JPA)
   flyway:
-    enabled: false
+    enabled: true
+    # Opcional pero recomendado para limpiar la BD H2 en cada reinicio
+    clean-disabled: fals
 
 management:
   endpoints:

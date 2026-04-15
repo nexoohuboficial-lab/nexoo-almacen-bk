@@ -127,6 +127,7 @@ CREATE TABLE producto_maestro (
     sku_proveedor VARCHAR(50),
     nombre_comercial VARCHAR(200) NOT NULL,
     descripcion TEXT,
+    marca VARCHAR(100),
     categoria_id INTEGER REFERENCES categoria(id),
     proveedor_id INTEGER REFERENCES proveedor(id),
     clave_sat VARCHAR(8),
@@ -316,6 +317,25 @@ CREATE INDEX idx_precio_especial_sku_tipo ON precio_especial(sku_interno, tipo_c
 CREATE INDEX idx_producto_categoria ON producto_maestro(categoria_id);
 CREATE INDEX idx_producto_proveedor ON producto_maestro(proveedor_id);
 CREATE INDEX idx_producto_nombre ON producto_maestro(nombre_comercial);
+CREATE INDEX idx_producto_marca ON producto_maestro(marca);
+CREATE INDEX idx_producto_activo ON producto_maestro(activo);
+
+-- Índices para proveedores (búsqueda por nombre)
+CREATE INDEX idx_proveedor_nombre ON proveedor(nombre_empresa);
+
+-- Índices para categorías (búsqueda por nombre)
+CREATE INDEX idx_categoria_nombre ON categoria(nombre);
+
+-- Índices para motos (búsqueda avanzada)
+CREATE INDEX idx_moto_marca ON moto(marca);
+CREATE INDEX idx_moto_modelo ON moto(modelo);
+CREATE INDEX idx_moto_cilindrada ON moto(cilindrada);
+CREATE INDEX idx_moto_marca_modelo_cilindrada ON moto(marca, modelo, cilindrada);
+
+-- Índices para compatibilidad (búsquedas de productos por moto)
+CREATE INDEX idx_compatibilidad_sku ON compatibilidad_producto(sku_interno);
+CREATE INDEX idx_compatibilidad_moto ON compatibilidad_producto(moto_id);
+CREATE INDEX idx_compatibilidad_anios ON compatibilidad_producto(anio_inicio, anio_fin);
 
 -- Índices para movimientos de inventario
 CREATE INDEX idx_movimiento_sucursal_fecha ON movimiento_inventario(sucursal_id, fecha_movimiento DESC);
