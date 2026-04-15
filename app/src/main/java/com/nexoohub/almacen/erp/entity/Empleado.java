@@ -47,7 +47,8 @@ public class Empleado {
     @Column(nullable = false, length = 20)
     private String estatus = "ACTIVO";
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false,
+            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
     @PrePersist

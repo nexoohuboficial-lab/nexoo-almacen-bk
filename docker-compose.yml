@@ -11,14 +11,19 @@ services:
     environment:
       POSTGRES_DB: nexoohub_almacen
       POSTGRES_USER: nexoohub_user
-      # ---> CAMBIO 1: Aquí le dices a Postgres cuál será su contraseña
-      POSTGRES_PASSWORD: MiClaveSecreta999 
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-MiClaveSecreta999}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - red-interna
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexoohub_user -d nexoohub_almacen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   # -----------------------------------
   # 2. EL LADO DE JAVA (SPRING BOOT)
@@ -28,19 +33,23 @@ services:
     container_name: nexoohub_java_app
     restart: always
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - DB_URL=jdbc:postgresql://postgres-db:5432/nexoohub_almacen
       - DB_USER=nexoohub_user
-      # ---> CAMBIO 2: Aquí le inyectas la misma contraseña a Spring Boot
-      - DB_PASSWORD=MiClaveSecreta999 
+      - DB_PASSWORD=${DB_PASSWORD:-MiClaveSecreta999}
+      - JWT_SECRET=${JWT_SECRET:-NexooHubSuperSecretKeyParaFirmaDeTokens2026!}
+      - MAIL_USERNAME=${MAIL_USERNAME:-nexoohub.erp@gmail.com}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_FROM=${MAIL_FROM:-nexoohub.erp@gmail.com}
+      - TELEGRAM_ENABLED=${TELEGRAM_ENABLED:-false}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
     ports:
       - "8080:8080"
     networks:
       - red-interna
-
-# ... (resto del archivo igual: volumes y networks)
 
 # Definición del volumen para la persistencia
 volumes:

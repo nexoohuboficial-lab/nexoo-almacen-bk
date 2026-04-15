@@ -7,7 +7,8 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: validate
+      # create-drop permite que Hibernate cree el esquema en H2 sin Flyway
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
@@ -19,11 +20,10 @@ spring:
       enabled: true
       path: /h2-console
   
-  # Desactivar Flyway en desarrollo (H2 usa create-drop de JPA)
+  # Flyway desactivado en DEV: H2 no es compatible con SQL PostgreSQL (SERIAL, etc.)
+  # Usa ddl-auto: create-drop para generar el esquema automáticamente desde las entidades.
   flyway:
-    enabled: true
-    # Opcional pero recomendado para limpiar la BD H2 en cada reinicio
-    clean-disabled: fals
+    enabled: false
 
 management:
   endpoints:

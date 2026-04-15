@@ -226,7 +226,7 @@ class RendimientoPersonalServiceTest {
     private Cotizacion crearCotizacion(String estado) {
         Cotizacion c = new Cotizacion();
         c.setEstado(estado);
-        c.setFechaCotizacion(LocalDateTime.now().minusDays(5));
+        c.setFechaCotizacion(LocalDateTime.of(2026, 3, 15, 10, 0));
         return c;
     }
 }

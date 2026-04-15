@@ -82,24 +82,34 @@ CREATE TABLE sucursal (
 
 CREATE TABLE empleado (
     id SERIAL PRIMARY KEY,
+    usuario_id INTEGER UNIQUE,
     nombre VARCHAR(150) NOT NULL,
     apellidos VARCHAR(200),
-    puesto VARCHAR(100),
-    fecha_contratacion DATE DEFAULT CURRENT_DATE,
-    activo BOOLEAN DEFAULT TRUE,
+    nombre_completo VARCHAR(200),
+    curp VARCHAR(18) UNIQUE,
+    rfc VARCHAR(13) UNIQUE,
+    nss VARCHAR(15) UNIQUE,
+    puesto VARCHAR(100) NOT NULL,
+    departamento VARCHAR(50),
+    salario_diario NUMERIC(12,4) DEFAULT 0.00,
     sucursal_id INTEGER NOT NULL REFERENCES sucursal(id),
+    fecha_contratacion DATE DEFAULT CURRENT_DATE,
+    fecha_ingreso DATE,
+    activo BOOLEAN DEFAULT TRUE,
+    estatus VARCHAR(20) DEFAULT 'ACTIVO',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_creacion VARCHAR(50),
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_actualizacion VARCHAR(50)
 );
 
-CREATE TABLE usuario (
+CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
-    empleado_id INTEGER REFERENCES empleado(id),
+    empleado_id INTEGER,
     activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_creacion VARCHAR(50),
@@ -211,7 +221,7 @@ CREATE TABLE venta (
     id SERIAL PRIMARY KEY,
     cliente_id INTEGER REFERENCES cliente(id),
     sucursal_id INTEGER REFERENCES sucursal(id),
-    vendedor_id INTEGER REFERENCES usuario(id),
+    vendedor_id INTEGER REFERENCES usuarios(id),
     metodo_pago VARCHAR(50),
     total NUMERIC(10, 2) DEFAULT 0.00,
     fecha_venta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -271,7 +281,7 @@ VALUES (1, 'Administrador', 'Sistema', 'Administrador General', 1, 'SISTEMA');
 
 -- Usuario Administrador (password: admin123)
 -- Hash BCrypt: $2a$10$k/mIluuONgJLE8efmX6Cse4/k8aUv5dvUqsCjJmxXKELm6ZMPZqsm
-INSERT INTO usuario (id, username, password, role, empleado_id, usuario_creacion)
+INSERT INTO usuarios (id, username, password, role, empleado_id, usuario_creacion)
 VALUES (1, 'admin', '$2a$10$k/mIluuONgJLE8efmX6Cse4/k8aUv5dvUqsCjJmxXKELm6ZMPZqsm', 'ROLE_ADMIN', 1, 'SISTEMA');
 
 -- Cliente Genérico para Venta Mostrador
@@ -287,7 +297,7 @@ SELECT setval('proveedor_id_seq', 1, true);
 SELECT setval('tipo_cliente_id_seq', 3, true);
 SELECT setval('sucursal_id_seq', 1, true);
 SELECT setval('empleado_id_seq', 1, true);
-SELECT setval('usuario_id_seq', 1, true);
+SELECT setval('usuarios_id_seq', 1, true);
 SELECT setval('cliente_id_seq', 1, true);
 
 -- ==================================================================

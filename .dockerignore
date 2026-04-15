@@ -1,0 +1,22 @@
+# Excluir archivos que no necesita Docker para compilar
+.git/
+.gitignore
+.env
+*.md
+recursos/
+
+# Artefactos de build locales (se recompilan dentro del contenedor)
+app/build/
+app/bin/
+app/.gradle/
+.gradle/
+build/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Logs
+logs/
+*.log

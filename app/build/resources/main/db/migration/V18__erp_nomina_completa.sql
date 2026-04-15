@@ -1,25 +1,10 @@
 -- ==================================================================
 -- FLYWAY MIGRATION V18: Nómina Completa y RRHH (ERP-04)
 -- ==================================================================
+-- Nota: La tabla 'empleado' fue creada con todas sus columnas en V1.
+--       Esta migración solo agrega las tablas de nómina relacionadas.
 
--- 1. Empleados (indepentientes del login 'users', aunque pueden vincularse si entran al sistema)
-CREATE TABLE empleado (
-    id                  SERIAL PRIMARY KEY,
-    usuario_id          INTEGER      UNIQUE,           -- ID en tabla users, si tiene acceso al sistema
-    sucursal_id         INTEGER      NOT NULL,
-    nombre_completo     VARCHAR(100) NOT NULL,
-    curp                VARCHAR(18)  UNIQUE,
-    rfc                 VARCHAR(13)  UNIQUE,
-    nss                 VARCHAR(15)  UNIQUE,
-    departamento        VARCHAR(50)  NOT NULL,
-    puesto              VARCHAR(50)  NOT NULL,
-    salario_diario      NUMERIC(12,4) NOT NULL DEFAULT 0.00,
-    fecha_ingreso       DATE         NOT NULL,
-    estatus             VARCHAR(20)  NOT NULL DEFAULT 'ACTIVO', -- ACTIVO, INACTIVO
-    created_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- 2. Periodo de Nómina (Ej: Quincena 1 Enero 2026, Semana 12, etc.)
+-- 1. Periodo de Nómina (Ej: Quincena 1 Enero 2026, Semana 12, etc.)
 CREATE TABLE nomina_periodo (
     id                  SERIAL PRIMARY KEY,
     nombre              VARCHAR(100) NOT NULL,         -- "1ra Quincena Ene 2026"

@@ -1,4 +1,6 @@
-echo "build/
+build/
 .gradle/
 bin/
-out/" > .gitignore
+out/
+.env
+*.env
