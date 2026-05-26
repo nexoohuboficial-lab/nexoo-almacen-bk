@@ -9,8 +9,8 @@
 
 -- 1. TABLAS NUEVAS
 CREATE TABLE historial_precio_proveedor (
-    id SERIAL PRIMARY KEY,
-    catalogo_id INTEGER NOT NULL REFERENCES catalogo_proveedor_producto(id),
+    id BIGSERIAL PRIMARY KEY,
+    catalogo_id BIGINT NOT NULL REFERENCES catalogo_proveedor_producto(id),
     precio_costo_anterior NUMERIC(12,2),
     precio_costo_nuevo NUMERIC(12,2) NOT NULL,
     variacion_porcentual NUMERIC(5,2),

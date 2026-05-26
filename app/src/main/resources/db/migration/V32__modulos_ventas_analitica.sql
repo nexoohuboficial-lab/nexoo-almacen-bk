@@ -56,13 +56,18 @@ CREATE TABLE cotizacion (
     terminos_condiciones VARCHAR(2000),
     observaciones_internas VARCHAR(1000),
     fecha_aceptacion TIMESTAMP,
+    fecha_rechazo TIMESTAMP,
+    motivo_rechazo VARCHAR(500),
+    venta_id INTEGER,
+    fecha_conversion TIMESTAMP,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_creacion VARCHAR(50),
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_actualizacion VARCHAR(50),
     CONSTRAINT fk_cotizacion_cliente FOREIGN KEY (cliente_id) REFERENCES cliente(id),
     CONSTRAINT fk_cotizacion_sucursal FOREIGN KEY (sucursal_id) REFERENCES sucursal(id),
-    CONSTRAINT fk_cotizacion_empleado FOREIGN KEY (vendedor_id) REFERENCES empleado(id)
+    CONSTRAINT fk_cotizacion_empleado FOREIGN KEY (vendedor_id) REFERENCES empleado(id),
+    CONSTRAINT fk_cotizacion_venta FOREIGN KEY (venta_id) REFERENCES venta(id) ON DELETE SET NULL
 );
 
 CREATE TABLE detalle_cotizacion (
@@ -94,7 +99,7 @@ CREATE TABLE reserva (
     fecha_finalizacion TIMESTAMP,
     venta_id INTEGER,
     comentarios VARCHAR(500),
-    usuario_creacion VARCHAR(100),
+    usuario_registro VARCHAR(100) NOT NULL,
     CONSTRAINT fk_reserva_cliente FOREIGN KEY (cliente_id) REFERENCES cliente(id),
     CONSTRAINT fk_reserva_sku FOREIGN KEY (sku_interno) REFERENCES producto_maestro(sku_interno),
     CONSTRAINT fk_reserva_sucursal FOREIGN KEY (sucursal_id) REFERENCES sucursal(id),
@@ -134,8 +139,8 @@ CREATE TABLE historial_credito (
     folio_comprobante VARCHAR(50),
     concepto VARCHAR(500) NOT NULL,
     observaciones VARCHAR(1000),
-    fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario_creacion VARCHAR(50),
+    fecha_movimiento TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario_registro VARCHAR(100),
     CONSTRAINT fk_historial_credito_cliente FOREIGN KEY (cliente_id) REFERENCES cliente(id),
     CONSTRAINT fk_historial_credito_venta FOREIGN KEY (venta_id) REFERENCES venta(id)
 );
@@ -201,6 +206,11 @@ CREATE TABLE alerta_lento_movimiento (
     stock_actual INTEGER NOT NULL,
     costo_inmovilizado NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     estado_alerta VARCHAR(20) NOT NULL, -- ADVERTENCIA, CRITICO, RESUELTA
+    fecha_deteccion DATE NOT NULL,
+    fecha_resolucion DATE,
+    accion_tomada VARCHAR(100),
+    observaciones VARCHAR(500),
+    resuelto BOOLEAN NOT NULL DEFAULT FALSE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_creacion VARCHAR(50),
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -12,8 +12,8 @@
 -- Almacena los productos que un usuario ADMIN ha agregado a su carrito.
 CREATE TABLE sesion_carrito_compra (
     id SERIAL PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    catalogo_id INT NOT NULL,
+    usuario_id INTEGER NOT NULL,
+    catalogo_id BIGINT NOT NULL,
     sku_interno VARCHAR(50) NOT NULL,
     proveedor_id INT NOT NULL,
     cantidad INT NOT NULL CHECK (cantidad > 0),
@@ -36,10 +36,10 @@ CREATE TABLE orden_compra_proveedor (
     fecha_envio TIMESTAMP,
     fecha_esperada_entrega TIMESTAMP,
     activo BOOLEAN NOT NULL DEFAULT true,
-    creado_por VARCHAR(50) NOT NULL,
-    fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    modificado_por VARCHAR(50),
-    fecha_modificacion TIMESTAMP,
+    usuario_creacion VARCHAR(50),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_actualizacion VARCHAR(50),
+    fecha_actualizacion TIMESTAMP,
     CONSTRAINT fk_oc_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedor(id),
     CONSTRAINT fk_oc_sucursal FOREIGN KEY (sucursal_id) REFERENCES sucursal(id)
 );
@@ -56,10 +56,10 @@ CREATE TABLE detalle_orden_compra (
     precio_venta_sugerido NUMERIC(10, 2),
     subtotal NUMERIC(12, 2) NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT true,
-    creado_por VARCHAR(50) NOT NULL,
-    fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    modificado_por VARCHAR(50),
-    fecha_modificacion TIMESTAMP,
+    usuario_creacion VARCHAR(50),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_actualizacion VARCHAR(50),
+    fecha_actualizacion TIMESTAMP,
     CONSTRAINT fk_detalle_oc FOREIGN KEY (orden_compra_id) REFERENCES orden_compra_proveedor(id) ON DELETE CASCADE
 );
 

@@ -37,7 +37,7 @@ CREATE TABLE rol_permiso (
 
 -- 4. Tabla puente Usuario -> Rol
 CREATE TABLE usuario_rol (
-    usuario_id INT NOT NULL,
+    usuario_id BIGINT NOT NULL,
     rol_id INT NOT NULL,
     PRIMARY KEY (usuario_id, rol_id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
@@ -46,7 +46,7 @@ CREATE TABLE usuario_rol (
 
 -- 5. Tabla puente Usuario -> Sucursal Limitada
 CREATE TABLE usuario_sucursal (
-    usuario_id INT NOT NULL,
+    usuario_id BIGINT NOT NULL,
     sucursal_id INT NOT NULL,
     PRIMARY KEY (usuario_id, sucursal_id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
