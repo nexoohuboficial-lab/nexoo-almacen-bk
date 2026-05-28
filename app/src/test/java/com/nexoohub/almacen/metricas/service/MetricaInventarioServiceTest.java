@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -126,7 +127,7 @@ class MetricaInventarioServiceTest {
         when(inventarioSucursalRepository.findAll()).thenReturn(inventariosTest);
 
         // Costo de ventas del período: $10,000
-        when(rentabilidadVentaRepository.calcularCostoTotalPeriodo(any(LocalDate.class), any(LocalDate.class)))
+        when(rentabilidadVentaRepository.calcularCostoTotalPeriodo(any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(new BigDecimal("10000.00"));
 
         MetricaInventario metricaGuardada = new MetricaInventario();
@@ -177,7 +178,7 @@ class MetricaInventarioServiceTest {
         request.setDiasPeriodoRotacion(30);
 
         when(inventarioSucursalRepository.findByIdSucursalId(1)).thenReturn(inventariosTest);
-        when(rentabilidadVentaRepository.calcularCostoTotalPeriodo(any(LocalDate.class), any(LocalDate.class)))
+        when(rentabilidadVentaRepository.calcularCostoTotalPeriodo(any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(new BigDecimal("10000.00"));
 
         // When
@@ -223,7 +224,7 @@ class MetricaInventarioServiceTest {
                 .thenReturn(Optional.empty());
 
         when(inventarioSucursalRepository.findAll()).thenReturn(inventariosTest);
-        when(rentabilidadVentaRepository.calcularCostoTotalPeriodo(any(LocalDate.class), any(LocalDate.class)))
+        when(rentabilidadVentaRepository.calcularCostoTotalPeriodo(any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(new BigDecimal("10000.00"));
 
         // When

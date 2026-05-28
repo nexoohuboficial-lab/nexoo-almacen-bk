@@ -34,7 +34,7 @@ public class VentaMapper {
             entity.getSucursalId(),
             entity.getSucursal() != null ? entity.getSucursal().getNombre() : null,
             entity.getVendedorId(),
-            entity.getVendedor() != null ? entity.getVendedor().getNombre() : null,
+            entity.getVendedor() != null ? entity.getVendedor().getUsername() : null,
             entity.getMetodoPago(),
             entity.getTotal(),
             entity.getFechaVenta(),

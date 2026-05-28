@@ -39,7 +39,7 @@ CREATE INDEX idx_regla_comision_sku ON regla_comision(sku_producto);
 -- Tabla de comisiones calculadas
 CREATE TABLE comision (
     id SERIAL PRIMARY KEY,
-    vendedor_id INTEGER NOT NULL REFERENCES empleados(id) ON DELETE CASCADE,
+    vendedor_id INTEGER NOT NULL REFERENCES empleado(id) ON DELETE CASCADE,
     periodo_anio INTEGER NOT NULL CHECK (periodo_anio >= 2000 AND periodo_anio <= 2100),
     periodo_mes INTEGER NOT NULL CHECK (periodo_mes >= 1 AND periodo_mes <= 12),
     total_ventas NUMERIC(12, 2) DEFAULT 0.00 NOT NULL CHECK (total_ventas >= 0),

@@ -47,13 +47,17 @@ public class NominaService {
 
         Empleado emp = new Empleado();
         emp.setUsuarioId(req.getUsuarioId());
-        emp.setSucursalId(req.getSucursalId());
+        emp.setSucursalId(req.getSucursalId() != null ? req.getSucursalId() : 1);
         emp.setNombreCompleto(req.getNombreCompleto());
+        // El campo 'nombre' en la entidad tiene @NotBlank — lo derivamos del nombreCompleto
+        String nombre = req.getNombreCompleto() != null ? req.getNombreCompleto().split(" ")[0] : "Sin Nombre";
+        emp.setNombre(nombre);
         emp.setCurp(req.getCurp());
         emp.setRfc(req.getRfc());
         emp.setNss(req.getNss());
         emp.setDepartamento(req.getDepartamento());
-        emp.setPuesto(req.getPuesto());
+        // El campo 'puesto' tiene @NotBlank — garantizamos valor por defecto
+        emp.setPuesto(req.getPuesto() != null && !req.getPuesto().isBlank() ? req.getPuesto() : "EMPLEADO");
         emp.setSalarioDiario(req.getSalarioDiario() != null ? req.getSalarioDiario() : BigDecimal.ZERO);
         emp.setFechaIngreso(req.getFechaIngreso() != null ? req.getFechaIngreso() : LocalDate.now());
         emp.setEstatus(req.getEstatus() != null ? req.getEstatus().toUpperCase() : "ACTIVO");

@@ -1,2491 +1,1644 @@
-# 📘 DOCUMENTACIÓN TÉCNICA COMPLETA - NexooHub Almacén
+# DOCUMENTACIÓN TÉCNICA COMPLETA — NexooHub Almacén
 
-> **Sistema Integral de Gestión de Inventarios Multi-Sucursal**  
-> Versión: 1.0.0  
-> Fecha: Marzo 12, 2026  
-> NexooHub Development Team
+> **Sistema Integral de Gestión Multi-Sucursal para Refacciones de Motocicletas**  
+> Versión: 1.0.0 | Actualización: Mayo 2026 | NexooHub Development Team
 
 ---
 
-## 📑 Tabla de Contenidos
+## Tabla de Contenidos
 
 1. [Resumen Ejecutivo](#1-resumen-ejecutivo)
 2. [Arquitectura del Sistema](#2-arquitectura-del-sistema)
 3. [Stack Tecnológico](#3-stack-tecnológico)
-4. [Modelo de Base de Datos](#4-modelo-de-base-de-datos)
-5. [Módulos Funcionales](#5-módulos-funcionales)
-6. [API REST - Endpoints](#6-api-rest---endpoints)
+4. [Estructura del Código Fuente](#4-estructura-del-código-fuente)
+5. [Base de Datos — Esquema Completo](#5-base-de-datos--esquema-completo)
+6. [Módulos Funcionales y Endpoints Detallados](#6-módulos-funcionales-y-endpoints-detallados)
 7. [Seguridad y Autenticación](#7-seguridad-y-autenticación)
-8. [Métricas y Analítica](#8-métricas-y-analítica)
-9. [Testing y Calidad](#9-testing-y-calidad)
-10. [Despliegue](#10-despliegue)
-11. [Guía de Desarrollo](#11-guía-de-desarrollo)
-12. [Troubleshooting](#12-troubleshooting)
+8. [Caché y Performance](#8-caché-y-performance)
+9. [Notificaciones y Alertas Automáticas](#9-notificaciones-y-alertas-automáticas)
+10. [Testing y Calidad](#10-testing-y-calidad)
+11. [Despliegue y Configuración Completa](#11-despliegue-y-configuración-completa)
+12. [Consideraciones y Deuda Técnica](#12-consideraciones-y-deuda-técnica)
 
 ---
 
 ## 1. Resumen Ejecutivo
 
-### 🎯 ¿Qué es NexooHub Almacén?
+NexooHub Almacén es una API REST construida con Spring Boot 3.2.3 / Java 21 que cubre la operación completa de una cadena de tiendas de refacciones de motocicletas: catálogos, inventario multi-sucursal, ventas, compras, CRM, ERP (contabilidad, logística, nómina), analítica predictiva y reporting financiero.
 
-NexooHub Almacén es un **sistema integral de gestión de inventarios** diseñado para cadenas de tiendas de refacciones de motocicletas que operan en múltiples sucursales. El sistema ofrece:
-
-- ✅ **Control multi-sucursal** en tiempo real
-- ✅ **Gestión completa de inventario** con trazabilidad
-- ✅ **Sistema de ventas** con facturación y crédito
-- ✅ **Módulo de compras** con gestión de proveedores
-- ✅ **Predicción de demanda** con IA/ML
-- ✅ **Sistema de comisiones** para vendedores
-- ✅ **Programa de fidelidad** con puntos
-- ✅ **Análisis ABC** de inventario
-- ✅ **Métricas financieras** y operativas en tiempo real
-- ✅ **API REST completa** con Swagger/OpenAPI
-
-### 📊 Estadísticas del Proyecto
+### Métricas del Proyecto
 
 | Métrica | Valor |
-|---------|-------|
-| **Líneas de Código** | ~45,000 |
-| **Controllers** | 35 |
-| **Services** | 42 |
-| **Entities** | 38 |
-| **Endpoints API** | 250+ |
-| **Tests Unitarios** | 790 |
-| **Cobertura de Tests** | 100% (790/790 pasando) |
-| **Migraciones BD** | 10 |
-| **Documentación YAML** | 35 archivos |
+|---|---|
+| Módulos de negocio | 21 |
+| Controladores REST (`*Controller.java`) | 65 archivos |
+| Servicios de negocio | 50+ |
+| Entidades JPA | 60+ |
+| Migraciones Flyway | 33 (V1–V33) |
+| Endpoints documentados | 250+ |
+| Tests (JUnit 5 + Jupiter) | 950+ — **100% pasando** |
+| Cobertura JaCoCo (core lógico) | **68% instrucciones / 50% ramas** |
+| Índices PostgreSQL declarados | **39** (25 en V1 + 14 en V33) |
+| Clase principal | `com.nexoohub.almacen.NexooHAlmacenApplication` |
 
-### 🏆 Características Clave
+### Respuesta Estándar (Éxito)
 
-1. **Multisucursal**: Gestión descentralizada con control centralizado
-2. **Predicción IA**: Algoritmos de forecasting para optimizar inventario
-3. **Compatibilidad Producto-Moto**: Sistema de matching inteligente
-4. **Control de Crédito**: Gestión de cuentas por cobrar y límites
-5. **Comisiones Dinámicas**: Cálculo automático por vendedor
-6. **Alertas Inteligentes**: Stock crítico, caducidad, lento movimiento
-7. **Rentabilidad**: Análisis detallado por producto/categoría/sucursal
-8. **Auditoría Completa**: Trazabilidad de cambios y movimientos
+La clase `ApiResponse<T>` es un Java record:
+
+```java
+public record ApiResponse<T>(
+    @JsonProperty("exitoso")   boolean success,
+    @JsonProperty("mensaje")   String message,
+    @JsonProperty("datos")     T data,
+    @JsonProperty("rastreoId") String traceId,   // Inyectado por LogFilter via MDC
+    @JsonProperty("fechaHora") LocalDateTime timestamp
+)
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "exitoso": true,
+  "mensaje": "Producto encontrado",
+  "datos": { "skuInterno": "ACEITE-CASTROL-10W40-1L", "nombreComercial": "Castrol GTX 10W-40" },
+  "rastreoId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "fechaHora": "2026-05-27T10:30:00"
+}
+```
+
+### Respuesta Estándar (Error)
+
+La clase `ApiErrorResponse` para errores:
+
+```json
+{
+  "estatus": 404,
+  "codigoError": "No encontrado",
+  "mensaje": "El SKU ACEITE-CASTROL-10W40-1L no existe.",
+  "detalles": null,
+  "rastreoId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "fechaHora": "2026-05-27T10:30:00"
+}
+```
 
 ---
 
 ## 2. Arquitectura del Sistema
 
-### 🏗️ Arquitectura General
-
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                     CLIENTE (Frontend)                        │
-│            (React/Angular/Vue - NO IMPLEMENTADO)             │
-└────────────┬─────────────────────────────────────────────────┘
-             │ HTTP/REST + JWT
-             ▼
-┌──────────────────────────────────────────────────────────────┐
-│                    SPRING BOOT 3.2.3                         │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │              CAPA DE CONTROLADORES (35)               │  │
-│  │  • AuthController        • ProductoController         │  │
-│  │  • VentaController       • InventarioController       │  │
-│  │  • CompraController      • MetricasController         │  │
-│  │  • [... 30 controllers más]                           │  │
-│  └────────────────────────┬───────────────────────────────┘  │
-│                           │                                   │
-│  ┌────────────────────────▼───────────────────────────────┐  │
-│  │              CAPA DE SERVICIOS (42)                    │  │
-│  │  • Lógica de Negocio                                   │  │
-│  │  • Validaciones                                        │  │
-│  │  • Cálculos (Comisiones, Predicción, Rentabilidad)    │  │
-│  │  • Orquestación de Transacciones                      │  │
-│  └────────────────────────┬───────────────────────────────┘  │
-│                           │                                   │
-│  ┌────────────────────────▼───────────────────────────────┐  │
-│  │            CAPA DE PERSISTENCIA (JPA)                  │  │
-│  │  • Repositories (38 interfaces)                        │  │
-│  │  • Entities con Validaciones                           │  │
-│  │  • Queries Personalizadas (JPQL/Native)               │  │
-│  └────────────────────────┬───────────────────────────────┘  │
-└────────────────────────────┼───────────────────────────────────┘
-                             │ JDBC
-                             ▼
-┌──────────────────────────────────────────────────────────────┐
-│                    POSTGRESQL 15+                            │
-│  • 38 Tablas                                                 │
-│  • Flyway Migrations (10 versiones)                         │
-│  • Índices Optimizados                                      │
-│  • Constraints e Integridad Referencial                     │
-└──────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    CLIENTE (HTTP :8080)                  │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────┐
+│              SPRING BOOT 3.2.3 APPLICATION               │
+│                                                          │
+│  ┌──────────────────────────────────────────────────┐    │
+│  │  LogFilter (MDC traceId) + JwtAuthenticationFilter│    │
+│  └──────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────┐    │
+│  │  SecurityFilterChain  (Spring Security 6)         │    │
+│  │  BCryptPasswordEncoder + CORS configurable        │    │
+│  └──────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────┐    │
+│  │   @RestController  (65 controladores)             │    │
+│  │   Respuesta: ApiResponse<T> / ApiErrorResponse    │    │
+│  └──────────────────────┬───────────────────────────┘    │
+│  ┌──────────────────────▼───────────────────────────┐    │
+│  │   @Service  (lógica de negocio, @Transactional)   │    │
+│  │   VentaService, CreditoService, AlertaScheduler…  │    │
+│  └──────────────────────┬───────────────────────────┘    │
+│  ┌──────────────────────▼───────────────────────────┐    │
+│  │   JpaRepository + Specifications + Native SQL     │    │
+│  │   H2 (tests) / PostgreSQL 15 (producción)         │    │
+│  └──────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────┐    │
+│  │   Scheduler (@Scheduled) — 4 cron jobs            │    │
+│  └──────────────────────────────────────────────────┘    │
+└─────────────────────────┬───────────────────────────────┘
+                          │ JDBC / PostgreSQL Driver
+┌─────────────────────────▼───────────────────────────────┐
+│   PostgreSQL 15-alpine  (nexoohub_almacen DB)            │
+│   Flyway V1–V33 — ddl-auto: validate                     │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### 📦 Patrón de Diseño: Layered Architecture (DDD Light)
+### Patrón de Capas por Módulo
 
-**1. Controller Layer** (`controller/`)
-- Recibe HTTP requests
-- Valida datos de entrada (@Valid)
-- Delega a Services
-- Retorna HTTP responses estandarizadas
-- Manejo de excepciones con @RestControllerAdvice
-
-**2. Service Layer** (`service/`)
-- Lógica de negocio core
-- Transacciones (@Transactional)
-- Validaciones de negocio
-- Orquestación entre múltiples repositorios
-- Cálculos complejos (métricas, predicciones)
-
-**3. Repository Layer** (`repository/`)
-- Interfaces JPA
-- Queries personalizadas (@Query)
-- Operaciones CRUD estándar
-- Paginación y ordenamiento
-
-**4. Entity Layer** (`entity/`)
-- Mapeo JPA a tablas
-- Validaciones Jakarta (`@NotNull`, `@Size`, etc.)
-- Relaciones (@OneToMany, @ManyToOne)
-- Hooks de ciclo de vida (`@PrePersist`, `@PreUpdate`)
-
-**5. DTO Layer** (`dto/`)
-- Records inmutables (Java 14+)
-- Transferencia de datos API
-- Separación de concerns (Entity ≠ DTO)
-
-**6. Exception Layer** (`exception/`)
-- Excepciones custom de negocio
-- GlobalExceptionHandler centralizado
-- Respuestas de error estandarizadas
-
-### 🔐 Flujo de Seguridad
+Cada módulo sigue estrictamente el patrón:
 
 ```
-Cliente → JWT Token → FilterChain → 
-  JwtAuthenticationFilter → 
-    SecurityContext → 
-      Controller (@PreAuthorize)
+Controller → Service → Repository (→ Specification si hay búsqueda dinámica)
+     ↓            ↓
+   DTO          Entity  →  AuditableEntity (fechaCreacion, usuarioCreacion, etc.)
+   DTO          Mapper (conversión manual Entity ↔ DTO)
 ```
 
-1. Cliente envía token en header `Authorization: Bearer {token}`
-2. `JwtAuthenticationFilter` valida token
-3. Extrae usuario y roles
-4. Carga en `SecurityContext`
-5. Spring Security verifica permisos con @PreAuthorize
+- **`AuditableEntity`** (`@MappedSuperclass`): Clase base abstracta con `@EntityListeners(AuditingEntityListener.class)`. Provee 4 campos auditados automáticamente: `fechaCreacion`, `usuarioCreacion`, `fechaActualizacion`, `usuarioActualizacion`. Todos se mapean a columnas de la BD (`fecha_creacion`, `usuario_creacion`, etc.).
+
+- **`ProductoMaestroSpecification`**: Implementa el patrón `Specification<T>` de Spring Data JPA para búsqueda dinámica multi-criterio con hasta 16 parámetros opcionales.
+
+- **`InventarioSucursalId`**: Clave compuesta (`@Embeddable`) para la tabla `inventario_sucursal` (PK: `sucursal_id + sku_interno`).
+
+### Configuración de Seguridad — Clases Clave
+
+| Clase | Función |
+|---|---|
+| `SecurityConfig` | `@EnableWebSecurity @EnableMethodSecurity(prePostEnabled = true)`. Configura cadena de filtros, CORS, endpoints públicos |
+| `JwtUtil` | Genera y valida tokens HMAC-SHA256. Valida secret en `@PostConstruct` |
+| `JwtAuthenticationFilter` | Intercepta cada request, extrae Bearer token, setea `SecurityContext` |
+| `AuditConfig` | `@EnableJpaAuditing` — activa los campos `@CreatedBy`, `@CreatedDate` |
+| `AuditorAwareImpl` | Lee `SecurityContextHolder` para obtener el `username` del token JWT actual |
+| `LogFilter` | Inyecta un UUID v4 como `traceId` en MDC para correlacionar logs y respuestas |
+| `CacheConfig` | Manejador de errores de caché (graceful degradation) |
+| `OpenApiConfig` | Configura Swagger con autenticación Bearer JWT |
+| `RedisConfig` | **DESHABILITADO** — comentado completamente, no se carga en Spring |
 
 ---
 
 ## 3. Stack Tecnológico
 
-### ☕ Backend
+| Componente | Versión | Nota |
+|---|---|---|
+| Java | **21** (LTS) | Toolchain en `build.gradle.kts`: `JavaLanguageVersion.of(21)` |
+| Spring Boot | **3.2.3** | Plugins: `org.springframework.boot:3.2.3`, `io.spring.dependency-management:1.1.4` |
+| Spring Security | 6.x (SM) | `@EnableMethodSecurity(prePostEnabled = true)`, `BCryptPasswordEncoder` |
+| PostgreSQL Driver | SM | `runtimeOnly("org.postgresql:postgresql")` |
+| Flyway | SM | `implementation("org.flywaydb:flyway-core")` |
+| JJWT | **0.12.5** | `jjwt-api:0.12.5`, `jjwt-impl:0.12.5`, `jjwt-jackson:0.12.5` |
+| SpringDoc OpenAPI | **2.3.0** | `springdoc-openapi-starter-webmvc-ui:2.3.0` |
+| Caffeine | **3.1.8** | `com.github.ben-manes.caffeine:caffeine:3.1.8` |
+| Apache POI | **5.2.5** | `poi-ooxml:5.2.5` (Excel para OC) |
+| Lombok | SM | `compileOnly` + `annotationProcessor` |
+| JUnit 5 | **5.10.1** | `useJUnitJupiter("5.10.1")` en `testing.suites` |
+| JaCoCo | SM | Plugin `jacoco` en Gradle |
+| H2 | SM | `runtimeOnly("com.h2database:h2")` — solo para tests |
+| Guava | 33.0.0-jre | `implementation(libs.guava)` vía `gradle/libs.versions.toml` |
+| Spring Mail | SM | `spring-boot-starter-mail` (Gmail SMTP) |
+| Docker Compose | 3.8 | 2 servicios: `postgres-db` + `java-backend` |
+| Gradle | **8.7** (Kotlin DSL) | Build system, `settings.gradle.kts` |
 
-| Tecnología | Versión | Propósito |
-|------------|---------|-----------|
-| **Java** | 17 (LTS) | Lenguaje principal |
-| **Spring Boot** | 3.2.3 | Framework principal |
-| **Spring Data JPA** | 3.2.3 | Persistencia |
-| **Spring Security** | 6.2.1 | Seguridad y autenticación |
-| **Spring Validation** | 3.2.3 | Validación de datos |
-| **Hibernate** | 6.4.1 | ORM |
-| **PostgreSQL Driver** | 42.6.0 | Conector JDBC |
-| **H2 Database** | 2.2.224 | Testing en memoria |
+> **SM** = versión gestionada por Spring Boot 3.2.3 BOM (Bill of Materials).
 
-### 🔧 Librerías Adicionales
+### Flags Especiales del Compilador
 
-| Librería | Versión | Propósito |
-|----------|---------|-----------|
-| **JWT (jjwt)** | 0.12.5 | Tokens JWT |
-| **Flyway** | 9.22.3 | Migraciones de BD |
-| **Lombok** | 1.18.30 | Reducir boilerplate |
-| **SpringDoc OpenAPI** | 2.3.0 | Documentación Swagger |
-| **Caffeine** | 3.1.8 | Rate limiting / caching |
-| **JUnit 5** | 5.10.1 | Testing |
-| **Mockito** | 5.7.0 | Mocking en tests |
-| **Jacoco** | 0.8.11 | Cobertura de código |
-| **Guava** | 32.1.1-jre | Utilidades |
+```kotlin
+// build.gradle.kts — CRÍTICO para Spring @RequestParam / @PathVariable
+tasks.named<JavaCompile>("compileJava") {
+    options.compilerArgs.add("-parameters")
+}
+tasks.named<JavaCompile>("compileTestJava") {
+    options.compilerArgs.add("-parameters")
+}
+```
 
-### 🗄️ Base de Datos
-
-- **PostgreSQL 15+** (Producción)
-- **H2 Database** (Desarrollo y Testing)
-- **Flyway** para migraciones versionadas
-
-### 🛠️ Herramientas de Desarrollo
-
-| Herramienta | Propósito |
-|-------------|-----------|
-| **Gradle 8.7** | Build tool |
-| **Git** | Control de versiones |
-| **Docker** | Containerización (opcional) |
-| **VS Code / IntelliJ IDEA** | IDEs recomendados |
-| **Postman / Insomnia** | Testing de API |
-| **DBeaver / pgAdmin** | Cliente PostgreSQL |
+Sin `-parameters`, Spring no puede resolver los nombres de parámetros en métodos y los endpoints con `@RequestParam` o `@PathVariable` fallan.
 
 ---
 
-## 4. Modelo de Base de Datos
-
-### 🗄️ Diagrama ER Simplificado
+## 4. Estructura del Código Fuente
 
 ```
-┌─────────────┐         ┌──────────────┐         ┌─────────────┐
-│   Usuario   │         │   Empleado   │         │  Sucursal   │
-│─────────────│         │──────────────│         │─────────────│
-│ id (PK)     │         │ id (PK)      │    ┌───▶│ id (PK)     │
-│ username    │         │ nombre       │    │    │ nombre      │
-│ password    │         │ puesto       │────┘    │ direccion   │
-│ role        │         │ sucursalId   │         │ telefono    │
-└─────────────┘         │ salarioBase  │         └─────────────┘
-                        │ comisionVtas │                │
-                        └──────────────┘                │
-                                                        │
-┌─────────────┐         ┌──────────────┐              │
-│  Categoria  │    ┌───▶│   Producto   │◀─────────────┤
-│─────────────│    │    │──────────────│              │
-│ id (PK)     │    │    │ id (PK)      │              │
-│ nombre      │────┘    │ skuInterno   │              │
-│ descripcion │         │ nombre       │              │
-└─────────────┘         │ categoriaId  │              │
-                        │ proveedorId  │              │
-┌─────────────┐         │ precioCompra │         ┌────▼────────┐
-│  Proveedor  │         │ precioVenta  │         │  Inventario │
-│─────────────│         │ stockMin/Max │         │  Sucursal   │
-│ id (PK)     │◀────────│ ...          │────────▶│─────────────│
-│ nombre      │         └──────────────┘         │ id (PK)     │
-│ RFC         │               │ ▲                 │ sucursalId  │
-│ contacto    │               │ │                 │ productoId  │
-└─────────────┘               │ │                 │ stock       │
-                              │ │                 │ ...         │
-┌─────────────┐               │ │                 └─────────────┘
-│   Cliente   │         ┌─────▼─┴──────┐
-│─────────────│    ┌───▶│    Venta     │
-│ id (PK)     │    │    │──────────────│
-│ nombre      │────┘    │ id (PK)      │
-│ RFC         │         │ clienteId    │
-│ email       │         │ empleadoId   │
-│ telefono    │         │ sucursalId   │
-│ direccion   │         │ total        │
-│ tipoClienteId         │ metodoPago   │
-└─────────────┘         │ fecha        │
-                        └──────────────┘
-                              │
-                        ┌─────▼────────┐
-                        │ DetalleVenta │
-                        │──────────────│
-                        │ id (PK)      │
-                        │ ventaId      │
-                        │ productoId   │
-                        │ cantidad     │
-                        │ precioUnit   │
-                        │ descuento    │
-                        └──────────────┘
+app/src/main/java/com/nexoohub/almacen/
+│
+├── NexooHAlmacenApplication.java            # @SpringBootApplication, main()
+│
+├── common/                                  # Infraestructura transversal
+│   ├── config/
+│   │   ├── SecurityConfig.java              # @EnableWebSecurity @EnableMethodSecurity
+│   │   ├── JwtUtil.java                     # HMAC-SHA256, generar/validar tokens
+│   │   ├── JwtAuthenticationFilter.java     # OncePerRequestFilter, extrae Bearer
+│   │   ├── AuditConfig.java                 # @EnableJpaAuditing
+│   │   ├── AuditorAwareImpl.java            # Lee username del SecurityContext
+│   │   ├── CacheConfig.java                 # CachingConfigurer: graceful degradation
+│   │   ├── OpenApiConfig.java               # Swagger: bearerAuth scheme
+│   │   ├── LogFilter.java                   # MDC traceId (UUID v4 por request)
+│   │   └── RedisConfig.java                 # [DESHABILITADO] comentado + @ConditionalOnProperty
+│   ├── controller/
+│   │   ├── AuthController.java              # POST /api/v1/auth/login
+│   │   ├── UsuarioController.java           # CRUD /api/v1/usuarios
+│   │   └── RolesController.java             # /api/v1/admin/roles, asignación
+│   ├── dto/
+│   │   ├── LoginRequest.java                # record: username, password
+│   │   └── AuthResponse.java                # record: token
+│   ├── entity/
+│   │   ├── AuditableEntity.java             # @MappedSuperclass con 4 campos auditados
+│   │   ├── Usuario.java                     # tabla: usuarios, @ManyToMany Rol, Sucursal
+│   │   ├── Rol.java                         # tabla: rol
+│   │   └── Permiso.java                     # tabla: permiso
+│   ├── exception/
+│   │   ├── GlobalExceptionHandler.java      # @RestControllerAdvice, 10 handlers
+│   │   ├── BusinessException.java
+│   │   ├── ResourceNotFoundException.java   # 404
+│   │   ├── DuplicateResourceException.java  # 409
+│   │   ├── StockInsuficienteException.java  # 409
+│   │   ├── CreditoInsuficienteException.java# 409
+│   │   └── InvalidOperationException.java  # 400
+│   ├── repository/
+│   │   └── UsuarioRepository.java           # findByUsername(String)
+│   └── ApiResponse.java                     # record universal de respuesta
+│
+├── catalogo/                                # Categorías, Clientes, Proveedores, Motos, etc.
+│   └── controller/
+│       ├── CategoriaController.java         # /api/v1/categorias
+│       ├── ClienteController.java           # /api/v1/clientes
+│       ├── MorosidadController.java         # /api/v1/clientes (morosidad)
+│       ├── MorosidadV1Controller.java       # [HEREDADO] duplicado
+│       ├── TipoClienteController.java       # /api/v1/tipos-cliente
+│       ├── ProveedorController.java         # /api/v1/proveedores
+│       ├── MotoController.java              # /api/v1/motos
+│       ├── CompatibilidadController.java    # /api/v1/compatibilidad
+│       └── PrecioEspecialController.java    # /api/v1/precios-especiales
+│
+├── inventario/                              # Inventario multi-sucursal
+│   ├── controller/
+│   │   ├── ProductoController.java          # /api/v1/productos (Specification pattern)
+│   │   ├── InventarioController.java        # /api/v1/inventario (stock, alertas)
+│   │   ├── CodigoBarrasController.java      # /api/v1/inventario/codigos-barras
+│   │   ├── TraspasoController.java          # /api/v1/inventario/traspasos
+│   │   ├── CaducidadController.java         # /api/v1/inventario/caducidad
+│   │   ├── AnalisisAbcController.java       # /api/v1/inventario/analisis-abc
+│   │   └── AlertaLentoMovimientoController.java # /api/alertas/lento-movimiento
+│   ├── repository/
+│   │   ├── ProductoMaestroRepository.java   # JpaSpecificationExecutor<ProductoMaestro>
+│   │   └── InventarioSucursalRepository.java# Queries JPQL + Native SQL paginado
+│   └── specification/
+│       └── ProductoMaestroSpecification.java# 16 criterios de búsqueda dinámica
+│
+├── ventas/                                  # Ventas, Reservas, Devoluciones
+├── compras/                                 # Ingresos de mercancía
+├── cotizaciones/                            # Cotizaciones
+├── adquisiciones/                           # Comparador, Actualiz. masiva, OC
+├── caja/                                    # Turnos, Arqueos
+├── pos/                                     # CFDI, Terminal, Offline sync
+├── crm/                                     # Pipeline B2B, Garantías, NPS, Mktg
+├── finanzas/                                # Dashboard, Crédito, Config, Auditoría
+├── erp/                                     # Contabilidad, Logística, Nómina, CxP
+├── comisiones/                              # Reglas de comisión y metas
+├── metricas/                                # 4 tipos de métricas calculadas
+├── rentabilidad/                            # Análisis de rentabilidad
+├── analitica/                               # RFM, Churn, Market Basket, Rendimiento
+├── fidelidad/                               # Programa de puntos
+├── prediccion/                              # Predicción de demanda
+├── alertas/                                 # Motor de notificaciones (Scheduler + API)
+├── sucursal/                                # Gestión de sucursales
+└── empleados/                               # Empleados operativos
 ```
 
-### 📊 Tablas Principales (38 total)
+### Estructura de Tests
 
-#### **Módulo Seguridad**
-1. `usuarios` - Usuarios del sistema con roles
+```
+app/src/test/java/com/nexoohub/almacen/
+├── common/       # AuthController, UsuarioController, RolesController tests
+├── catalogo/     # ClienteController, CategoriaController, etc.
+├── inventario/   # ProductoController, InventarioController, etc.
+├── ventas/       # VentaController, ReservaController, DevolucionController
+├── cotizaciones/ # CotizacionController integration tests
+└── ... (un paquete espejo por cada módulo de negocio)
+```
 
-#### **Módulo Catálogo**
-2. `categoria` - Categorías de productos
-3. `cliente` - Clientes con RFC y contacto
-4. `tipo_cliente` - Tipos con descuentos  
-5. `proveedor` - Proveedores con RFC
-6. `moto` - Catálogo de motos (marca, modelo, año)
-7. `compatibilidad_producto` - Relación producto-moto
+Los tests de integración usan H2 en-memoria con `spring.jpa.hibernate.ddl-auto=create-drop`, sin necesidad de PostgreSQL activo.
 
-#### **Módulo Inventario**
-8. `producto_maestro` - Catálogo maestro de productos
-9. `inventario_sucursal` - Stock por sucursal
-10. `movimiento_inventario` - Trazabilidad de movimientos
-11. `traspaso` - Traspasos entre sucursales
+---
 
-#### **Módulo Ventas**
-12. `venta` - Encabezado de ventas
-13. `detalle_venta` - Detalle de productos vendidos
-14. `reserva` - Reservas de productos
-15. `devolucion` - Devoluciones de ventas
+## 5. Base de Datos — Esquema Completo
 
-#### **Módulo Compras**
-16. `compra` - Encabezado de compras
-17. `detalle_compra` - Detalle de productos comprados
+### Motor y Gestión
 
-#### **Módulo Finanzas**
-18. `configuracion_financiera` - Parámetros financieros
-19. `limite_credito` - Límites de crédito por cliente
-20. `historial_precio` - Auditoría de cambios de precio
+- Motor: **PostgreSQL 15-alpine** (Docker)
+- Esquema gestionado exclusivamente por **Flyway** (`ddl-auto: validate` — solo valida, nunca crea ni altera)
+- Base de datos: `nexoohub_almacen`
+- Usuario BD: `nexoohub_user`
+- Migrations location: `classpath:db/migration` (archivos `V{n}__{nombre}.sql`)
+- `baseline-on-migrate: true`, `baseline-version: 0`, `validate-on-migrate: true`
 
-#### **Módulo Comisiones**
-21. `regla_comision` - Reglas de cálculo de comisiones
-22. `comision` - Comisiones calculadas
+### Migraciones Flyway — V1 a V33
 
-#### **Módulo Fidelidad**
-23. `programa_fidelidad` - Programas de puntos por cliente
-24. `movimiento_punto` - Historial de puntos
+| Versión | Archivo | Tablas Creadas / Acción |
+|---|---|---|
+| V1 | `V1__initial_schema.sql` | `configuracion_financiera`, `categoria`, `proveedor`, `tipo_cliente`, `moto`, `sucursal`, `empleado`, `usuarios`, `cliente`, `producto_maestro`, `historial_precio`, `precio_especial`, `compatibilidad_producto`, `inventario_sucursal`, `compra`, `detalle_compra`, `venta`, `detalle_venta`, `movimiento_inventario` + datos semilla + 25 índices |
+| V2 | `V2__comisiones_vendedores.sql` | Tablas de comisiones y vendedores |
+| V3 | `V3__prediccion_demanda.sql` | `prediccion_demanda` |
+| V4 | `V4__analisis_abc_inventario.sql` | `analisis_abc` |
+| V5 | `V5__programa_fidelidad.sql` | `programa_fidelidad`, `movimiento_punto` |
+| V6 | `V6__rentabilidad_ventas_productos.sql` | `rentabilidad_venta`, `rentabilidad_producto` |
+| V7 | `V7__metricas_financieras.sql` | `metrica_financiera` |
+| V8 | `V8__metricas_inventario.sql` | `metrica_inventario` |
+| V9 | `V9__metricas_venta_cliente.sql` | `metrica_venta_cliente` |
+| V10 | `V10__metricas_operativas.sql` | `metrica_operativa` |
+| V11 | `V11__caja_arqueos.sql` | `turno_caja`, `movimiento_caja` |
+| V12 | `V12__pos_terminales.sql` | `terminal_bancaria`, `transaccion_tarjeta` |
+| V13 | `V13__pos_cfdi.sql` | `factura_fiscal`, `detalle_factura` |
+| V14 | `V14__pos_offline_sync.sql` | `lote_sincronizacion`, `venta_offline` |
+| V15 | `V15__erp_cxp_gastos.sql` | `cuenta_por_pagar`, `gasto_operativo` |
+| V16 | `V16__erp_contabilidad.sql` | `cuenta_contable`, `poliza_contable`, `movimiento_contable` |
+| V17 | `V17__erp_logistica.sql` | `vehiculo`, `chofer`, `ruta_entrega`, `detalle_ruta` |
+| V18 | `V18__erp_nomina.sql` | `empleado_nomina`, `nomina_periodo`, `recibo_nomina` |
+| V19 | `V19__erp_devolucion_proveedor.sql` | `devolucion_proveedor`, `devolucion_proveedor_detalle` |
+| V20 | `V20__inventario_codigos_barras.sql` | `codigo_barras_producto` |
+| V21 | `V21__crm_garantias.sql` | `ticket_garantia`, `historial_garantia` |
+| V22 | `V22__crm_pipeline_b2b.sql` | `prospecto`, `oportunidad_venta`, `interaccion_crm` |
+| V23 | `V23__crm_marketing_campanas.sql` | `campana_marketing`, `log_envio_mensaje` |
+| V24 | `V24__crm_nps_encuestas.sql` | `encuesta_nps`, `respuesta_nps` |
+| V25 | `V25__ana_rfm.sql` | `analisis_rfm` |
+| V26 | `V26__pro_alertas_notificaciones.sql` | `alerta_sistema`, `configuracion_alerta`, `config_notificacion` |
+| V27 | `V27__sup_comparador_proveedores.sql` | `catalogo_proveedor`, `historial_precio_proveedor` |
+| V28 | `V28__sup_actualizacion_precios.sql` | Actualización masiva de `historial_precio_proveedor` |
+| V29 | `V29__sup_ordenes_compra.sql` | `orden_compra`, `detalle_orden_compra`, `carrito_compra` |
+| V30 | `V30__pro_metas_comisiones.sql` | `meta_ventas_empleado`, `regla_comision` |
+| V31 | `V31__pro_rbac_accesos.sql` | `rol`, `permiso`, `rol_permiso`, `usuario_rol`, `usuario_sucursal` |
+| V32 | `V32__modulos_ventas_analitica.sql` | `cotizacion`, `detalle_cotizacion`, `reserva`, `devolucion`, `detalle_devolucion`, `alerta_lento_movimiento`, `analisis_churn`, `analisis_canasta`, `analisis_rendimiento_personal` |
+| V33 | `V33__performance_indexes.sql` | 14 índices de performance (ver sección 8) |
 
-#### **Módulo Predicción**
-25. `prediccion_demanda` - Predicciones generadas
-26. `historial_demanda` - Datos históricos para ML
+### Tablas Principales — Columnas Relevantes (V1)
 
-#### **Módulo Análisis**
-27. `analisis_abc` - Clasificación ABC de productos
-28. `alerta_lento_movimiento` - Productos con bajo movimiento
-29. `precio_especial` - Precios especiales por tipo de cliente
+#### `producto_maestro` (PK: `sku_interno VARCHAR(50)`)
 
-#### **Módulo Métricas**
-30. `metrica_financiera` - KPIs financieros
-31. `metrica_inventario` - KPIs de inventario
-32. `metrica_operativa` - KPIs operacionales
-33. `metrica_venta_cliente` - Métricas de ventas y clientes
+| Columna | Tipo | Nota |
+|---|---|---|
+| `sku_interno` | `VARCHAR(50)` | PK — identificador único del producto |
+| `sku_proveedor` | `VARCHAR(50)` | SKU del catálogo del proveedor |
+| `nombre_comercial` | `VARCHAR(200) NOT NULL` | Nombre de venta al público |
+| `descripcion` | `TEXT` | Descripción larga |
+| `marca` | `VARCHAR(100)` | Honda, Yamaha, Castrol, etc. |
+| `categoria_id` | `INTEGER` | FK → `categoria(id)` |
+| `proveedor_id` | `INTEGER` | FK → `proveedor(id)` |
+| `clave_sat` | `VARCHAR(8)` | Clave SAT para facturación |
+| `stock_minimo_global` | `INTEGER DEFAULT 2` | Stock mínimo de reorden global |
+| `sensibilidad_precio` | `VARCHAR(20) DEFAULT 'MEDIA'` | ALTA / MEDIA / BAJA |
+| `activo` | `BOOLEAN DEFAULT TRUE` | Soft delete |
 
-#### **Módulo Rentabilidad**
-34. `rentabilidad_producto` - Análisis por producto
-35. `rentabilidad_venta` - Análisis por venta
+#### `inventario_sucursal` (PK compuesta: `sucursal_id + sku_interno`)
 
-#### **Otros**
-36. `sucursal` - Sucursales de la empresa
-37. `empleado` - Empleados con comisiones
-38. `cotizacion` - Cotizaciones a clientes
+| Columna | Tipo | Nota |
+|---|---|---|
+| `sucursal_id` | `INTEGER` | FK → `sucursal(id)` |
+| `sku_interno` | `VARCHAR(50)` | FK → `producto_maestro(sku_interno)` |
+| `stock_actual` | `INTEGER NOT NULL DEFAULT 0` | Stock en tiempo real |
+| `stock_minimo_sucursal` | `INTEGER DEFAULT 0` | Mínimo configurable por sucursal |
+| `costo_promedio_ponderado` | `NUMERIC(10,2)` | CPP actualizado en cada compra |
+| `ubicacion_pasillo` | `VARCHAR(100)` | Ubicación física en almacén |
+| `fecha_caducidad` | `DATE` | Fecha de caducidad del lote |
+| `lote` | `VARCHAR(100)` | Número de lote |
 
-### 🔑 Relaciones Clave
+#### `venta` (PK: `id SERIAL`)
+
+| Columna | Tipo | Nota |
+|---|---|---|
+| `id` | `SERIAL` | PK autoincremental |
+| `cliente_id` | `INTEGER` | FK → `cliente(id)` |
+| `sucursal_id` | `INTEGER` | FK → `sucursal(id)` |
+| `vendedor_id` | `INTEGER` | FK → `usuarios(id)` |
+| `metodo_pago` | `VARCHAR(50)` | EFECTIVO / TARJETA / TRANSFERENCIA / CREDITO |
+| `total` | `NUMERIC(10,2) DEFAULT 0.00` | Total calculado por `VentaService` |
+| `fecha_venta` | `TIMESTAMP DEFAULT CURRENT_TIMESTAMP` | — |
+
+#### `cliente` (PK: `id SERIAL`)
+
+| Columna | Tipo | Nota |
+|---|---|---|
+| `id` | `SERIAL` | PK |
+| `tipo_cliente_id` | `INTEGER` | FK → `tipo_cliente(id)` |
+| `nombre` | `VARCHAR(255) NOT NULL` | — |
+| `rfc` | `VARCHAR(13)` | RFC para facturación |
+| `telefono` | `VARCHAR(20)` | — |
+| `email` | `VARCHAR(100)` | — |
+| `bloqueado` | `BOOLEAN DEFAULT FALSE` | Bloqueo por morosidad |
+| `saldo_pendiente` | `NUMERIC(12,2) DEFAULT 0.00` | Deuda acumulada |
+| `motivo_bloqueo` | `VARCHAR(500)` | Razón del bloqueo |
+
+#### `usuarios` (PK: `id BIGSERIAL`)
+
+| Columna | Tipo | Nota |
+|---|---|---|
+| `id` | `BIGSERIAL` | PK — BigInt por relación con Spring Security |
+| `username` | `VARCHAR(50) UNIQUE NOT NULL` | Login |
+| `password` | `VARCHAR(255) NOT NULL` | BCrypt hash (`$2a$10$...`) |
+| `role` | `VARCHAR(20) DEFAULT 'ROLE_USER'` | Rol simple (legacy). RBAC usa tabla `usuario_rol` |
+| `empleado_id` | `INTEGER` | FK → `empleado(id)` |
+| `activo` | `BOOLEAN DEFAULT TRUE` | — |
+
+**Seed:** `admin` / `admin123` (BCrypt `$2a$10$k/mIluuONgJLE8efmX6Cse4/k8aUv5dvUqsCjJmxXKELm6ZMPZqsm`)
+
+#### Tablas RBAC — V31
+
+| Tabla | Descripción |
+|---|---|
+| `rol` | `id, nombre VARCHAR(50) UNIQUE, descripcion, activo` |
+| `permiso` | `id, nombre VARCHAR(100) UNIQUE, descripcion, modulo` |
+| `rol_permiso` | PK compuesta `(rol_id, permiso_id)` |
+| `usuario_rol` | PK compuesta `(usuario_id, rol_id)` |
+| `usuario_sucursal` | PK compuesta `(usuario_id, sucursal_id)` — restringe sucursales visibles |
+
+**Roles semilla:** `ROLE_ADMIN`, `ROLE_GERENTE_SUCURSAL`, `ROLE_VENDEDOR`, `ROLE_CAJERO`, `ROLE_ALMACENISTA`
+
+**Permisos semilla:** `ACCESO_GLOBAL`, `LEER_VENTA`, `CREAR_VENTA`, `LEER_COMPRA`, `CREAR_COMPRA`, `GESTIONAR_PRECIOS`, `GESTIONAR_METAS`, `LEER_REPORTES`
+
+---
+
+## 6. Módulos Funcionales y Endpoints Detallados
+
+> **Base URL:** `http://localhost:8080`  
+> **Autenticación:** `Authorization: Bearer {TOKEN}` en todos los endpoints **excepto los listados como públicos**.
+>
+> **Roles disponibles** (en `@PreAuthorize`):  
+> `ADMIN`, `SUPERVISOR`, `GERENTE`, `ALMACENISTA`, `VENDEDOR`, `CAJERO`
+
+---
+
+### 6.1 Autenticación y Usuarios
+
+**Clase:** `AuthController` — `@RequestMapping("/api/v1/auth")`
+
+| Método | Path | Roles | Request | Descripción |
+|---|---|---|---|---|
+| POST | `/api/v1/auth/login` | **PÚBLICO** | `LoginRequest{username, password}` | Devuelve JWT en `AuthResponse{token}` |
+
+**Clase:** `UsuarioController` — `@RequestMapping("/api/v1/usuarios")`
+
+| Método | Path | Roles | Request Body | Descripción |
+|---|---|---|---|---|
+| GET | `/api/v1/usuarios` | Autenticado | — | Listar usuarios |
+| POST | `/api/v1/usuarios` | Autenticado | `Usuario{username, password, role, empleadoId}` | Crear usuario |
+| GET | `/api/v1/usuarios/{id}` | Autenticado | — | Obtener por ID |
+| PUT | `/api/v1/usuarios/{id}` | Autenticado | `Usuario` | Actualizar |
+| PUT | `/api/v1/usuarios/{id}/password` | Autenticado | `{passwordActual, passwordNuevo}` | Cambiar contraseña (BCrypt) |
+| DELETE | `/api/v1/usuarios/{id}` | Autenticado | — | Eliminar usuario |
+
+**Clase:** `RolesController` — `@RequestMapping("/api/v1/admin")`
+
+| Método | Path | Roles | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/admin/roles` | ADMIN | Crear rol con permisos |
+| POST | `/api/v1/admin/usuarios/{id}/roles` | ADMIN | Asignar rol a usuario |
+| GET | `/api/v1/admin/usuarios/{id}/permisos` | ADMIN | Ver permisos del usuario |
+
+---
+
+### 6.2 Catálogo
+
+**`CategoriaController`** — `/api/v1/categorias`
+
+| Método | Path | Roles | Descripción |
+|---|---|---|---|
+| GET | `/api/v1/categorias` | Autenticado | Listar todas |
+| POST | `/api/v1/categorias` | Autenticado | Crear (`nombre NOT NULL`, `descripcion`) |
+| PUT | `/api/v1/categorias/{id}` | Autenticado | Actualizar |
+
+**`ClienteController`** — `/api/v1/clientes`
+
+| Método | Path | Roles | Request / Params | Descripción |
+|---|---|---|---|---|
+| GET | `/api/v1/clientes` | Autenticado | `?page=0&size=20` | Listar (paginado) |
+| POST | `/api/v1/clientes` | Autenticado | `{nombre, rfc, telefono, email, tipoClienteId, bloqueado}` | Crear |
+| PUT | `/api/v1/clientes/{id}` | Autenticado | `{nombre, rfc, telefono, email, tipoClienteId}` | Actualizar |
+| GET | `/api/v1/clientes/bloqueados` | Autenticado | — | Clientes con `bloqueado=true` |
+| GET | `/api/v1/clientes/morosos` | Autenticado | — | Clientes con `saldo_pendiente > 0` |
+
+**`MorosidadController`** — `/api/v1/clientes`
+
+| Método | Path | Roles | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/clientes/{id}/bloquear` | Autenticado | `?motivo=` — setea `bloqueado=true` |
+| POST | `/api/v1/clientes/{id}/desbloquear` | Autenticado | Setea `bloqueado=false` |
+| POST | `/api/v1/clientes/{id}/registrar-pago` | Autenticado | `?monto=` — reduce `saldo_pendiente`, desbloquea si saldo=0 |
+
+**`MotoController`** — `/api/v1/motos`
+
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/motos` | Listar (marca, modelo, cilindrada) |
+| POST | `/api/v1/motos` | Crear `{marca, modelo, cilindrada, anioInicio, anioFin}` |
+| PUT | `/api/v1/motos/{id}` | Actualizar |
+
+**`CompatibilidadController`** — `/api/v1/compatibilidad`
+
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/compatibilidad/producto/{skuInterno}` | Motos compatibles con un SKU |
+| GET | `/api/v1/compatibilidad/moto/{motoId}` | Productos compatibles con una moto |
+| POST | `/api/v1/compatibilidad` | `{skuInterno, motoId, anioInicio, anioFin}` |
+
+**`PrecioEspecialController`** — `/api/v1/precios-especiales`
+
+> ⚠️ Solo `POST` y `DELETE`. No hay `GET`. Los precios especiales se consultan implícitamente en cada venta.
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/precios-especiales` | `{skuInterno, tipoClienteId, precioFijo, fechaInicio, fechaFin}` |
+| DELETE | `/api/v1/precios-especiales/{id}` | Eliminar precio especial |
+
+---
+
+### 6.3 Inventario — Productos
+
+**`ProductoController`** — `@RequestMapping("/api/v1/productos")`
+
+#### `GET /api/v1/productos/search` — Motor de Búsqueda Omnicanal
+
+Implementado con `ProductoMaestroSpecification.busquedaDinamica(...)`.  
+Devuelve `Page<ProductoMaestroResponseDTO>` (default: `size=20, page=0`).  
+Requiere roles: `ADMIN, SUPERVISOR, ALMACENISTA, VENDEDOR, CAJERO`.
+
+Parámetros opcionales (todos `required = false`):
+
+| Param | Tipo | Descripción |
+|---|---|---|
+| `q` | `String` | Texto libre — busca en SKU, nombre, descripción, marca |
+| `categoriaId` | `Integer` | ID exacto de categoría |
+| `nombreCategoria` | `String` | Búsqueda parcial por nombre de categoría |
+| `proveedorId` | `Integer` | ID exacto de proveedor |
+| `nombreProveedor` | `String` | Búsqueda parcial por nombre de proveedor |
+| `motoId` | `Integer` | ID exacto de moto compatible |
+| `marcaMoto` | `String` | Marca de moto (Honda, Yamaha…) |
+| `modeloMoto` | `String` | Modelo de moto (CBR, YZF…) |
+| `cilindrada` | `Integer` | Cilindraje (150, 200, 250…) |
+| `anio` | `Integer` | Año de compatibilidad |
+| `soloActivos` | `Boolean` | Si `true` → solo `activo=true` |
+| `conStock` | `Boolean` | Si `true` → solo con `stock_actual > 0` en la sucursal indicada |
+| `sucursalIdStock` | `Integer` | Sucursal para evaluar `conStock` |
+| `precioMin` | `BigDecimal` | Precio mínimo de venta al público |
+| `precioMax` | `BigDecimal` | Precio máximo de venta al público |
+| `clasificacionAbc` | `String` | Clasificación ABC: `A`, `B` o `C` |
+
+#### Otros Endpoints de Productos
+
+| Método | Path | Roles | DTO Entrada | Descripción |
+|---|---|---|---|---|
+| POST | `/api/v1/productos` | ADMIN, SUPERVISOR | `ProductoMaestro{skuInterno, nombreComercial, categoriaId, proveedorId, claveSat, stockMinimoGlobal}` | Crea producto maestro |
+| GET | `/api/v1/productos/{sku}` | ADMIN, SUPERVISOR, ALMACENISTA, VENDEDOR, CAJERO | — | Devuelve `ProductoMaestroResponseDTO` |
+| PUT | `/api/v1/productos/{sku}` | ADMIN, SUPERVISOR | `ProductoMaestro` | Actualiza `nombreComercial`, `claveSat`, `stockMinimoGlobal` (SKU no se actualiza — es PK) |
+| DELETE | `/api/v1/productos/{sku}` | ADMIN | — | Elimina producto (permanente) |
+| GET | `/api/v1/productos/mostrador` | ADMIN, SUPERVISOR, ALMACENISTA, VENDEDOR, CAJERO | — | Lista simplificada `ProductoResumenDTO` para POS |
+
+---
+
+### 6.4 Inventario — Stock y Movimientos
+
+**`InventarioController`** — `@RequestMapping("/api/v1/inventario")`
+
+| Método | Path | Roles | Request | Descripción |
+|---|---|---|---|---|
+| POST | `/api/v1/inventario` | ADMIN, SUPERVISOR, ALMACENISTA | `InventarioSucursal{sucursalId, skuInterno, stockActual, costoPromedioPonderado}` | Inicializar/ajustar stock. Devuelve `201 Created` |
+| GET | `/api/v1/inventario/sucursales/{sucursalId}` | Todos | `?page=0&size=50&sort=nombreComercial` | Paginado nativo SQL via `InventarioSucursalProjection` |
+| GET | `/api/v1/inventario/alertas/stock-bajo/sucursales/{sucursalId}` | ADMIN, SUPERVISOR, ALMACENISTA | — | JPQL: `stockActual < stockMinimoSucursal AND activo=true`, ordenado por déficit DESC |
+| GET | `/api/v1/inventario/alertas/stock-bajo` | ADMIN, SUPERVISOR, ALMACENISTA | — | Igual que anterior pero todas las sucursales |
+
+**Queries Clave en `InventarioSucursalRepository`:**
 
 ```sql
--- Cliente tiene muchas Ventas
-Venta.clienteId → Cliente.id
+-- Fotografía paginada (native SQL con proyección de interfaz)
+SELECT i.sku_interno, p.nombre_comercial, i.stock_actual, i.costo_promedio_ponderado
+FROM inventario_sucursal i
+JOIN producto_maestro p ON i.sku_interno = p.sku_interno
+WHERE i.sucursal_id = :sucursalId
 
--- Producto pertenece a Categoría y Proveedor
-Producto.categoriaId → Categoria.id
-Producto.proveedorId → Proveedor.id
+-- Productos con stock bajo en una sucursal (JPQL)
+WHERE i.id.sucursalId = :sucursalId
+  AND i.stockActual < i.stockMinimoSucursal
+  AND p.activo = true
+ORDER BY (i.stockMinimoSucursal - i.stockActual) DESC
 
--- Venta tiene muchos DetalleVenta
-DetalleVenta.ventaId → Venta.id
-DetalleVenta.productoId → Producto.id
-
--- InventarioSucursal relaciona Sucursal con Producto
-InventarioSucursal.sucursalId → Sucursal.id
-InventarioSucursal.productoId → Producto.id
-
--- Empleado pertenece a Sucursal
-Empleado.sucursalId → Sucursal.id
+-- Productos próximos a caducar (JPQL)
+WHERE i.fechaCaducidad IS NOT NULL
+  AND i.fechaCaducidad <= :fechaLimite    -- now() + 30 días
+  AND i.fechaCaducidad >= CURRENT_DATE
+  AND p.activo = true
+ORDER BY i.fechaCaducidad ASC
 ```
 
 ---
 
-## 5. Módulos Funcionales
-
-### 📦 01. Módulo de Catálogos
-
-**Propósito**: Gestión de entidades maestras del sistema
-
-**Controllers**:
-- `CategoriaController` - CRUD de categorías
-- `ClienteController` - Gestión de clientes con RFC
-- `TipoClienteController` - Tipos de cliente y descuentos
-- `ProveedorController` - Gestión de proveedores
-- `MotoController` - Catálogo de motocicletas
-- `CompatibilidadController` - Matching producto-moto
-- `PrecioEspecialController` - Precios por tipo de cliente
-- `MorosidadController` - Control de clientes morosos
-
-**Funcionalidades Core**:
-- ✅ CRUD completo de entidades maestras
-- ✅ Validación de RFC (CURP mexicano pattern)
-- ✅ Sistema de compatibilidad producto-moto con observaciones
-- ✅ Precios especiales con vigencia temporal
-- ✅ Control de morosidad con alertas
-
-### 🏪 02. Módulo de Inventario
-
-**Propósito**: Control total del stock multi-sucursal
-
-**Controllers**:
-- `ProductoController` - Catálogo maestro de productos
-- `InventarioController` - Gestión de stock por sucursal
-- `TraspasoController` - Traspasos entre sucursales
-- `CaducidadController` - Control de productos perecederos
-- `AnalisisABCController` - Clasificación de productos
-- `AlertaLentoMovimientoController` - Detección de obsoletos
-
-**Funcionalidades Core**:
-- ✅ **Motor de búsqueda omnicanal** (SKU, nombre, categoría, moto compatible)
-- ✅ **Trazabilidad completa** de movimientos (entrada/salida/traspaso/ajuste)
-- ✅ **Análisis ABC automático** por valor de ventas
-- ✅ **Alertas inteligentes**: stock crítico, caducidad próxima, lento movimiento
-- ✅ **Stock mínimo/máximo** con recomendaciones de reorden
-- ✅ **Control de caducidad** con bajas automáticas
-
-**Algoritmo ABC**:
-```
-Productos Clase A: 80% del valor de ventas (top 20% productos)
-Productos Clase B: 15% del valor de ventas (siguiente 30%)
-Productos Clase C: 5% del valor restante (resto)
-```
-
-### 🛒 03. Módulo de Ventas
-
-**Propósito**: Proceso completo de ventas y post-venta
-
-**Controllers**:
-- `VentaController` - Gestión de ventas completas
-- `ReservaController` - Sistema de apartados
-- `DevolucionController` - Devoluciones y reembolsos
-
-**Funcionalidades Core**:
-- ✅ **Ventas multi-producto** con descuentos por ítem
-- ✅ **Aplicación automática de precios especiales** según tipo de cliente
-- ✅ **Métodos de pago**: Efectivo, Tarjeta, Transferencia, Crédito
-- ✅ **Reservas con anticipo** y vigencia configurable
-- ✅ **Devoluciones parciales** con motivos catalogados
-- ✅ **Cálculo automático de com isiones** por vendedor
-- ✅ **Integración con fidelidad** (acumulación de puntos)
-- ✅ **Control de crédito** con verificación de límites
-
-### 📥 04. Módulo de Compras
-
-**Controller**: `CompraController`
-
-**Funcionalidades Core**:
-- ✅ Órdenes de compra multi-producto
-- ✅ Control de estado: PENDIENTE → RECIBIDA → CANCELADA
-- ✅ **Entrada automática de inventario** al confirmar recepción
-- ✅ Actualización de precios de compra
-- ✅ Historial de compras por proveedor
-
-### 📋 05. Módulo de Cotizaciones
-
-**Controller**: `CotizacionController`
-
-**Funcionalidades Core**:
-- ✅ Generación de cotizaciones formales
-- ✅ Vigencia configurable (días)
-- ✅ **Conversión automática a venta** en un click
-- ✅ Historial de cotizaciones por cliente
-- ✅ Estado: VIGENTE → VENCIDA → CONVERTIDA → RECHAZADA
-
-### 🏢 06. Módulo de Sucursales
-
-**Controller**: `SucursalController`
-
-**Funcionalidades Core**:
-- ✅ CRUD de sucursales
-- ✅ Asignación de responsables
-- ✅ Datos de contacto completos
-- ✅ Métricas por sucursal
-
-### 👥 07. Módulo de Empleados
-
-**Controller**: `EmpleadoController`
-
-**Funcionalidades Core**:
-- ✅ Gestión de personal por sucursal
-- ✅ Configuración de salario base + % comisión
-- ✅ Fecha de ingreso y puesto
--  ✅ Integración con módulo de comisiones
-
-### 💰 08. Módulo de Comisiones
-
-**Controller**: `ComisionController`
-
-**Funcionalidades Core**:
-- ✅ **Cálculo automático** por periodo
-- ✅ Reglas configurables por empleado
-- ✅ Desglose detallado por venta
-- ✅ Estados: PENDIENTE → APROBADA → PAGADA
-- ✅ Reportes de comisiones por sucursal
-
-**Fórmula de Cálculo**:
-```
-Comisión = Σ (Subtotal_Venta × % comisionVendedor)
-Donde:
-- Subtotal_Venta = Total venta antes de impuestos
-- % comisionVendedor viene de Empleado.comisionVentas
-```
-
-### 💳 09. Módulo de Finanzas
-
-**Controllers**:
-- `ConfiguracionFinancieraController` - Parámetros globales
-- `CreditoController` - Control de crédito y cuentas por cobrar
-- `DashboardController` - Dashboard financiero
-- `AuditoriaPrecioController` - Auditoría de cambios de precio
-
-**Funcionalidades Core**:
-- ✅ **Límites de crédito por cliente** con saldos en tiempo real
-- ✅ **Días de crédito configurables** con alertas de vencimiento
-- ✅ **Auditoría completa** de cambios de precio con responsables
-- ✅ **Dashboard en tiempo real**: ingresos, gastos, utilidad, ROI
-- ✅ **Margen de utilidad objetivo** y comparación
-- ✅ **IVA configurable** (16% por defecto)
-
-### 💎 10. Módulo de Fidelidad
-
-**Controller**: `ProgramaFidelidadController`
-
-**Funcionalidades Core**:
-- ✅ **Programa de puntos** automático por compra
-- ✅ Niveles: BRONCE, PLATA, ORO, PLATINO
-- ✅ **1 punto por cada $10 MXN de compra**
-- ✅ **Canje de puntos**: 100 puntos = $10 MXN descuento
-- ✅ Historial completo de movimientos
-- ✅ Estadísticas del programa (clientes activos, puntos emitidos/canjeados)
-- ✅ Validaciones: monto mínimo $10, puntos mínimos canje 100
-
-**Reglas de Negocio**:
-```java
-// Acumulación
-puntosganados = montoCompra / 10  // 1 punto por cada $10
-
-// Canje
-descuento = puntosCanjeados / 10  // 100 puntos = $10 descuento
-```
-
-### 🔮 11. Módulo de Predicción de Demanda
-
-**Controller**: `PrediccionDemandaController`
-
-**Funcionalidades Core**:
-- ✅ **Algoritmos de forecasting**:
-  - Promedio Móvil Simple
-  - Promedio Móvil Ponderado
-  - Suavización Exponencial
-  - Regresión Lineal
-- ✅ **Recomendaciones de reorden** automáticas
-- ✅ Predicciones por producto y sucursal
-- ✅ **Evaluación de precisión** del modelo (MAE, MAPE)
-- ✅ Datos históricos de demanda
-
-**Algoritmo Promedio Móvil**:
-```java
-prediccion[t+1] = (venta[t] + venta[t-1] + ... + venta[t-n]) / n
-Donde:
-- t = periodo actual
-- n = ventana de periodos (configurable, default: 3)
-```
-
-### 📊 12. Módulo de Métricas
-
-**Controllers**:
-- `MetricaFinancieraController` - KPIs financieros
-- `MetricaInventarioController` - KPIs de inventario
-- `MetricaOperativaController` - KPIs operacionales
-- `MetricaVentaClienteController` - KPIs de ventas y clientes
-
-**Funcionalidades Core**:
-
-#### **Métricas Financieras**:
-- Ingresos totales
-- Gastos totales
-- Utilidad bruta/neta
-- Margen de utilidad %
-- ROI (Return on Investment)
-- Cuentas por cobrar vencidas
-
-#### **Métricas de Inventario**:
-- Rotación de inventario
-- Días de inventario disponible
-- Stock crítico (productos bajo mínimo)
-- Valor total del inventario
-- Productos obsoletos o lento movimiento
-- Índice de caducidad
-
-#### **Métricas Operativas**:
-- Total de ventas (cantidad y monto)
-- Total de compras (cantidad y monto)
-- Total de traspasos
-- Eficiencia operativa
-- Balance de transacciones
-- Actividad por sucursal
-
-#### **Métricas de Ventas y Clientes**:
-- Ticket promedio
-- Clientes activos vs nuevos
-- Top 10 productos más vendidos
-- Top 10 clientes por valor
-- Métodos de pago más usados
-- Tasa de devolución
-
-**Actualización**: Algunas métricas se calculan **en tiempo real** consultando directamente las transacciones, otras se **cachean** por rendimiento.
-
-### 💸 13. Módulo de Rentabilidad
-
-**Controller**: `RentabilidadController`
-
-**Funcionalidades Core**:
-- ✅ **Análisis de rentabilidad** por producto
-- ✅ Rentabilidad por categoría
-- ✅ Rentabilidad por sucursal
-- ✅ **Top productos rentables** vs **productos con pérdida**
-- ✅ Análisis de márgenes reales vs objetivo
-- ✅ ROI por producto
-- ✅ Comparación de periodos
-
-**Cálculo de Rentabilidad**:
-```
-Costo Total = Precio Compra × Cantidad Vendida
-Ingreso Total = Precio Venta × Cantidad Vendida
-Utilidad Bruta = Ingreso Total - Costo Total
-Margen % = (Utilidad Bruta / Ingreso Total) × 100
-ROI = (Utilidad Bruta / Costo Total) × 100
-```
-
-### 🤝 14. Módulo CRM (Garantías, Pipeline B2B y Marketing)
-
-**Controllers**:
-- `GarantiaController` - Gestión de tickets de garantía
-- `PipelineController` - Embudo de ventas B2B
-- `InteraccionCrmController` - Seguimientos y notas B2B
-- `MarketingCampanaController` - Automatización de campañas
-- `NpsController` - Encuestas de satisfacción
-
-**Funcionalidades Core**:
-- ✅ **Tickets de Garantía** vinculados con SKU, número de serie y la venta original, con tiempos de respuesta.
-- ✅ **Embudo de Ventas (Pipeline)** B2B, permitiendo crear prospectos, oportunidades y registrar llamadas/visitas.
-- ✅ **Marketing Automatizado** para enviar campañas masivas (SMS, Email) a segmentos de clientes con integración a Twilio/SendGrid.
-- ✅ **Encuestas NPS** enviadas automáticamente a clientes tras la venta para clasificar Promotores, Pasivos y Detractores.
-
-### 📊 15. Módulo Analítica Avanzada (RFM)
-
-**Controller**: `RfmController`
-
-**Funcionalidades Core**:
-- ✅ **Segmentación RFM**: Calcula la Recencia, Frecuencia y Monto gastado por todos los clientes.
-- ✅ **Asignación de Segmentos** en base a sus scores, detectando: `CAMPEON`, `LEAL`, `EN_RIESGO`, etc.
-
-### 🛒 16. Módulo Analítica - Canasta de Compra (Market Basket)
-
-**Controller**: `MarketBasketController`
-
-**Funcionalidades Core**:
-- ✅ **Algoritmo Apriori**: Procesa matemáticamente el historial de ventas para descubrir qué artículos se compran juntos con mayor frecuencia.
-- ✅ **Recomendaciones de Venta Cruzada (Cross-Selling)**: Dado un producto que el cliente quiere llevar, sugiere los top 5 productos complementarios (Ej: "Quien lleva Aceite, también lleva Filtro el 85% de las veces").
-- ✅ **Métricas Estadísticas**: Soporte, Confianza y Lift almacenados para dar precisión a la recomendación.
-
-### 🔮 17. Módulo Analítica - Predicción de Churn (Riesgo de Abandono)
-
-**Controller**: `ChurnPredictionController`
-
-**Funcionalidades Core**:
-- ✅ **Cálculo de Riesgo**: Algoritmo matemático que evalúa la recencia (días desde última compra) frente a la frecuencia histórica del cliente.
-- ✅ **Ponderado de Montos**: Asigna mayor riesgo si la última compra tuvo un ticket promedio 30% inferior al histórico reciente del cliente.
-- ✅ **Score y Endpoint para Retargeting**: Califica clientes de 0 a 100 y lista los que superan un score de 70 para ser abordados por los vendedores telefónicos.
-
-### 🕵️ 18. Módulo de Compras Inteligentes - Comparador (SUP-01)
-
-**Controller**: `ComparadorPreciosController`
-
-**Funcionalidades Core**:
-- ✅ **Catálogo Unificado de Proveedores**: Consulta de todos los proveedores que ofrecen un producto específico.
-- ✅ **Comparador Automático**: Evaluación y ordenamiento de opciones de compra de mejor a peor precio.
-- ✅ **Proyección Inteligente de Venta Sugerida**: Cálculo estandarizado de precio técnico con margen e IVA aplicado.
-- ✅ **Rentabilidad Estimada**: Simulaciones financieras en tiempo real previas a la compra.
-
-### 📈 19. Módulo de Actualización Masiva de Precios (SUP-02)
-
-**Controller**: `ActualizacionPreciosController`
-
-**Funcionalidades Core**:
-- ✅ **Actualización en Lote o Individual**: Modifica el costo de múltiples artículos a la vez a partir de listas de proveedores.
-- ✅ **Alertas por Variación de Costos**: Sistema automatizado que inyecta una advertencia de negocio si el precio supera el 10% de alza en relación al costo anterior.
-- ✅ **Historial de Precios Auditado**: Trazabilidad absoluta de cuándo cambió el costo, por qué y en qué porcentaje.
-
-### 🛒 20. Módulo de Control de Abastecimiento (SUP-03)
-
-**Controller**: `OrdenCompraController`
-
-**Funcionalidades Core**:
-- ✅ **Carrito de Compras Universal**: Permite agregar productos de distintos proveedores simultáneamente.
-- ✅ **Generación y Desglose de Órdenes**: Fragmenta el carrito en Órdenes de Compra (OC) individuales por proveedor y previene errores manuales.
-- ✅ **Exportación en Excel Automatizada**: Transforma las OCs en reportes XLSX estandarizados mediante Apache POI.
-- ✅ **Cruce Automático con Almacén Físico**: Integra una OC recibida directamente contra el inventario real y dispara las actualizaciones financieras del Costo Promedio Ponderado.
+### 6.5 Inventario — Extensiones
+
+**`CodigoBarrasController`** — `/api/v1/inventario`
+
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/inventario/productos/buscar-por-codigo?codigo=` | Busca producto por EAN/código de barras |
+| POST | `/api/v1/inventario/escaneo` | `{codigoBarras, sucursalId}` — escaneo en POS |
+| POST | `/api/v1/inventario/productos/{skuInterno}/codigos-barras` | `{codigo, descripcion}` — agrega código |
+| GET | `/api/v1/inventario/productos/{skuInterno}/codigos-barras` | Lista códigos de un SKU |
+| DELETE | `/api/v1/inventario/codigos-barras/{id}` | Elimina código de barras |
+| POST | `/api/v1/inventario/productos/importar-masivo` | Importación masiva de productos |
+
+**`TraspasoController`** — `/api/v1/inventario/traspasos`
+
+| Método | Path | Request Body | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/inventario/traspasos` | `{sucursalOrigenId, sucursalDestinoId, skuInterno, cantidad, motivo}` | Genera movimiento de inventario SALIDA en origen y ENTRADA en destino |
+
+**`CaducidadController`** — `/api/v1/inventario/caducidad`
+
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/inventario/caducidad/proximos` | Vence en los próximos 30 días (hardcoded en repo query) |
+| GET | `/api/v1/inventario/caducidad/vencidos` | `fechaCaducidad < CURRENT_DATE` |
+
+**`AnalisisAbcController`** — `/api/v1/inventario/analisis-abc`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/inventario/analisis-abc/generar` | `{sucursalId, fechaInicio, fechaFin}` — clasifica productos por rotación |
+| GET | `/api/v1/inventario/analisis-abc/sucursal/{sucursalId}/ultimo` | Último análisis generado |
+| GET | `/api/v1/inventario/analisis-abc/sucursal/{sucursalId}/clasificacion/{clasificacion}` | Productos clase `A`, `B` o `C` |
+| GET | `/api/v1/inventario/analisis-abc/sucursal/{sucursalId}/resumen` | Porcentajes y totales por clase |
+
+**`AlertaLentoMovimientoController`** — `/api/alertas/lento-movimiento` _(sin `/v1/`)_
+
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/alertas/lento-movimiento` | Listar activas |
+| POST | `/api/alertas/lento-movimiento/generar` | `{sucursalId, diasSinMovimiento}` |
+| GET | `/api/alertas/lento-movimiento/{id}` | Obtener por ID |
+| GET | `/api/alertas/lento-movimiento/sucursal/{sucursalId}` | Por sucursal |
+| GET | `/api/alertas/lento-movimiento/criticas` | Solo criticidad ALTA |
+| GET | `/api/alertas/lento-movimiento/producto/{skuInterno}` | Por SKU |
+| GET | `/api/alertas/lento-movimiento/costo-inmovilizado` | Suma total del capital inmovilizado |
+| PUT | `/api/alertas/lento-movimiento/{id}/resolver` | `{accionTomada, observaciones}` |
+| DELETE | `/api/alertas/lento-movimiento/{id}` | Eliminar alerta |
 
 ---
 
-### 🔔 21. Módulo de Notificaciones y Alertas (WebSockets)
+### 6.6 Ventas
 
-**Controller**: `AlertaController`
+**`VentaController`** — `@RequestMapping("/api/v1/ventas")`
 
-**Funcionalidades Core**:
-- ✅ **Server-Sent Events (SSE) / WebSockets**: Infraestructura reactiva para empujar notificaciones desde el backend al frontend en tiempo real.
-- ✅ **Alertas de Sistema y Negocio**: Emisión de eventos distribuidos de Stock Bajo, Riesgo de Churn, Descuentos No Autorizados y Calificaciones NPS Críticas.
-- ✅ **Gestión de Lectura**: Endpoints para listar alertas no leídas, marcar como leídas, o archivar notificaciones a nivel de empleado.
-- ✅ **Integración Intramódulo**: El `AlertaService` actúa como un bus de eventos (Observer Pattern) consumido por Inventory y CRM.
+| Método | Path | Roles | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/ventas` | ADMIN, VENDEDOR, CAJERO | Registrar venta. Devuelve `201 Created` con `VentaResponseDTO` |
 
-### 🎯 22. Módulo de Rendimiento de Personal y Metas
+**Request Body — `VentaRequestDTO`:**
 
-**Controller**: `RendimientoPersonalController`
+```json
+{
+  "clienteId":  1,          // @NotNull — Integer
+  "sucursalId": 1,          // @NotNull — Integer
+  "metodoPago": "EFECTIVO", // @NotNull — String: EFECTIVO | TARJETA | TRANSFERENCIA | CREDITO
+  "items": [                // @NotEmpty — List<ItemVentaDTO>
+    {
+      "skuInterno": "ACEITE-CASTROL-10W40-1L",  // @NotNull
+      "cantidad": 2,                             // @NotNull
+      "precioOfertaEspecial": 170.00             // Opcional — descuento adicional del vendedor
+    }
+  ]
+}
+```
 
-**Funcionalidades Core**:
-- ✅ **Cálculo de Productividad (KPIs):** Análisis de Tickets Promedio, Total Vendido y Tasa de Retención por empleado.
-- ✅ **Sistema de Metas Dinámicas:** Configuración de cuotas mensuales de venta y su seguimiento porcentual hacia la obtención de bonos.
-- ✅ **Ranking Multi-Sucursal:** Generación de posiciones ("Leaderboard") para fomentar sana competencia en base a efectividad transaccional.
-- ✅ **Endpoints Protegidos por Jerarquía:** Configurado mediante Data Access Security (RBAC con Spring Security `@PreAuthorize("hasRole('GERENTE')")`) asegurando que los vendedores solo vean sus métricas y los gerentes las de su equipo.
+**Flujo interno de `VentaService.procesarVenta()`:**
+
+1. Busca `Usuario` por `vendedorUsername` del `SecurityContext` → 404 si no existe
+2. Busca `Cliente` por `clienteId` → obtiene su `tipoClienteId`
+3. Si `metodoPago == "CREDITO"`: calcula total estimado → `CreditoService.validarCreditoDisponible()` → lanza `CreditoInsuficienteException` si no alcanza
+4. Para cada ítem: verifica `InventarioSucursal` → lanza `StockInsuficienteException` si `stockActual < cantidad`
+5. Busca `HistorialPrecio` más reciente del SKU → obtiene `precioFinalPublico`
+6. Busca `PrecioEspecial` por `(skuInterno, tipoClienteId)` → si existe, sobreescribe precio (precio para taller, mayorista, etc.)
+7. Si `precioOfertaEspecial < precioCalculado` → aplica descuento especial del vendedor
+8. Resta stock: `inventario.stockActual -= cantidad` → `inventarioRepository.save()`
+9. Guarda `DetalleVenta` con precio final, descuento y porcentaje de descuento
+10. Calcula y actualiza `venta.total`
+11. Si `metodoPago == "CREDITO"`: `CreditoService.registrarCargo()` → actualiza `saldo_pendiente` del cliente
+
+**`ReservaController`** — `/api/v1/reservas`
+
+| Método | Path | Roles | Request / Params | Descripción |
+|---|---|---|---|---|
+| GET | `/api/v1/reservas` | Autenticado | — | Listar todas |
+| POST | `/api/v1/reservas` | Autenticado | `{sucursalId, clienteId, skuInterno, cantidad, anticipo, diasVigencia}` | Crear apartado |
+| GET | `/api/v1/reservas/{id}` | Autenticado | — | Consultar |
+| GET | `/api/v1/reservas/cliente/{clienteId}` | Autenticado | — | Por cliente |
+| GET | `/api/v1/reservas/estado/{estado}` | Autenticado | `estado`: PENDIENTE, COMPLETADA, CANCELADA | Por estado |
+| GET | `/api/v1/reservas/proximas-vencer` | Autenticado | — | Vencen en las próximas 24h |
+| PUT | `/api/v1/reservas/{id}/cancelar` | Autenticado | `{motivo}` | Cancela y libera stock |
+| PUT | `/api/v1/reservas/{id}/completar` | Autenticado | `{observaciones}` | Entrega y genera venta |
+| POST | `/api/v1/reservas/procesar-vencidas` | ADMIN | — | Batch — cancela vencidas automáticamente |
+
+**`DevolucionController`** — `/api/v1/devoluciones`
+
+| Método | Path | Request Body | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/devoluciones` | `{ventaId, motivo, detalles:[{detalleVentaId, cantidadDevuelta}]}` | Registra devolución y reinstala stock |
+| GET | `/api/v1/devoluciones/{id}` | — | Consultar devolución |
+| GET | `/api/v1/devoluciones/venta/{ventaId}` | — | Devoluciones de una venta específica |
 
 ---
 
-## 6. API REST - Endpoints
+### 6.7 Cotizaciones
 
-### 📡 Estructura de Endpoints
+**`CotizacionController`** — `@RequestMapping("/api/cotizaciones")` _(sin `/v1/`)_
 
-**Base URL**: `http://localhost:8080/api/v1`
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/cotizaciones` | Listar todas |
+| POST | `/api/cotizaciones` | `{clienteId, empleadoId, detalles:[{skuInterno, cantidad, precioUnitario, descuento}], vigenciaDias}` |
+| GET | `/api/cotizaciones/{id}` | Por ID |
+| PUT | `/api/cotizaciones/{id}` | Actualizar cotización en estado BORRADOR |
+| DELETE | `/api/cotizaciones/{id}` | Eliminar |
+| GET | `/api/cotizaciones/folio/{folio}` | Buscar por folio `COT-{año}-{seq}` |
+| PUT | `/api/cotizaciones/{id}/estado` | Cambiar estado |
+| POST | `/api/cotizaciones/{id}/convertir-venta` | `{sucursalId, metodoPago}` — crea venta desde cotización |
+| GET | `/api/cotizaciones/vencimiento/proximas` | Vencen en los próximos 3 días |
+| GET | `/api/cotizaciones/pendientes-conversion` | En estado APROBADA pero no convertidas |
+| GET | `/api/cotizaciones/estadisticas` | Tasa de conversión, monto promedio |
+| POST | `/api/cotizaciones/marcar-vencidas` | Batch — marca como VENCIDAS las expiradas |
 
-**Total de Endpoints**: 250+
+---
 
-### 🔑 Autenticación
+### 6.8 Compras e Ingresos
 
-```
-POST   /auth/login                    # Login y obtener JWT token
-```
+| Método | Path | Request Body | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/compras/ingreso` | `{proveedorId, sucursalId, esCredito, diasCredito, detalles:[{skuInterno, cantidad, precioUnitario}]}` | Ingresa mercancía, actualiza CPP, genera CxP si `esCredito=true` |
 
-### 👤 Usuarios
+---
 
-```
-GET    /usuarios                      # Listar usuarios
-POST   /usuarios                      # Crear usuario
-GET    /usuarios/{id}                 # Obtener usuario
-PUT    /usuarios/{id}                 # Actualizar usuario
-DELETE /usuarios/{id}                 # Eliminar usuario
-```
+### 6.9 Adquisiciones
 
-### 📦 Catálogo - Categorías
+**Comparador:** `GET /api/sup/comparador/producto/{sku}` — lista precios del SKU en todos los proveedores del catálogo de comparación.
 
-```
-GET    /catalogo/categorias           # Listar
-POST   /catalogo/categorias           # Crear
-GET    /catalogo/categorias/{id}      # Obtener
-PUT    /catalogo/categorias/{id}      # Actualizar
-DELETE /catalogo/categorias/{id}      # Eliminar
-```
+**Actualización masiva de precios** — `/api/v1/comparador/catalogo`
 
-### 👥 Catálogo - Clientes
+| Método | Path | Descripción |
+|---|---|---|
+| PUT | `/api/v1/comparador/catalogo/{id}/precio` | `{nuevoPrecio, motivo}` — actualiza un ítem |
+| POST | `/api/v1/comparador/catalogo/actualizar-masivo` | `[{skuInterno, nuevoPrecio}]` — batch |
+| GET | `/api/v1/comparador/catalogo/{id}/historial` | Historial de cambios de precio de un ítem |
 
-```
-GET    /catalogo/clientes             # Listar (paginado)
-POST   /catalogo/clientes             # Crear
-GET    /catalogo/clientes/{id}        # Obtener
-GET    /catalogo/clientes/rfc/{rfc}   # Buscar por RFC
-PUT    /catalogo/clientes/{id}        # Actualizar
-DELETE /catalogo/clientes/{id}        # Eliminar
-```
+**Órdenes de Compra** — `/api/v1/oc`
 
-### 🏍️ Catálogo - Motos
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/oc` | Listar OC |
+| POST | `/api/v1/oc/carrito/agregar` | `{catalogoId, cantidad}` |
+| DELETE | `/api/v1/oc/carrito/{catalogoId}` | Quitar del carrito |
+| GET | `/api/v1/oc/carrito` | Ver carrito actual |
+| POST | `/api/v1/oc/generar` | `{sucursalId, proveedorId}` — genera OC desde carrito |
+| PATCH | `/api/v1/oc/{id}/estado` | `{estado}`: BORRADOR, ENVIADA, CONFIRMADA, RECIBIDA |
+| POST | `/api/v1/oc/{id}/recibir` | Confirma recepción, actualiza inventario |
+| GET | `/api/v1/oc/{id}/exportar-excel` | Descarga `.xlsx` (Apache POI) |
 
-```
-GET    /catalogo/motos                # Listar
-POST   /catalogo/motos                # Crear
-GET    /catalogo/motos/{id}           # Obtener
-PUT    /catalogo/motos/{id}           # Actualizar
-DELETE /catalogo/motos/{id}           # Eliminar
-GET    /catalogo/motos?marca=Honda    # Filtrar por marca
-```
+---
 
-### 🔗 Catálogo - Compatibilidad
+### 6.10 Caja
 
-```
-GET    /catalogo/compatibilidad                  # Listar
-POST   /catalogo/compatibilidad                  # Crear relación
-GET    /catalogo/compatibilidad/producto/{id}    # Por producto
-GET    /catalogo/compatibilidad/moto/{id}        # Por moto
-DELETE /catalogo/compatibilidad/producto/{pid}/moto/{mid}  # Eliminar
-```
+**`CajaController`** — `/api/v1/cajas`
 
-### 📦 Inventario - Productos
+| Método | Path | Request Body | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/cajas/abrir` | `{sucursalId, empleadoId, fondoInicial}` | Abre turno — `turno_caja.estado = ABIERTO` |
+| POST | `/api/v1/cajas/movimientos` | `{turnoCajaId, tipo: ENTRADA|SALIDA, monto, concepto}` | Registra movimiento |
+| POST | `/api/v1/cajas/{id}/cerrar` | `{efectivoContado, observaciones}` | Arqueo Z — calcula diferencia, cierra turno |
+| GET | `/api/v1/cajas/{id}/resumen` | — | Resumen del turno: ventas, efectivo, diferencia |
 
-```
-GET    /productos                     # Listar (paginado)
-GET    /productos/search              # Búsqueda omnicanal
-POST   /productos                     # Crear
-GET    /productos/{id}                # Obtener
-GET    /productos/sku/{sku}           # Por SKU
-PUT    /productos/{id}                # Actualizar
-DELETE /productos/{id}                # Eliminar
-```
+---
 
-### 📊 Inventario - Gestión
+### 6.11 POS
 
-```
-GET    /inventario/sucursal/{sid}/producto/{pid}  # Stock actual
-POST   /inventario/entrada                        # Entrada de stock
-POST   /inventario/salida                         # Salida de stock
-GET    /inventario/movimientos/producto/{id}      # Historial
-GET    /inventario/movimientos/sucursal/{id}      # Por sucursal
-```
+**Facturación CFDI** — `/api/v1/facturacion`
 
-### 🔄 Inventario - Traspasos
+| Método | Path | Request Body | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/facturacion/timbrar` | `{ventaId, rfcReceptor, usoCfdi, metodoPago, formaPago}` | Genera CFDI 4.0 |
+| POST | `/api/v1/facturacion/{facturaId}/cancelar` | `{motivo, folioSustitucion}` | Cancela ante SAT |
+| GET | `/api/v1/facturacion/{facturaId}/descargar` | — | Descarga XML/PDF |
+| GET | `/api/v1/facturacion/cliente/{clienteId}` | — | Historial de facturas |
 
-```
-GET    /inventario/traspasos          # Listar
-POST   /inventario/traspasos          # Crear traspaso
-GET    /inventario/traspasos/{id}     # Obtener
-PUT    /inventario/traspasos/{id}/confirmar  # Confirmar recepción
-PUT    /inventario/traspasos/{id}/cancelar   # Cancelar
-```
+**Terminal Bancaria** — `/api/v1/pos/pagos`
 
-### ⚠️ Inventario - Análisis
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/pos/pagos/tarjeta` | `{ventaId, monto, tipoTarjeta: DEBITO|CREDITO}` |
+| POST | `/api/v1/pos/pagos/cancelar` | Cancela cargo en terminal |
+| GET | `/api/v1/pos/pagos/{referencia}/estatus` | Estatus de transacción |
 
-```
-POST   /inventario/analisis-abc/generar          # Generar ABC
-GET    /inventario/analisis-abc                  # Listar análisis
-GET    /inventario/analisis-abc/{id}             # Obtener
-GET    /inventario/analisis-abc/{id}/productos/{clase}  # Por clase A/B/C
+**Sincronización Offline** — `/api/v1/sincronizacion`
 
-POST   /inventario/alertas-lento-movimiento/generar  # Generar alertas
-GET    /inventario/alertas-lento-movimiento      # Listar alertas
-PUT    /inventario/alertas-lento-movimiento/{id}/resolver  # Resolver
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/sincronizacion/lote` | Sube lote de ventas capturadas sin conexión |
+| POST | `/api/v1/sincronizacion/reintentar` | Reintenta lotes fallidos |
+| GET | `/api/v1/sincronizacion/pendientes` | Lotes en estado PENDIENTE |
 
-GET    /inventario/caducidad/proximos            # Próximos a caducar
-GET    /inventario/caducidad/caducados           # Ya caducados
-POST   /inventario/caducidad/registrar-baja      # Baja por caducidad
-```
+---
 
-### 🛒 Ventas
+### 6.12 Sucursales y Empleados
 
-```
-GET    /ventas                        # Listar
-POST   /ventas                        # Crear venta
-GET    /ventas/{id}                   # Obtener
-GET    /ventas/sucursal/{id}          # Por sucursal
-GET    /ventas/cliente/{id}           # Por cliente
-GET    /ventas/empleado/{id}          # Por empleado
-PUT    /ventas/{id}/cancelar          # Cancelar venta
-```
+**`SucursalController`** — `/api/v1/sucursales`
 
-### 📝 Ventas - Reservas
+| Método | Path | Roles | Descripción |
+|---|---|---|---|
+| GET | `/api/v1/sucursales` | Autenticado | Listar |
+| POST | `/api/v1/sucursales` | ADMIN | `{nombre, direccion, activo}` |
+| PUT | `/api/v1/sucursales/{id}` | ADMIN | Actualizar |
+| DELETE | `/api/v1/sucursales/{id}` | ADMIN | Eliminar |
 
-```
-GET    /ventas/reservas               # Listar
-POST   /ventas/reservas               # Crear reserva
-GET    /ventas/reservas/{id}          # Obtener
-PUT    /ventas/reservas/{id}/entregar # Entregar
-PUT    /ventas/reservas/{id}/cancelar # Cancelar
-```
+**`EmpleadoController`** — `/api/v1/empleados`
 
-### 🔙 Ventas - Devoluciones
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/empleados` | `{nombre, apellidos, puesto, departamento, sucursalId, salarioDiario, fechaIngreso}` |
+| GET | `/api/v1/empleados/sucursal/{sucursalId}` | Empleados de una sucursal |
+| DELETE | `/api/v1/empleados/{id}` | Eliminar |
 
-```
-GET    /ventas/devoluciones           # Listar
-POST   /ventas/devoluciones           # Crear devolución
-GET    /ventas/devoluciones/{id}      # Obtener
-PUT    /ventas/devoluciones/{id}/aprobar  # Aprobar
-```
+---
 
-### 📥 Compras
+### 6.13 Comisiones y Metas
 
-```
-GET    /compras                       # Listar
-POST   /compras                       # Crear orden
-GET    /compras/{id}                  # Obtener
-GET    /compras/proveedor/{id}        # Por proveedor
-PUT    /compras/{id}/recibir          # Confirmar recepción
-```
+**`ComisionController`** — `@RequestMapping("/api/comisiones")` _(sin `/v1/`)_
 
-### 📋 Cotizaciones
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/comisiones/reglas` | Listar reglas de comisión |
+| POST | `/api/comisiones/reglas` | `{nombre, tipo: PORCENTAJE|MONTO_FIJO, porcentaje}` |
+| GET | `/api/comisiones/reglas/{id}` | Obtener regla |
+| PUT | `/api/comisiones/reglas/{id}` | Actualizar regla |
+| DELETE | `/api/comisiones/reglas/{id}` | Eliminar regla |
+| POST | `/api/comisiones/calcular?anio=&mes=` | Calcula comisiones de todos los vendedores del mes |
+| POST | `/api/comisiones/calcular/vendedor/{vendedorId}` | Calcula solo para un vendedor |
+| GET | `/api/comisiones/{id}` | Obtener comisión específica |
+| GET | `/api/comisiones/vendedor/{vendedorId}` | Historial de un vendedor |
+| GET | `/api/comisiones/periodo` | Por periodo |
+| GET | `/api/comisiones/estado/{estado}` | PENDIENTE, APROBADA, PAGADA |
+| GET | `/api/comisiones/resumen?anio=&mes=` | Total y promedio del mes |
+| PUT | `/api/comisiones/{id}/aprobar` | `{observaciones}` — aprueba para nómina |
+| PUT | `/api/comisiones/{id}/pagar` | Marca como pagada |
+| PUT | `/api/comisiones/{id}/ajustar` | `{nuevoMonto, justificacion}` |
 
-```
-GET    /cotizaciones                  # Listar
-POST   /cotizaciones                  # Crear
-GET    /cotizaciones/{id}             # Obtener
-POST   /cotizaciones/{id}/convertir-venta  # Convertir a venta
-```
+**Metas (RH)** — `/api/v1/rh/metas`
 
-### 💰 Comisiones
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/rh/metas` | `{empleadoId, mes, anio, metaMonto}` |
+| GET | `/api/v1/rh/metas/{empleadoId}/progreso` | Avance actual vs meta asignada |
 
-```
-POST   /comisiones/calcular           # Calcular comisiones
-GET    /comisiones                    # Listar
-GET    /comisiones/empleado/{id}      # Por empleado
-GET    /comisiones/reporte            # Reporte general
-PUT    /comisiones/{id}/aprobar       # Aprobar comisión
-```
+---
 
-### 💳 Finanzas - Crédito
+### 6.14 Finanzas
 
-```
-GET    /credito/cliente/{id}          # Límite de crédito
-POST   /credito/cliente/{id}/limite   # Asignar límite
-GET    /credito/cuentas-cobrar        # Cuentas por cobrar
-GET    /credito/cliente/{id}/saldo    # Saldo actual
-POST   /credito/cliente/{id}/pago     # Registrar pago
-```
+**Dashboard:** `GET /api/v1/dashboard` — KPIs consolidados: ventas del día, inventario total, CxP pendientes, etc.
 
-### 📊 Finanzas - Dashboard
+**Configuración Financiera** — `/api/v1/finanzas/parametros`
 
-```
-GET    /finanzas/dashboard            # Dashboard general
-GET    /finanzas/dashboard/mes-actual # Métricas del mes
-GET    /finanzas/dashboard/comparativo  # Comparar periodos
-GET    /finanzas/dashboard/indicadores  # Indicadores clave
-```
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/finanzas/parametros` | Config vigente: `margenGananciaBase`, `comisionTarjeta`, `iva`, `metaVentasMensual`, etc. |
+| PUT | `/api/v1/finanzas/parametros` | Actualizar parámetros globales |
 
-### 🎁 Fidelidad
+**Auditoría de Precios** — `/api/v1/auditoria/precios`
 
-```
-POST   /fidelidad/programa            # Crear programa
-GET    /fidelidad/programa/cliente/{id}  # Consultar por cliente
-POST   /fidelidad/acumular            # Acumular puntos
-POST   /fidelidad/canjear             # Canjear puntos
-GET    /fidelidad/programa/cliente/{id}/historial  # Historial
-GET    /fidelidad/estadisticas        # Estadísticas generales
-```
+| Método | Path | Params | Descripción |
+|---|---|---|---|
+| GET | `/api/v1/auditoria/precios/producto/{skuInterno}` | — | Todos los registros de `historial_precio` para ese SKU |
+| GET | `/api/v1/auditoria/precios/periodo` | `?fechaInicio=ISO&fechaFin=ISO` | Cambios en un rango de fechas |
+| GET | `/api/v1/auditoria/precios/significativos` | — | Cambios > umbral configurado (default 10%) |
 
-### 🔮 Predicción de Demanda
+**Crédito y Cobranza** — `@RequestMapping("/api/credito")` _(sin `/v1/`)_
 
-```
-POST   /prediccion-demanda/generar    # Generar predicción
-GET    /prediccion-demanda            # Listar
-GET    /prediccion-demanda/producto/{id}  # Por producto
-GET    /prediccion-demanda/recomendacion/producto/{pid}/sucursal/{sid}  # Recomendación
-GET    /prediccion-demanda/precision  # Precisión del modelo
-```
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/credito/limites` | `{clienteId, limiteCredito, diasCredito}` — crea/actualiza límite |
+| GET | `/api/credito/limites` | Listar todos |
+| GET | `/api/credito/limites/cliente/{clienteId}` | Límite y disponible de un cliente |
+| PUT | `/api/credito/limites/cliente/{clienteId}` | Actualizar límite |
+| GET | `/api/credito/limites/estado/{estado}` | Por estado: ACTIVO, BLOQUEADO, SUSPENDIDO |
+| GET | `/api/credito/limites/activos` | Solo activos |
+| GET | `/api/credito/limites/bloqueados` | Solo bloqueados |
+| GET | `/api/credito/limites/riesgo` | `saldo_pendiente / limite_credito > 80%` |
+| GET | `/api/credito/limites/sobregiro` | `saldo_pendiente > limite_credito` |
+| GET | `/api/credito/validar?clienteId=&monto=` | Devuelve `{creditoDisponible, montoDisponible, codigo, mensaje}` |
+| POST | `/api/credito/abonos` | `{clienteId, monto, metodoPago, referencia}` — reduce `saldo_pendiente` |
+| PUT | `/api/credito/limites/cliente/{clienteId}/bloquear` | Bloquea crédito (`estado=BLOQUEADO`) |
+| PUT | `/api/credito/limites/cliente/{clienteId}/desbloquear` | Reactiva crédito |
+| PUT | `/api/credito/limites/cliente/{clienteId}/suspender` | Suspende temporalmente |
+| GET | `/api/credito/historial/{clienteId}` | Todos los movimientos del cliente |
+| GET | `/api/credito/historial/{clienteId}/cargos` | Solo cargos (ventas a crédito) |
+| GET | `/api/credito/historial/{clienteId}/abonos` | Solo abonos (pagos) |
+| GET | `/api/credito/historial/{clienteId}/rango` | `?fechaInicio=&fechaFin=` |
 
-### 📊 Métricas
+---
 
-```
-GET    /metricas-financieras          # KPIs financieros
-GET    /metricas/inventario           # KPIs inventario
-GET    /metricas/operativas           # KPIs operativos
-GET    /metricas/ventas               # KPIs ventas
-GET    /metricas/clientes             # KPIs clientes
-GET    /metricas/clientes/top         # Top clientes
-```
+### 6.15 ERP
 
-### 💸 Rentabilidad
+**CxP y Gastos** — `/api/v1`
 
-```
-GET    /rentabilidad/producto/{id}    # Por producto
-GET    /rentabilidad/categoria/{id}   # Por categoría
-GET    /rentabilidad/sucursal/{id}    # Por sucursal
-GET    /rentabilidad/top-productos    # Top rentables
-GET    /rentabilidad/analisis-margenes  # Análisis de márgenes
-```
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/cxp` | Listar cuentas por pagar pendientes |
+| POST | `/api/v1/cxp` | Crear CxP manual |
+| POST | `/api/v1/cxp/{id}/pagos` | `{monto, metodoPago, referencia}` — registra pago |
+| POST | `/api/v1/finanzas/gastos` | `{concepto, monto, categoria, sucursalId, fecha}` |
+| GET | `/api/v1/finanzas/gastos` | Listar gastos operativos |
 
-### 🤝 CRM y Atención a Clientes
+**Contabilidad** — `/api/v1/contabilidad`
 
-```
-# Garantías
-POST   /crm/garantias                 # Crear ticket garantía
-GET    /crm/garantias/cliente/{id}    # Historial cliente
-PATCH  /crm/garantias/{id}/resolucion # Resolver (Cambio, Devolución, etc)
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/contabilidad/cuentas` | Catálogo de cuentas contables |
+| POST | `/api/v1/contabilidad/polizas` | `{tipo: INGRESO|EGRESO|DIARIO, descripcion, movimientos:[{cuentaId, debe, haber}]}` |
+| GET | `/api/v1/contabilidad/polizas` | Listar pólizas |
+| GET | `/api/v1/contabilidad/reportes/balanza` | Balanza de comprobación al corte |
+| GET | `/api/v1/contabilidad/reportes/estado-resultados` | Estado de resultados del periodo |
 
-# Pipeline B2B
-POST   /crm/prospectos                # Registrar prospecto
-POST   /crm/oportunidades             # Crear oportunidad
-PATCH  /crm/oportunidades/{id}/etapa  # Avanzar (NUEVA -> NEGOCIACION -> GANADA)
-POST   /crm/interacciones             # Registrar llamada/visita
+**Logística** — `/api/v1/logistica`
 
-# Marketing Automatizado
-POST   /marketing/campanas            # Crear campaña SMS/Email
-POST   /marketing/campanas/{id}/ejecutar # Enviar
-GET    /marketing/campanas/{id}/metricas # Logs de envío y fallos
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/logistica/vehiculos` | Flota vehicular con capacidad y estado |
+| GET | `/api/v1/logistica/choferes` | Choferes registrados |
+| GET | `/api/v1/logistica/rutas` | Listar rutas de entrega |
+| POST | `/api/v1/logistica/rutas` | `{vehiculoId, choferId, fecha}` |
+| POST | `/api/v1/logistica/rutas/{id}/facturas` | `{facturaIds:[1,2,3]}` — asigna facturas a ruta |
+| PATCH | `/api/v1/logistica/rutas/{id}/estatus` | `{estatus}`: PENDIENTE, EN_CAMINO, ENTREGADO |
 
-# Encuestas NPS
-POST   /crm/nps/encuestas             # Generar token para venta
-POST   /crm/nps/respuestas            # Cliente envía su evaluación
-GET    /crm/nps/dashboard             # Puntuación global NPS
-```
+**Nómina** — `/api/v1/nomina`
 
-### 🕵️ Compras Inteligentes - Catálogo, Precios y Abastecimiento
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/nomina/empleados` | Empleados en nómina |
+| POST | `/api/v1/nomina/empleados` | `{empleadoId, salarioBruto, periodicidad: SEMANAL|QUINCENAL|MENSUAL, tipoPago}` |
+| GET | `/api/v1/nomina/periodos` | Periodos de nómina |
+| POST | `/api/v1/nomina/periodos` | `{fechaInicio, fechaFin, descripcion}` |
+| POST | `/api/v1/nomina/periodos/{id}/generar` | Genera `recibo_nomina` para cada empleado con cálculo de ISR/IMSS |
+| GET | `/api/v1/nomina/recibos/{id}` | Recibo individual con desglose |
 
-```
-GET    /sup/comparador/producto/{sku}         # Comparar precios de proveedores por producto (SUP-01)
-PUT    /comparador/catalogo/{id}/precio       # Actualizar un precio y recalcular margen (SUP-02)
-POST   /comparador/catalogo/actualizar-masivo # Actualizar precios en lote (SUP-02)
-GET    /comparador/catalogo/{id}/historial    # Historial de cambios de precio (SUP-02)
+**Devoluciones a Proveedor** — `/api/v1/devoluciones/proveedores`
 
-# Endpoints de Abastecimiento (SUP-03)
-POST   /oc/carrito/agregar                    # Agregar al carrito universal
-GET    /oc/carrito                            # Ver el carrito agrupado
-DELETE /oc/carrito/{sesionId}                 # Quitar item del carrito
-POST   /oc/generar                            # Convertir carrito en Órdenes de Compra
-GET    /oc                                    # Listar Órdenes de Compra histórcias
-PATCH  /oc/{id}/estado                        # Cambiar estado manual a una OC
-POST   /oc/{id}/recibir                       # Confirmar ingreso físico de la OC a inventario
-GET    /oc/{id}/exportar-excel                # Descargar reporte formal en XLSX
-```
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/devoluciones/proveedores` | Listar |
+| POST | `/api/v1/devoluciones/proveedores` | `{proveedorId, detalles:[{skuInterno, cantidad, motivo}]}` |
+| GET | `/api/v1/devoluciones/proveedores/{id}` | Obtener |
+| POST | `/api/v1/devoluciones/proveedores/{id}/aplicar` | Genera movimiento SALIDA en inventario y nota de crédito |
 
-### 📈 Analítica RFM
+---
 
-```
-POST   /analitica/rfm/calcular        # (CRON) Generar segmentación
-GET    /analitica/rfm/segmentos       # Población por cada segmento (Ej. 100 Campeones)
-GET    /analitica/rfm/cliente/{id}    # Consultar segmentación de un cliente
-```
+### 6.16 CRM
 
-**Documentación Interactiva**: Todos los endpoints están documentados en **Swagger UI** disponible en `http://localhost:8080/swagger-ui.html`
+**Pipeline B2B** — `/api/v1/crm`
 
-**Archivo de CURLs**: Ver `CURL-COMPLETO.md` para ejemplos completos de cada endpoint.
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/crm/prospectos` | Listar prospectos B2B |
+| POST | `/api/v1/crm/prospectos` | `{empresa, contactoPrincipal, telefono, email, rfc}` |
+| GET | `/api/v1/crm/prospectos/{id}` | Obtener prospecto |
+| POST | `/api/v1/crm/oportunidades` | `{prospectoId, titulo, valorProyectado, etapa, probabilidad}` |
+| PATCH | `/api/v1/crm/oportunidades/{id}/etapa` | `{nuevaEtapa, observaciones}` — avanza en el embudo |
+| GET | `/api/v1/crm/prospectos/{prospectoId}/oportunidades` | Oportunidades de un prospecto |
+| POST | `/api/v1/crm/interacciones` | `{prospectoId, tipoInteraccion: LLAMADA|EMAIL|VISITA, resumen}` |
+| GET | `/api/v1/crm/prospectos/{prospectoId}/interacciones` | Historial |
+
+**Garantías** — `@RequestMapping("/api/crm/garantias")` _(sin `/v1/`)_
+
+| Método | Path | Roles | Descripción |
+|---|---|---|---|
+| GET | `/api/crm/garantias` | Autenticado | Listar tickets |
+| POST | `/api/crm/garantias` | Autenticado | `{clienteId, ventaId, skuInterno, descripcionProblema}` |
+| GET | `/api/crm/garantias/cliente/{clienteId}` | Autenticado | Por cliente |
+| GET | `/api/crm/garantias/{ticketId}` | Autenticado | Obtener |
+| PUT | `/api/crm/garantias/{ticketId}/estado` | Autenticado | Cambiar estado |
+| PUT | `/api/crm/garantias/{ticketId}/resolver` | Autenticado | `{resolucion, observaciones}` |
+
+**NPS** — `/api/v1/crm/nps`
+
+| Método | Path | Roles | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/crm/nps/encuestas` | Autenticado | `{clienteId, ventaId}` — genera encuesta |
+| POST | `/api/v1/crm/nps/respuestas` | **PÚBLICO** | `{encuestaId, puntuacion: 0-10, comentario}` — clientes responden sin login |
+| GET | `/api/v1/crm/nps/dashboard` | Autenticado | Score NPS, distribución Promotores/Pasivos/Detractores |
+
+**Marketing** — `/api/v1/marketing/campanas`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/marketing/campanas` | `{nombre, tipo: EMAIL|SMS, segmento, mensaje}` |
+| POST | `/api/v1/marketing/campanas/{id}/ejecutar` | Dispara envío masivo (email o Telegram) |
+| GET | `/api/v1/marketing/campanas/{id}/metricas` | Enviados, abiertos, errores |
+
+---
+
+### 6.17 Métricas (4 módulos)
+
+**Métricas Financieras** — `/api/v1/metricas-financieras`
+
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/metricas-financieras` | Listar registros históricos |
+| POST | `/api/v1/metricas-financieras/analisis` | `{sucursalId, fechaInicio, fechaFin}` |
+| POST | `/api/v1/metricas-financieras/comparacion` | Comparar dos periodos |
+| GET | `/api/v1/metricas-financieras/top-productos` | Top 10 por ingreso bruto |
+| GET | `/api/v1/metricas-financieras/historico` | Serie temporal de snapshots |
+| GET | `/api/v1/metricas-financieras/dashboard-ejecutivo` | KPIs ejecutivos consolidados |
+| GET | `/api/v1/metricas-financieras/sucursal/{sucursalId}` | Por sucursal |
+| GET | `/api/v1/metricas-financieras/health` | Health check del módulo |
+
+**Métricas de Inventario** — `/api/v1/metricas/inventario`
+
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/metricas/inventario` | Resumen (valor total, productos sin stock, etc.) |
+| POST | `/api/v1/metricas/inventario/generar` | Genera snapshot del inventario |
+| GET | `/api/v1/metricas/inventario/valor-actual` | Valor total `sum(stock_actual * costo_promedio_ponderado)` |
+| GET | `/api/v1/metricas/inventario/productos/bajo-stock` | Productos con stock bajo |
+| GET | `/api/v1/metricas/inventario/productos/sin-stock` | `stock_actual = 0` |
+| GET | `/api/v1/metricas/inventario/productos/proximos-caducar` | Vencen en 30 días |
+| GET | `/api/v1/metricas/inventario/historico` | Histórico de snapshots |
+
+**Métricas Operativas** — `/api/v1/metricas/operativas`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/metricas/operativas/analisis` | `{fechaInicio, fechaFin, sucursalId}` |
+| GET | `/api/v1/metricas/operativas/mes-actual` | Mes en curso |
+| GET | `/api/v1/metricas/operativas/mes-anterior` | Mes anterior |
+| GET | `/api/v1/metricas/operativas/ultimos-7-dias` | Últimos 7 días |
+| POST | `/api/v1/metricas/operativas/por-sucursal/{sucursalId}` | Por sucursal |
+| POST | `/api/v1/metricas/operativas/generar-guardar` | Genera y persiste snapshot |
+| GET | `/api/v1/metricas/operativas/consolidado` | Consolidado multi-sucursal |
+| GET | `/api/v1/metricas/operativas/historial` | Histórico de snapshots |
+| POST | `/api/v1/metricas/operativas/analisis-consolidado-con-detalle` | Con desglose por sucursal |
+
+**Métricas Ventas/Clientes** — `/api/metricas/ventas-clientes` _(sin `/v1/`)_
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/metricas/ventas-clientes/analisis` | `{sucursalId, fechaInicio, fechaFin}` |
+| GET | `/api/metricas/ventas-clientes/consolidado` | Consolidado |
+| GET | `/api/metricas/ventas-clientes/historial` | Histórico |
+| POST | `/api/metricas/ventas-clientes/generar-guardar` | Genera y persiste |
+| GET | `/api/metricas/ventas-clientes/mes-actual` | Mes actual |
+| GET | `/api/metricas/ventas-clientes/mes-anterior` | Mes anterior |
+| GET | `/api/metricas/ventas-clientes/ultimos-7-dias` | Últimos 7 días |
+| POST | `/api/metricas/ventas-clientes/por-sucursal/{sucursalId}` | Por sucursal |
+
+---
+
+### 6.18 Rentabilidad
+
+**Base:** `/api/v1/rentabilidad`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/rentabilidad/venta/{ventaId}` | Calcula rentabilidad de una venta (margen = ingresos - CPP) |
+| GET | `/api/v1/rentabilidad/venta/{ventaId}` | Obtener rentabilidad calculada |
+| POST | `/api/v1/rentabilidad/productos` | `{sucursalId, fechaInicio, fechaFin}` |
+| GET | `/api/v1/rentabilidad/productos/mas-rentables` | `?top=10&sucursalId=1` |
+| GET | `/api/v1/rentabilidad/productos/menos-rentables` | `?top=10&sucursalId=1` |
+| GET | `/api/v1/rentabilidad/ventas/bajo-costo` | Ventas con margen bruto < 10% |
+| GET | `/api/v1/rentabilidad/estadisticas` | `?sucursalId=1` — promedio de margen, top SKU |
+
+---
+
+### 6.19 Analítica
+
+**RFM** — `/api/v1/analitica/rfm`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/analitica/rfm/calcular` | Calcula recencia, frecuencia, monto para todos los clientes |
+| GET | `/api/v1/analitica/rfm/segmentos` | Segmentos: Campeones, Leales, En Riesgo, Perdidos |
+| GET | `/api/v1/analitica/rfm/cliente/{id}` | Score RFM individual |
+
+**Churn** — `/api/v1/analitica/churn`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/analitica/churn/calcular` | Calcula probabilidad de abandono por cliente |
+| GET | `/api/v1/analitica/churn/en-riesgo` | Clientes con score > umbral |
+
+**Market Basket** — `/api/v1/analitica/canasta`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/analitica/canasta/calcular` | Calcula reglas de asociación (productos que se compran juntos) |
+| GET | `/api/v1/analitica/canasta/{sku}` | Sugerencias de cross-sell para un SKU |
+
+**Rendimiento Personal** — `/api/v1/analitica/personal`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/analitica/personal/calcular` | Calcula score de rendimiento por vendedor |
+| GET | `/api/v1/analitica/personal/rendimiento` | Ranking general |
+| GET | `/api/v1/analitica/personal/{empleadoId}/tendencia` | Tendencia histórica de un empleado |
+
+---
+
+### 6.20 Fidelidad
+
+**Base:** `/api/v1/fidelidad`
+
+| Método | Path | Descripción |
+|---|---|---|
+| POST | `/api/v1/fidelidad/programa` | `{clienteId, nivel: BRONCE|PLATA|ORO}` |
+| GET | `/api/v1/fidelidad/programa/cliente/{clienteId}` | Programa activo, puntos acumulados |
+| POST | `/api/v1/fidelidad/acumular` | `{clienteId, montoCompra, ventaId}` — suma puntos |
+| POST | `/api/v1/fidelidad/canjear` | `{clienteId, puntosACanjear, ventaId}` — descuenta puntos |
+| GET | `/api/v1/fidelidad/historial/cliente/{clienteId}` | Movimientos de puntos |
+| GET | `/api/v1/fidelidad/calcular-descuento` | Calcula descuento equivalente a un monto de puntos |
+| GET | `/api/v1/fidelidad/estadisticas` | Total puntos activos, canjes, etc. |
+| PATCH | `/api/v1/fidelidad/programa/cliente/{clienteId}/desactivar` | Desactivar |
+| PATCH | `/api/v1/fidelidad/programa/cliente/{clienteId}/reactivar` | Reactivar |
+
+---
+
+### 6.21 Predicción de Demanda
+
+**Base:** `/api/predicciones` _(sin `/v1/`)_
+
+| Método | Path | Request | Descripción |
+|---|---|---|---|
+| POST | `/api/predicciones/generar` | `{skuProducto, sucursalId, periodos, algoritmo: PROMEDIO_MOVIL}` | Genera predicción estadística |
+| GET | `/api/predicciones/{id}` | — | Obtener predicción por ID |
+| GET | `/api/predicciones/producto/{skuProducto}` | — | Predicción activa de un SKU |
+| GET | `/api/predicciones/recomendaciones` | — | SKUs con stock proyectado < stock mínimo en N días |
+
+---
+
+### 6.22 Alertas del Sistema
+
+**`AlertaController`** — `@RequestMapping("/api/v1/alertas")`
+
+| Método | Path | `@PreAuthorize` | Descripción |
+|---|---|---|---|
+| GET | `/api/v1/alertas/mis-alertas/{usuarioId}` | `isAuthenticated()` | Alertas no leídas del usuario |
+| GET | `/api/v1/alertas/sucursal/{sucursalId}` | `ADMIN, GERENTE` | Alertas no resueltas de la sucursal |
+| GET | `/api/v1/alertas/badge/{usuarioId}` | `isAuthenticated()` | Contador no leídas para badge en UI |
+| PUT | `/api/v1/alertas/{alertaId}/resolver` | `ADMIN, GERENTE` | Cierre definitivo de alerta (devuelve `204 No Content`) |
+| PUT | `/api/v1/alertas/{alertaId}/leer` | `isAuthenticated()` | Marca como leída (devuelve `204 No Content`) |
+| POST | `/api/v1/alertas/configurar-sucursal` | `ADMIN` | `@Valid ConfigurarAlertaRequest` — umbrales por sucursal |
+| POST | `/api/v1/alertas/configurar-canal` | `isAuthenticated()` | `@Valid ConfigNotificacionRequest{canal: EMAIL|TELEGRAM}` |
 
 ---
 
 ## 7. Seguridad y Autenticación
 
-### 🔒 Arquitectura de Seguridad
-
-El sistema utiliza **JWT (JSON Web Tokens)** para autenticación stateless.
-
-#### **Flujo de Autenticación**
+### Configuración de Seguridad (`SecurityConfig`)
 
 ```
-1. Cliente → POST /auth/login {username, password}
-2. Backend verifica credenciales contra BD
-3. Backend genera JWT firmado con secret key
-4. Backend retorna token al cliente
-5. Cliente guarda token (localStorage/sessionStorage)
-6. Cliente incluye token en cada request:
-   Header: Authorization: Bearer {token}
-7. JwtAuthenticationFilter intercepta y valida token
-8. Si válido, carga usuario en SecurityContext
-9. Controller verifica permisos con @PreAuthorize
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)   // Activa @PreAuthorize / @PostAuthorize
 ```
 
-### 🔑 Generación de Token JWT
+**Endpoints Públicos (sin JWT):**
 
-**Clase**: `JwtUtil.java`
-
-```java
-public String generateToken(String username) {
-    return Jwts.builder()
-        .setSubject(username)
-        .setIssuedAt(new Date())
-        .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))  // 24 horas
-        .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-        .compact();
-}
+```
+/api/v1/auth/**                   — Login
+/api/v1/crm/nps/respuestas        — Clientes responden encuestas NPS sin cuenta
+/actuator/**                      — Salud y métricas de Actuator
+/h2-console/**                    — H2 (solo dev/tests)
+/swagger-ui/**                    — Swagger UI
+/v3/api-docs/**                   — OpenAPI JSON
+/swagger-ui.html                  — Swagger redirect
 ```
 
-**Campos del Token**:
-- `sub`: Username del usuario
-- `iat`: Fecha de emisión
-- `exp`: Fecha de expiración (24 horas)
-- **Firma**: HMAC-SHA256 con secret key
+**Todo lo demás:** `.anyRequest().authenticated()` — requiere JWT válido.
 
-### 🔐 Roles y Permisos
+### JWT (`JwtUtil`)
 
-**Roles Disponibles**:
-- `ROLE_ADMIN`: Acceso completo (crear/editar/eliminar)
-- `ROLE_USER`: Acceso limitado (solo lectura y ventas)
+| Aspecto | Detalle |
+|---|---|
+| Algoritmo | HMAC-SHA256 (HS256) mediante `io.jsonwebtoken.security.Keys.hmacShaKeyFor()` |
+| Expiración | **1 hora** (3,600,000 ms, configurado en `jwt.expiration: 3600000`) |
+| Clave mínima | 32 caracteres (256 bits) — validado en `@PostConstruct` |
+| Subject | `username` del usuario autenticado |
+| Campos del payload | `sub` (username), `iat` (issued at), `exp` (expiration) |
 
-**Uso en Controllers**:
-```java
-@PreAuthorize("hasRole('ADMIN')")
-@DeleteMapping("/{id}")
-public ResponseEntity<?> eliminar(@PathVariable Integer id) {
-    // Solo admin puede eliminar
-}
+**Validación del Secret en `@PostConstruct`:**
 
-@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-@GetMapping
-public ResponseEntity<?> listar() {
-    // Ambos roles pueden listar
-}
+1. Falla si `secret.length() < 32` → `IllegalStateException`
+2. En perfil de producción (sin `dev` o `test`), falla si el secret contiene palabras como `test`, `dev`, `demo`, `example`, `sample`
+3. En producción, falla si el secret es solo letras (sin números/símbolos)
+4. Logea longitud del secret (sin exponerlo)
+
+**Cabecera requerida:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
 ```
 
-### 🛡️ Configuración de Seguridad
+### CORS (`CorsConfigurationSource`)
 
-**Clase**: `SecurityConfig.java`
+Configurable vía variables de entorno (sin reinicio si se usan env vars del SO):
 
-```java
-@Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())  // API REST no necesita CSRF
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/v1/auth/**").permitAll()  // Login público
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()  // Swagger público
-            .anyRequest().authenticated()  // Todo lo demás requiere auth
-        )
-        .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // No sessions
-        )
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-    
-    return http.build();
-}
+| Variable de Entorno | Default | Descripción |
+|---|---|---|
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:4200` | Orígenes permitidos (separados por coma) |
+| `CORS_ALLOWED_METHODS` | `GET,POST,PUT,DELETE,OPTIONS,PATCH` | Métodos HTTP |
+| `CORS_ALLOWED_HEADERS` | `*` | Headers permitidos |
+| `CORS_ALLOW_CREDENTIALS` | `true` | Permitir cookies y Authorization header |
+| `CORS_MAX_AGE` | `3600` | Cache del preflight (segundos) |
+
+Headers expuestos al cliente: `Authorization`, `X-Total-Count`, `X-Page-Number`, `X-Page-Size`.
+
+### RBAC — Modelo de Entidades
+
+```
+Usuario (tabla: usuarios)
+  @ManyToMany → Rol (tabla: rol) — via tabla puente usuario_rol
+  @ManyToMany → Sucursal — via tabla puente usuario_sucursal (restringe visibilidad)
+
+Rol (tabla: rol)
+  @ManyToMany → Permiso (tabla: permiso) — via tabla puente rol_permiso
 ```
 
-### 🔒 Encriptación de Contraseñas
+`@PreAuthorize` evalúa el rol del usuario del JWT. Spring Security extrae los roles del `UserDetails` cargado por `UserDetailsServiceImpl`.
 
-**Algoritmo**: BCrypt con salt automático
+### Passwords
 
-```java
-@Bean
-public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-}
+`BCryptPasswordEncoder` strength 10.  
+Seed admin: `admin123` → hash `$2a$10$k/mIluuONgJLE8efmX6Cse4/k8aUv5dvUqsCjJmxXKELm6ZMPZqsm`
 
-// Uso
-String hashedPassword = passwordEncoder.encode("admin123");
-boolean matches = passwordEncoder.matches("admin123", hashedPassword);
-```
+### Manejo de Errores de Seguridad
 
-### ⚠️ Manejo de Excepciones de Seguridad
-
-**Clase**: `GlobalExceptionHandler.java`
-
-```java
-@ExceptionHandler(BadCredentialsException.class)
-public ResponseEntity<ApiErrorResponse> handleBadCredentials(BadCredentialsException ex) {
-    return buildErrorResponse(
-        HttpStatus.UNAUTHORIZED, 
-        "Credenciales Invalidas", 
-        "El usuario o la contraseña son incorrectos"
-    );
-}
-
-@ExceptionHandler(AccessDeniedException.class)
-public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException ex) {
-    return buildErrorResponse(
-        HttpStatus.FORBIDDEN, 
-        "Acceso Denegado", 
-        "No tiene permisos para realizar esta operación"
-    );
-}
-```
-
-### 🔐 Mejores Prácticas Implementadas
-
-✅ Contraseñas hasheadas con BCrypt (nunca plain text)  
-✅ Tokens JWT firmados y con expiración  
-✅ Validación de roles en cada endpoint sensible  
-✅ CORS configurado correctamente  
-✅ CSRF deshabilitado (apropiado para API REST)  
-✅ Sesiones stateless  
-✅ Secret key externalizada en application.yml  
-✅ Logs de intentos fallidos de autenticación
+| Exception | HTTP | Código | Descripción |
+|---|---|---|---|
+| `BadCredentialsException` | 401 | UNAUTHORIZED | Login con credenciales incorrectas |
+| `UsernameNotFoundException` | 401 | UNAUTHORIZED | Usuario no existe |
+| Sin token / token expirado | 401 | — | Respuesta automática de Spring Security |
+| Sin permisos (`@PreAuthorize` falla) | 403 | FORBIDDEN | Token válido pero rol insuficiente |
+| `ResourceNotFoundException` | 404 | No encontrado | Recurso no existe en BD |
+| `DataIntegrityViolationException` (duplicate key) | 409 | — | SKU, RFC o email duplicado |
+| `StockInsuficienteException` | 409 | — | Stock insuficiente al vender |
+| `CreditoInsuficienteException` | 409 | — | Límite de crédito superado |
+| `MethodArgumentNotValidException` | 400 | Datos invalidos | Validación de `@Valid` con lista de campos |
+| Cualquier otra `Exception` | 500 | Error Interno | Log con stack trace, mensaje genérico al cliente |
 
 ---
 
-## 8. Métricas y Analítica
+## 8. Caché y Performance
+
+### CacheConfig — Graceful Degradation
+
+La clase `CacheConfig` implementa `CachingConfigurer` únicamente para proveer un `CacheErrorHandler` personalizado. Si el caché (Redis cuando esté habilitado) falla, la aplicación **no lanza excepción** — simplemente omite el caché y consulta directamente en PostgreSQL, logueando un `WARN`.
+
+Esto garantiza:
+- Desarrollo sin Redis instalado — funciona normalmente
+- Producción resiliente — si Redis cae, la app no crashea
+- Logs claros para diagnóstico
+
+### Índices PostgreSQL (V1 — 25 índices)
+
+Creados en `V1__initial_schema.sql`:
+
+| Índice | Tabla / Columna(s) | Propósito |
+|---|---|---|
+| `idx_venta_sucursal_fecha` | `venta(sucursal_id, fecha_venta DESC)` | Reportes de ventas diarios |
+| `idx_venta_cliente` | `venta(cliente_id)` | Historial por cliente |
+| `idx_venta_vendedor` | `venta(vendedor_id)` | Comisiones por vendedor |
+| `idx_compra_proveedor_fecha` | `compra(proveedor_id, fecha_compra DESC)` | Historial compras por proveedor |
+| `idx_compra_sucursal` | `compra(sucursal_id)` | Compras por sucursal |
+| `idx_inventario_sku` | `inventario_sucursal(sku_interno)` | Búsquedas de stock |
+| `idx_inventario_sucursal` | `inventario_sucursal(sucursal_id)` | Inventario por sucursal |
+| `idx_historial_precio_sku_fecha` | `historial_precio(sku_interno, fecha_calculo DESC)` | Último precio del SKU |
+| `idx_precio_especial_sku_tipo` | `precio_especial(sku_interno, tipo_cliente_id)` | Lookup dinámico en venta |
+| `idx_producto_categoria` | `producto_maestro(categoria_id)` | Filtro por categoría |
+| `idx_producto_proveedor` | `producto_maestro(proveedor_id)` | Filtro por proveedor |
+| `idx_producto_nombre` | `producto_maestro(nombre_comercial)` | Búsqueda por nombre |
+| `idx_producto_marca` | `producto_maestro(marca)` | Filtro por marca |
+| `idx_producto_activo` | `producto_maestro(activo)` | Soft delete filter |
+| `idx_proveedor_nombre` | `proveedor(nombre_empresa)` | Búsqueda de proveedores |
+| `idx_categoria_nombre` | `categoria(nombre)` | Búsqueda de categorías |
+| `idx_moto_marca` | `moto(marca)` | Filtro compatibilidad |
+| `idx_moto_modelo` | `moto(modelo)` | Filtro compatibilidad |
+| `idx_moto_cilindrada` | `moto(cilindrada)` | Filtro compatibilidad |
+| `idx_moto_marca_modelo_cilindrada` | `moto(marca, modelo, cilindrada)` | Búsqueda compuesta |
+| `idx_compatibilidad_sku` | `compatibilidad_producto(sku_interno)` | Motos de un producto |
+| `idx_compatibilidad_moto` | `compatibilidad_producto(moto_id)` | Productos de una moto |
+| `idx_compatibilidad_anios` | `compatibilidad_producto(anio_inicio, anio_fin)` | Filtro por año |
+| `idx_movimiento_sucursal_fecha` | `movimiento_inventario(sucursal_id, fecha_movimiento DESC)` | Trazabilidad |
+| `idx_movimiento_rastreo` | `movimiento_inventario(rastreo_id)` | Lookup por UUID |
+
+### Índices PostgreSQL (V33 — 14 índices adicionales de performance)
+
+Creados en `V33__performance_indexes.sql`:
+
+| Índice | Tabla / Columna(s) | Propósito |
+|---|---|---|
+| `idx_producto_busqueda` | `producto_maestro(nombre_comercial, marca)` | Búsqueda omnicanal en POS |
+| `idx_producto_sensibilidad` | `producto_maestro(sensibilidad_precio)` | Filtro pricing |
+| `idx_inventario_sucursal_sku` | `inventario_sucursal(sku_interno)` | JOINs de CPP |
+| `idx_inventario_sucursal_id` | `inventario_sucursal(sucursal_id)` | JOINs de sucursal |
+| `idx_cliente_rfc` | `cliente(rfc)` | Validación fiscal |
+| `idx_cliente_nombre` | `cliente(nombre)` | Búsqueda en POS |
+| `idx_cliente_bloqueado` | `cliente(bloqueado)` | Filtro morosidad |
+| `idx_crm_oportunidad_prospecto` | `oportunidad_venta(prospecto_id)` | Pipeline B2B |
+| `idx_crm_oportunidad_etapa` | `oportunidad_venta(etapa)` | Kanban de oportunidades |
+| `idx_historial_precio_sku` | `historial_precio(sku_interno)` | Dashboards ejecutivos |
+| `idx_detalle_compra_sku` | `detalle_compra(sku_interno)` | Métricas de costo |
+| `idx_detalle_orden_compra_sku` | `detalle_orden_compra(sku_interno)` | Seguimiento de OC |
+| `idx_venta_fecha` | `venta(fecha_venta)` | Reportes de ventas por periodo |
+| `idx_turno_caja_estado` | `turno_caja(estado)` | Turnos abiertos en POS |
+
+**Total:** 39 índices declarados en código.
+
+### Configuración de Batch JPA (`application.yml`)
 
-### 📊 Sistema de Métricas
-
-El sistema genera y almacena métricas en 4 categorías:
-
-```
-1. Métricas Financieras (metrica_financiera)
-2. Métricas de Inventario (metrica_inventario)
-3. Métricas Operativas (metrica_operativa)
-4. Métricas de Venta y Cliente (metrica_venta_cliente)
-```
-
-### 💰 Métricas Financieras
-
-**Generación**: Diaria/Semanal/Mensual
-
-**KPIs Calculados**:
-```
-• Ingresos Totales
-• Gastos Totales (Compras)
-• Utilidad Bruta
-• Margen de Utilidad %
-• ROI %
-• Cuentas por Cobrar
-• Cuentas por Cobrar Vencidas
-• Índice de Liquidez
-```
-
-**Fórmulas**:
-```
-Utilidad Bruta = Ingresos - Gastos
-Margen % = (Utilidad / Ingresos) × 100
-ROI % = (Utilidad / Gastos) × 100
-Liquidez = Efectivo Disponible / Cuentas por Cobrar Vencidas
-```
-
-### 📦 Métricas de Inventario
-
-**KPIs Calculados**:
-```
-• Rotación de Inventario
-• Días de Inventario Disponible
-• Valor Total del Inventario
-• Productos en Stock Crítico (bajo mínimo)
-• Productos Obsoletos
-• Índice de Caducidad
-```
-
-**Fórmulas**:
-```
-Rotación = Costo de Ventas / Inventario Promedio
-Días Inventario = 365 / Rotación
-Valor Inventario = Σ (Stock × PrecioCompra)
-Stock Crítico = Productos donde Stock < StockMinimo
-```
-
-### 🏭 Métricas Operativas
-
-**KPIs Calculados**:
-```
-• Total Ventas (cantidad y monto)
-• Total Compras (cantidad y monto)
-• Total Traspasos
-• Eficiencia Operativa %
-• Balance de Transacciones
-• Actividad por Sucursal
-```
-
-**Fórmulas**:
-```
-Eficiencia = (Ventas / (Ventas + Compras + Traspasos)) × 100
-Balance = Entradas - Salidas
-```
-
-### 👥 Métricas de Venta y Cliente
-
-**KPIs Calculados**:
-```
-• Ticket Promedio
-• Clientes Activos
-• Clientes Nuevos
-• Top 10 Productos Vendidos
-• Top 10 Clientes por Valor
-• Métodos de Pago (distribución)
-• Tasa de Devolución %
-• Frecuencia de Compra
-```
-
-**Fórmulas**:
-```
-Ticket Promedio = Total Ventas / Número de Ventas
-Tasa Devolución = (Ventas Devueltas / Total Ventas) × 100
-Frecuencia = Compras Cliente / Meses Activo
-```
-
-### 📈 Visualización de Métricas
-
-**Endpoints de Dashboard**:
-```
-GET /finanzas/dashboard               # Vista general
-GET /finanzas/dashboard/mes-actual    # Mes en curso
-GET /finanzas/dashboard/compar ativo  # Comparación periodos
-```
-
-**Formato de Respuesta**:
-```json
-{
-  "exitoso": true,
-  "data": {
-    "periodo": "2026-03",
-    "ingresos": 125000.00,
-    "gastos": 75000.00,
-    "utilidad": 50000.00,
-    "margen": 40.0,
-    "roi": 66.67,
-    "ventasTotales": 450,
-    "ticketPromedio": 277.78,
-    "clientesActivos": 85,
-    "rotacionInventario": 6.5,
-    "diasInventario": 56
-  }
-}
-```
-
-### 📊 Análisis Avanzados
-
-#### **Análisis ABC de Inventario**
-
-Clasifica productos según la regla de Pareto (80/20):
-
-```
-Clase A: 20% de productos → 80% del valor
-Clase B: 30% de productos → 15% del valor
-Clase C: 50% de productos → 5% del valor
-```
-
-**Uso**:
-- Productos Clase A → Control estricto, reorden frecuente
-- Productos Clase B → Control normal
-- Productos Clase C → Control básico, revisar obsoletos
-
-#### **Análisis de Rentabilidad**
-
-Calcula rentabilidad real por:
-- Producto individual
-- Categoría completa
-- Sucursal
-- Periodo de tiempo
-
-**Incluye**:
-- Margen bruto
-- ROI real
-- Comparación vs margen objetivo
-- Identificación de productos con pérdida
-
----
-
-## 9. Testing y Calidad
-
-### 🧪 Estrategia de Testing
-
-**Cobertura**: **100% de tests pasando (790/790)**
-
-#### **Tipos de Tests Implementados**
-
-1. **Tests Unitarios** (Service Layer)
-   - Mockito para dependencies
-   - JUnit 5 (Jupiter)
-   - Tests aislados por método
-   - Cobertura: ~60% de líneas de código
-
-2. **Tests de Integración** (Controller Layer)
-   - @SpringBootTest
-   - @AutoConfigureMockMvc
-   - MockMvc para simular HTTP requests
-   - Base de datos H2 en memoria
-   - @Transactional para rollback automático
-
-3. **Tests de Entidades** (Entity Layer)
-   - Validaciones Jakarta
-   - Relaciones JPA
-   - Métodos helper (@PrePersist, etc.)
-
-### 📁 Estructura de Tests
-
-```
-app/src/test/java/com/nexoohub/almacen/
-├── catalogo/
-│   ├── controller/
-│   │   ├── CategoriaControllerIntegrationTest.java
-│   │   ├── ClienteControllerIntegrationTest.java
-│   │   └── ...
-│   ├── service/
-│   │   ├── CategoriaServiceTest.java
-│   │   └── ...
-│   └── entity/
-│       ├── CategoriaTest.java
-│       └── ...
-├── inventario/
-│   ├── controller/
-│   ├── service/
-│   └── entity/
-├── ventas/
-├── finanzas/
-├── fidelidad/
-└── ... (todos los módulos)
-```
-
-### 🎯 Ejemplo de Test de Integración
-
-```java
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Transactional
-class ProductoControllerIntegrationTest {
-    
-    @Autowired
-    private MockMvc mockMvc;
-    
-    @Autowired
-    private JwtUtil jwtUtil;
-    
-    private String token;
-    
-    @BeforeEach
-    void setUp() {
-        // Generar token JWT para tests
-        Usuario admin = new Usuario();
-        admin.setUsername("admin");
-        admin.setRole("ROLE_ADMIN");
-        token = jwtUtil.generateToken(admin.getUsername());
-    }
-    
-    @Test
-    void crearProducto_Exitoso() throws Exception {
-        // Given
-        String requestBody = """
-            {
-                "skuInterno": "TEST-001",
-                "nombre": "Producto Test",
-                "categoriaId": 1,
-                "proveedorId": 1,
-                "precioCompra": 100.00,
-                "precioVenta": 150.00,
-                "stockMinimo": 10,
-                "stockMaximo": 100,
-                "unidadMedida": "UNIDAD"
-            }
-            """;
-        
-        // When & Then
-        mockMvc.perform(post("/api/v1/productos")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.exitoso").value(true))
-            .andExpect(jsonPath("$.data.skuInterno").value("TEST-001"))
-            .andExpect(jsonPath("$.data.precioVenta").value(150.00));
-    }
-    
-    @Test
-    void buscarProductos_ConFiltros() throws Exception {
-        // When & Then
-        mockMvc.perform(get("/api/v1/productos/search")
-                .header("Authorization", "Bearer " + token)
-                .param("q", "aceite")
-                .param("categoriaId", "1")
-                .param("page", "0")
-                .param("size", "10"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.content").isArray())
-            .andExpect(jsonPath("$.data.totalElements").isNumber());
-    }
-}
-```
-
-### 🎯 Ejemplo de Test Unitario
-
-```java
-@ExtendWith(MockitoExtension.class)
-class VentaServiceTest {
-    
-    @Mock
-    private VentaRepository ventaRepository;
-    
-    @Mock
-    private ClienteRepository clienteRepository;
-    
-    @Mock
-    private ProductoRepository productoRepository;
-    
-    @InjectMocks
-    private VentaService ventaService;
-    
-    @Test
-    void crearVenta_ConClienteValido_Exitoso() {
-        // Given
-        Cliente cliente = new Cliente();
-        cliente.setId(1);
-        cliente.setNombre("Juan Test");
-        
-        when(clienteRepository.findById(1)).thenReturn(Optional.of(cliente));
-        when(productoRepository.findById(any())).thenReturn(Optional.of(new Producto()));
-        when(ventaRepository.save(any())).thenAnswer(i -> {
-            Venta v = i.getArgument(0);
-            v.setId(1);
-            return v;
-        });
-        
-        CrearVentaDTO dto = new CrearVentaDTO(
-            1, 1, 1, "EFECTIVO",
-            List.of(new DetalleVentaDTO(1, 2, 100.00, 0.0)),
-            null
-        );
-        
-        // When
-        VentaResponseDTO result = ventaService.crearVenta(dto);
-        
-        // Then
-        assertNotNull(result);
-        assertEquals(1, result.id());
-        verify(ventaRepository, times(1)).save(any(Venta.class));
-    }
-    
-    @Test
-    void crearVenta_ClienteNoExiste_LanzaExcepcion() {
-        // Given
-        when(clienteRepository.findById(999)).thenReturn(Optional.empty());
-        
-        CrearVentaDTO dto = new CrearVentaDTO(
-            1, 999, 1, "EFECTIVO",
-            List.of(new DetalleVentaDTO(1, 2, 100.00, 0.0)),
-            null
-        );
-        
-        // When & Then
-        assertThrows(ResourceNotFoundException.class, () -> {
-            ventaService.crearVenta(dto);
-        });
-        
-        verify(ventaRepository, never()).save(any());
-    }
-}
-```
-
-### 📊 Cobertura de Tests
-
-**Jacoco** genera reportes de cobertura automáticamente:
-
-```bash
-./gradlew test  # Ejecuta tests y genera reporte
-
-# Reporte ubicado en:
-# app/build/reports/jacoco/test/html/index.html
-```
-
-**Configuración en build.gradle.kts**:
-```kotlin
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-    }
-}
-```
-
-### ✅ Estado del Testing
-
-| Módulo | Tests | Estado |
-|--------|-------|--------|
-| Catálogo | 125 | ✅ 100% |
-| Inventario | 180 | ✅ 100% |
-| Ventas | 95 | ✅ 100% |
-| Compras | 42 | ✅ 100% |
-| Finanzas | 78 | ✅ 100% |
-| Comisiones | 35 | ✅ 100% |
-| Fidelidad | 42 | ✅ 100% |
-| Predicción | 38 | ✅ 100% |
-| Métricas | 95 | ✅ 100% |
-| Rentabilidad | 30 | ✅ 100% |
-| Otros | 30 | ✅ 100% |
-| **TOTAL** | **790** | **✅ 100%** |
-
-### 🚀 Ejecución de Tests
-
-```bash
-# Ejecutar todos los tests
-./gradlew test
-
-# Ejecutar tests de un módulo específico
-./gradlew test --tests "*CategoriaControllerIntegrationTest"
-
-# Ejecutar tests con cobertura
-./gradlew test jacocoTestReport
-
-# Ver resultados
-cat app/build/test-results/test/*.xml | grep "tests="
-```
-
----
-
-## 10. Despliegue
-
-### 🚀 Opciones de Despliegue
-
-#### **Opción 1: JAR Ejecutable (Recomendado)**
-
-```bash
-# 1. Compilar proyecto
-./gradlew clean build
-
-# 2. JAR generado en:
-# app/build/libs/app.jar
-
-# 3. Ejecutar
-java -jar app/build/libs/app.jar \
-  --spring.profiles.active=prod \
-  --spring.datasource.url=jdbc:postgresql://localhost:5432/nexoohub \
-  --spring.datasource.username=nexoohub_user \
-  --spring.datasource.password=secure_password_here
-```
-
-#### **Opción 2: Docker Container**
-
-**Dockerfile**:
-```dockerfile
-FROM eclipse-temurin:17-jre-alpine
-
-WORKDIR /app
-
-COPY app/build/libs/app.jar app.jar
-
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
-
-**docker-compose.yml** (con PostgreSQL):
 ```yaml
-version: '3.8'
+jpa:
+  show-sql: false               # En producción
+  properties:
+    hibernate:
+      format_sql: true
+      generate_statistics: true  # Detecta N+1 queries en logs
+      jdbc:
+        batch_size: 20           # Agrupa hasta 20 inserts/updates por round-trip
+      order_inserts: true        # Ordena inserts por tipo de entidad para aprovechar batch
+      order_updates: true
+```
 
+---
+
+## 9. Notificaciones y Alertas Automáticas
+
+### Canales de Notificación
+
+| Canal | Clase | Estado | Variable |
+|---|---|---|---|
+| In-app (BD) | `AlertaSistema` entity | **Siempre activo** | — |
+| Email (Gmail) | `GmailNotificacionService` | **Activo** si `MAIL_PASSWORD` configurado | `MAIL_USERNAME`, `MAIL_PASSWORD` |
+| Telegram | `TelegramNotificacionService` | **Deshabilitado** por default | `TELEGRAM_ENABLED=true`, `TELEGRAM_BOT_TOKEN` |
+| SSE Stream | `AlertaController` | **Activo** | Endpoint: `GET /api/v1/alertas/stream/SSE` |
+
+### Scheduler Automático (`AlertaScheduler`)
+
+4 Jobs con expresiones cron Spring:
+
+| Job | Cron | Descripción |
+|---|---|---|
+| `verificarStockBajo()` | `"0 0 * * * *"` | **Cada hora** — compara `stockActual` vs `ConfiguracionAlerta.stockMinimo` por sucursal |
+| `verificarProximosCaducar()` | `"0 0 7 * * *"` | **Diario 07:00** — productos con `fechaCaducidad <= hoy + 30 días` |
+| `verificarCxCVencidas()` | `"0 0 8 * * *"` | **Diario 08:00** — CxC vencidas (stub, pendiente integración CxC) |
+| `verificarMetasVentas()` | `"0 0 9 1 * *"` | **1ro de cada mes 09:00** — avance de metas de ventas vs umbral |
+
+### Tipos de Alerta (`TipoAlerta` enum)
+
+- `STOCK_BAJO` — Stock por debajo del mínimo
+- `PRODUCTO_POR_CADUCAR` — Fecha de caducidad próxima (< 30 días)
+- `CXC_VENCIDA` — Cuenta por cobrar vencida
+- `META_VENTAS_BAJA` — Avance de ventas < umbral de meta
+
+### Configuración por Sucursal (`ConfiguracionAlerta`)
+
+Campos configurables vía `POST /api/v1/alertas/configurar-sucursal`:
+
+- `sucursalId`
+- `stockMinimo` — umbral global de stock bajo para la sucursal
+- `diasVencimientoCxC` — días de gracia para CxC
+- `porcentajeMetaAlerta` — % de avance mínimo antes de alertar
+- `activo` — habilita/deshabilita alertas para la sucursal
+
+### Gmail SMTP (`application.yml`)
+
+```yaml
+mail:
+  host: smtp.gmail.com
+  port: 587
+  properties:
+    mail.smtp.auth: true
+    mail.smtp.starttls.enable: true
+    mail.smtp.starttls.required: true
+    mail.transport.protocol: smtp
+```
+
+Se requiere **App Password de Google** (16 caracteres) en la variable `MAIL_PASSWORD`. No sirve la contraseña normal de Gmail.
+
+---
+
+## 10. Testing y Calidad
+
+### Resultados
+
+| Métrica | Valor |
+|---|---|
+| Total tests | **950+** |
+| Tests pasando | **100%** |
+| Cobertura instrucciones | **68%** |
+| Cobertura ramas | **50%** |
+| Tests con H2 | Todos los de integración (sin PostgreSQL) |
+
+### Framework
+
+- **JUnit 5.10.1 (Jupiter)** — anotaciones `@Test`, `@BeforeEach`, `@AfterEach`
+- **Mockito** — `@MockBean` para aislar dependencias
+- **Spring Boot Test** — `@SpringBootTest`, `@WebMvcTest`, `@DataJpaTest`
+- **Spring Security Test** — `@WithMockUser` para tests con roles
+
+### Exclusiones de JaCoCo
+
+El plugin JaCoCo en `build.gradle.kts` excluye:
+
+```kotlin
+exclude("**/dto/**")
+exclude("**/entity/**")
+exclude("**/mapper/**")
+exclude("**/config/**")
+exclude("**/security/**")
+exclude("**/exception/**")
+exclude("**/*Application*")
+exclude("**/*Id*")          // Claves compuestas (InventarioSucursalId, etc.)
+exclude("**/specification/**")
+```
+
+El **68%** refleja exclusivamente la cobertura de **Servicios y Controladores** (la lógica real de negocio).
+
+### Comandos
+
+```bash
+# Solo tests
+.\gradlew test
+
+# Tests + reporte HTML de JaCoCo (tasks.test finalizedBy tasks.jacocoTestReport)
+.\gradlew test jacocoTestReport
+
+# Reporte en:
+# app/build/reports/jacoco/test/html/index.html
+
+# Limpiar caché de build antes de tests (si hay archivos bloqueados)
+.\gradlew clean test
+```
+
+### QA E2E Scripts
+
+```bash
+# Flujo principal (40 pasos): login, catálogos, inventario, venta, reserva, devolución, crédito, CRM, predicción, RFM
+powershell -ExecutionPolicy Bypass -File .\run-qa-flows.ps1
+# Genera: reporte-qa-completo.md
+
+# Flujo extendido (113 pasos): ERP, analítica avanzada, nómina, CFDI, offline sync, métricas
+powershell -ExecutionPolicy Bypass -File .\run-qa-extended.ps1
+# Genera: reporte-qa-extendido.md
+```
+
+**Criterio de falla:** Únicamente `HTTP 500`. Los códigos 400, 404, 405, 409 se consideran respuestas válidas de negocio.
+
+---
+
+## 11. Despliegue y Configuración Completa
+
+### Docker Compose (`docker-compose.yml`)
+
+```yaml
 services:
-  postgres:
+  postgres-db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: nexoohub
+      POSTGRES_DB: nexoohub_almacen
       POSTGRES_USER: nexoohub_user
-      POSTGRES_PASSWORD: secure_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-  
-  app:
+
+  java-backend:
     build: .
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexoohub
-      SPRING_DATASOURCE_USERNAME: nexoohub_user
-      SPRING_DATASOURCE_PASSWORD: secure_password
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
+      - postgres-db
+    environment:
+      DB_URL: jdbc:postgresql://postgres-db:5432/nexoohub_almacen
+      DB_USER: nexoohub_user
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      TELEGRAM_ENABLED: ${TELEGRAM_ENABLED:-false}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
 ```
 
-**Comandos**:
-```bash
-# Build y levantar servicios
-docker-compose up --build
+### Todas las Variables de Entorno
 
-# Detener
-docker-compose down
-```
+| Variable | Default en `application.yml` | Obligatoria en Producción |
+|---|---|---|
+| `DB_URL` | `jdbc:postgresql://localhost:5432/postgres` | No (Docker usa `postgres-db`) |
+| `DB_USER` | `user` | No |
+| `DB_PASSWORD` | *(vacío)* | **Sí** |
+| `JWT_SECRET` | `NexooHubSuperSecretKeyParaFirmaDeTokens2026!` | **Sí** (cambiar por uno seguro) |
+| `MAIL_USERNAME` | `nexoohub.erp@gmail.com` | No |
+| `MAIL_PASSWORD` | *(vacío)* | Para emails (App Password 16 chars) |
+| `MAIL_FROM` | `nexoohub.erp@gmail.com` | No |
+| `TELEGRAM_ENABLED` | `false` | No |
+| `TELEGRAM_BOT_TOKEN` | *(vacío)* | Para Telegram |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:4200` | Sí (cambiar a dominio de producción) |
+| `CORS_ALLOWED_METHODS` | `GET,POST,PUT,DELETE,OPTIONS,PATCH` | No |
+| `CORS_ALLOWED_HEADERS` | `*` | No |
+| `CORS_ALLOW_CREDENTIALS` | `true` | No |
+| `CORS_MAX_AGE` | `3600` | No |
 
-#### **Opción 3: Kubernetes**
-
-**deployment.yaml**:
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nexoohub-almacen
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nexoohub-almacen
-  template:
-    metadata:
-      labels:
-        app: nexoohub-almacen
-    spec:
-      containers:
-      - name: nexoohub-almacen
-        image: nexoohub/almacen:1.0.0
-        ports:
-        - containerPort: 8080
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "prod"
-        - name: SPRING_DATASOURCE_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: url
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 5
-```
-
-### ⚙️ Configuración por Ambiente
-
-**application.yml** (base):
-```yaml
-spring:
-  application:
-    name: nexoohub-almacen
-  
-  jpa:
-    show-sql: false
-    hibernate:
-      ddl-auto: validate  # Flyway controla el schema
-  
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-
-server:
-  port: 8080
-
-jwt:
-  secret: ${JWT_SECRET:changeme_in_production}
-  expiration: 86400000  # 24 horas
-```
-
-**application-dev.yml**:
-```yaml
-spring:
-  datasource:
-    url: jdbc:h2:mem:dev db;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-  
-  jpa:
-    show-sql: true
-  
-  h2:
-    console:
-      enabled: true
-
-logging:
-  level:
-    com.nexoohub.almacen: DEBUG
-```
-
-**application-prod.yml**:
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nexoohub}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      connection-timeout: 30000
-  
-  jpa:
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
-        use_sql_comments: false
-
-logging:
-  level:
-    com.nexoohub.almacen: INFO
-    org.springframework: WARN
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,metrics,info
-```
-
-### 🗄️ Backup de Base de Datos
-
-**Script de Backup Automatizado**:
-```bash
-#!/bin/bash
-# backup-db.sh
-
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_DIR="/backups/nexoohub"
-DB_NAME="nexoohub"
-DB_USER="nexoohub_user"
-
-mkdir -p $BACKUP_DIR
-
-# Backup completo
-pg_dump -U $DB_USER -d $DB_NAME -F c -b -v \
-  -f "$BACKUP_DIR/nexoohub_$TIMESTAMP.backup"
-
-# Comprimir
-gzip "$BACKUP_DIR/nexoohub_$TIMESTAMP.backup"
-
-# Limpiar backups antiguos (> 30 días)
-find $BACKUP_DIR -name "*.backup.gz" -mtime +30 -delete
-
-echo "✅ Backup completado: nexoohub_$TIMESTAMP.backup.gz"
-```
-
-**Cron Job** (diario a las 2 AM):
-```bash
-crontab -e
-
-0 2 * * * /usr/local/bin/backup-db.sh >> /var/log/nexoohub-backup.log 2>&1
-```
-
-### 📊 Monitoreo y Health Checks
-
-**Spring Boot Actuator** expone endpoints de monitoreo:
+### Ciclo de Despliegue Completo
 
 ```bash
-# Health check
+# 1. Compilar el .jar
+.\gradlew bootJar
+# Salida: app/build/libs/app-0.0.1-SNAPSHOT.jar
+
+# 2. Levantar contenedores (build de imagen + inicio)
+docker-compose up -d --build
+
+# 3. Verificar estado
+docker-compose ps
+docker-compose logs -f java-backend
+
+# 4. Verificar salud
 curl http://localhost:8080/actuator/health
 
-# Métricas
-curl http://localhost:8080/actuator/metrics
-
-# Info de aplicación
-curl http://localhost:8080/actuator/info
-```
-
-**Configuración de Alertas** (ejemplo con Prometheus):
-```yaml
-# prometheus.yml
-scrape_configs:
-  - job_name: 'nexoohub-almacen'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: ['localhost:8080']
-```
-
----
-
-## 11. Guía de Desarrollo
-
-### 🛠️ Setup de Entorno Local
-
-#### **Paso 1: Prerrequisitos**
-
-```bash
-# Verificar versiones
-java -version  # Debe ser 17+
-./gradlew --version  # Gradle 8.7+
-psql --version  # PostgreSQL 15+ (opcional para dev)
-```
-
-#### **Paso 2: Clonar Repositorio**
-
-```bash
-git clone https://github.com/nexoohub/almacen.git
-cd almacen
-```
-
-#### **Paso 3: Configurar Base de Datos (Dev)**
-
-**Opción A: H2 en memoria (por defecto)**
-- No requiere configuración adicional
-- Base de datos se crea automáticamente al iniciar
-- Datos se pierden al detener la aplicación
-
-**Opción B: PostgreSQL local**
-
-```bash
-# Crear BD
-createdb nexoohub
-
-# Crear usuario
-psql -c "CREATE USER nexoohub_user WITH PASSWORD 'dev123';"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE nexoohub TO nexoohub_user;"
-
-# Editar application-dev.yml para usar PostgreSQL
-```
-
-#### **Paso 4: Compilar Proyecto**
-
-```bash
-./gradlew clean build
-```
-
-#### **Paso 5: Ejecutar Aplicación**
-
-```bash
-# Modo desarrollo (H2 en memoria)
-./gradlew bootRun --args='--spring.profiles.active=dev'
-
-# O con PostgreSQL
-./gradlew bootRun --args='--spring.profiles.active=dev,postgres'
-```
-
-**Aplicación iniciará en**: `http://localhost:8080`
-
-#### **Paso 6: Acceder a Recursos**
-
-```bash
-# Swagger UI
-http://localhost:8080/swagger-ui.html
-
-# H2 Console (si usa H2)
-http://localhost:8080/h2-console
-JDBC URL: jdbc:h2:mem:devdb
-User: sa
-Password: (dejar vacío)
-
-# Login de prueba
+# 5. Primer login
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}'
 ```
 
-### 🔧 Convenciones de Código
+### URLs de Acceso
+
+| Recurso | URL |
+|---|---|
+| API REST | `http://localhost:8080/api/v1/` |
+| Swagger UI | `http://localhost:8080/swagger-ui.html` |
+| OpenAPI JSON | `http://localhost:8080/v3/api-docs` |
+| Actuator Health | `http://localhost:8080/actuator/health` |
+| Actuator Metrics | `http://localhost:8080/actuator/metrics` |
+| Actuator Info | `http://localhost:8080/actuator/info` |
+
+### Logging (`application.yml`)
 
-#### **Estructura de Paquetes**
-
-```
-com.nexoohub.almacen/
-├── common/                   # Config, seguridad, utilidades
-│   ├── config/
-│   ├── controller/
-│   ├── entity/
-│   ├── exception/
-│   ├── repository/
-│   └── service/
-├── catalogo/                 # Módulo de catálogos
-│   ├── controller/
-│   ├── dto/
-│   ├── entity/
-│   ├── repository/
-│   └── service/
-├── inventario/               # Módulo de inventario
-├── ventas/                   # Módulo de ventas
-├── compras/                  # Módulo de compras
-└── ... (otros módulos)
-```
-
-#### **Nomenclatura**
-
-**Clases**:
-```java
-// Controller: *Controller
-public class ProductoController {}
-
-// Service: *Service
-public class ProductoService {}
-
-// Repository: *Repository
-public interface ProductoRepository extends JpaRepository {}
-
-// Entity: singular, sin sufijo
-public class Producto {}
-
-// DTO: *DTO
-public record ProductoResponseDTO() {}
-public record CrearProductoDTO() {}
-
-// Exception: *Exception
-public class BusinessException extends RuntimeException {}
-```
-
-**Métodos**:
-```java
-// CRUD operations
-public ProductoResponseDTO crear(...) {}
-public ProductoResponseDTO actualizar(...) {}
-public void eliminar(...) {}
-public ProductoResponseDTO buscarPorId(...) {}
-public Page<ProductoResponseDTO> listar(...) {}
-
-// Business logic
-public void calcularStock(...) {}
-public BigDecimal obtenerPrecioVigente(...) {}
-public boolean validarDisponibilidad(...) {}
-```
-
-**Variables y Parámetros**:
-```java
-// camelCase
-Integer productoId;
-BigDecimal precioVenta;
-LocalDateTime fechaCreacion;
-
-// Collections plurales
-List<Producto> productos;
-Set<Integer> categoriaIds;
-```
-
-#### **Anotaciones Comunes**
-
-**Entities**:
-```java
-@Entity
-@Table(name = "producto_maestro")
-@Getter @Setter @NoArgsConstructor  // Lombok
-public class Producto {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    
-    @Column(name = "sku_interno", nullable = false, unique = true, length = 50)
-    @NotBlank(message = "SKU es obligatorio")
-    private String skuInterno;
-    
-    @Column(name = "precio_venta", nullable = false)
-    @NotNull(message = "Precio de venta es obligatorio")
-    @Min(value = 0, message = "Precio no puede ser negativo")
-    private BigDecimal precioVenta;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
-    
-    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
-    private List<InventarioSucursal> inventarios;
-    
-    @PrePersist
-    protected  void onCreate() {
-        fechaCreacion = LocalDateTime.now();
-    }
-}
-```
-
-**Services**:
-```java
-@Service
-@Transactional
-@RequiredArgsConstructor // Lombok inyección por constructor
-@Slf4j  // Logging
-public class ProductoService {
-    
-    private final ProductoRepository productoRepository;
-    private final CategoriaRepository categoriaRepository;
-    
-    public ProductoResponseDTO crear(CrearProductoDTO dto) {
-        // Validaciones
-        if (productoRepository.existsBySkuInterno(dto.skuInterno())) {
-            throw new DuplicateResourceException("SKU ya existe");
-        }
-        
-        Categoria categoria = categoriaRepository.findById(dto.categoriaId())
-            .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
-        
-        // Lógica de negocio
-        Producto producto = new Producto();
-        producto.setSkuInterno(dto.skuInterno());
-        producto.setNombre(dto.nombre());
-        producto.setCategoria(categoria);
-        // ... más setters
-        
-        Producto saved = productoRepository.save(producto);
-        
-        log.info("Producto creado: {} (ID: {})", saved.getSkuInterno(), saved.getId());
-        
-        return mapToDTO(saved);
-    }
-    
-    @Transactional(readOnly = true)
-    public ProductoResponseDTO buscarPorId(Integer id) {
-        Producto producto = productoRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
-        return mapToDTO(producto);
-    }
-}
-```
-
-**Controllers**:
-```java
-@RestController
-@RequestMapping("/api/v1/productos")
-@RequiredArgsConstructor
-@Tag(name = "Productos", description = "Gestión del catálogo de productos")
-public class ProductoController {
-    
-    private final ProductoService productoService;
-    
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Crear producto", description = "Crea un nuevo producto en el catálogo")
-    @ApiResponse(responseCode = "201", description = "Producto creado exitosamente")
-    @ApiResponse(responseCode = "400", description = "Datos inválidos")
-    @ApiResponse(responseCode = "409", description = "SKU duplicado")
-    public ResponseEntity<ApiResponse<ProductoResponseDTO>> crear(
-            @Valid @RequestBody CrearProductoDTO dto) {
-        
-        ProductoResponseDTO producto = productoService.crear(dto);
-        
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(ApiResponse.success("Producto creado exitosamente", producto));
-    }
-    
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    @Operation(summary = "Buscar producto por ID")
-    public ResponseEntity<ApiResponse<ProductoResponseDTO>> buscarPorId(
-            @PathVariable Integer id) {
-        
-        ProductoResponseDTO producto = productoService.buscarPorId(id);
-        
-        return ResponseEntity.ok(ApiResponse.success("Producto encontrado", producto));
-    }
-}
-```
-
-### 📝 Crear un Nuevo Módulo
-
-**Ejemplo: Módulo de Promociones**
-
-#### **Paso 1: Crear estructura de paquetes**
-
-```
-src/main/java/com/nexoohub/almacen/promociones/
-├── controller/
-│   └── PromocionController.java
-├── dto/
-│   ├── PromocionResponseDTO.java
-│   └── CrearPromocionDTO.java
-├── entity/
-│   └── Promocion.java
-├── repository/
-│   └── PromocionRepository.java
-└── service/
-    └── PromocionService.java
-```
-
-#### **Paso 2: Crear Entity**
-
-```java
-package com.nexoohub.almacen.promociones.entity;
-
-@Entity
-@Table(name = "promocion")
-@Getter @Setter @NoArgsConstructor
-public class Promocion {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    
-    @Column(nullable = false)
-    @NotBlank
-    private String nombre;
-    
-    @Column(nullable = false)
-    @NotNull
-    private BigDecimal descuento;
-    
-    @Column(name = "fecha_inicio", nullable = false)
-    @NotNull
-    private LocalDate fechaInicio;
-    
-    @Column(name = "fecha_fin", nullable = false)
-    @NotNull
-    private LocalDate fechaFin;
-    
-    // ... más campos y relaciones
-}
-```
-
-#### **Paso 3: Crear Migración Flyway**
-
-`src/main/resources/db/migration/V11__create_promociones.sql`:
-
-```sql
-CREATE TABLE promocion (
-    id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descuento DECIMAL(5,2) NOT NULL CHECK (descuento >= 0 AND descuento <= 100),
-    fecha_inicio DATE NOT NULL,
-    fecha_fin DATE NOT NULL,
-    activo BOOLEAN DEFAULT TRUE,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT check_fechas CHECK (fecha_fin >= fecha_inicio)
-);
-
-CREATE INDEX idx_promocion_fechas ON promocion(fecha_inicio, fecha_fin);
-CREATE INDEX idx_promocion_activo ON promocion(activo);
-```
-
-#### **Paso 4: Crear DTOs**
-
-```java
-public record PromocionResponseDTO(
-    Integer id,
-    String nombre,
-    BigDecimal descuento,
-    LocalDate fechaInicio,
-    LocalDate fechaFin,
-    Boolean activo
-) {}
-
-public record CrearPromocionDTO(
-    @NotBlank String nombre,
-    @NotNull @Min(0) @Max(100) BigDecimal descuento,
-    @NotNull LocalDate fechaInicio,
-    @NotNull LocalDate fechaFin
-) {}
-```
-
-#### **Paso 5: Crear Repository, Service y Controller**
-
-Seguir patrones de módulos existentes.
-
-#### **Paso 6: Crear Tests**
-
-```java
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Transactional
-class PromocionControllerIntegrationTest {
-    // ... tests
-}
-```
-
-#### **Paso 7: Documentar en OpenAPI YAML**
-
-`recursos/promocion-controller.yaml`:
-
-```yaml
-openapi: 3.0.0
-info:
-  title: API de Promociones
-  version: 1.0.0
-paths:
-  /api/v1/promociones:
-    get:
-      summary: Listar promociones
-      # ... resto de la documentación
-```
-
-### 🔄 Workflow de Git
-
-```bash
-# 1. Crear branch para feature
-git checkout -b feature/modulo-promociones
-
-# 2. Hacer cambios y commits
-git add .
-git commit -m "feat(promociones): agregar módulo de promociones
-
-- Crear entity Promocion
-- Implementar CRUD completo
-- Agregar validaciones de fechas
-- Tests de integración
-
-Closes #45"
-
-# 3. Push a remote
-git push origin feature/modulo-promociones
-
-# 4. Crear Pull Request en GitHub
-
-# 5. Después de aprobación, merge a main
-git checkout main
-git pull origin main
-git merge feature/modulo-promociones
-git push origin main
-
-# 6. Limpiar branch
-git branch -d feature/modulo-promociones
-git push origin --delete feature/modulo-promociones
-```
-
-**Convención de Commits** (Conventional Commits):
-```
-feat: Nueva funcionalidad
-fix: Corrección de bug
-docs: Cambios en documentación
-style: Formato de código (sin cambios funcionales)
-refactor: Refactorización de código
-test: Agregar o modificar tests
-chore: Tareas de mantenimiento
-```
-
----
-
-## 12. Troubleshooting
-
-### ❌ Problemas Comunes
-
-#### **1. Tests Fallan: "Usuario no autorizado"**
-
-**Problema**: Tests de integración fallan con 401 Unauthorized
-
-**Causa**: Token JWT no se está enviando correctamente
-
-**Solución**:
-```java
-// Asegurarse de generar token en @BeforeEach
-@BeforeEach
-void setUp() {
-    Usuario admin = usuarioRepository.save(new Usuario("admin", "admin123", "ROLE_ADMIN"));
-    token = jwtUtil.generateToken(admin.getUsername());
-}
-
-// Incluir token en cada request
-mockMvc.perform(get("/api/v1/productos")
-    .header("Authorization", "Bearer " + token))  // ← Crucial
-    .andExpect(status().isOk());
-```
-
-#### **2. Flyway Migration Error: "Schema already exists"**
-
-**Problema**: Error al iniciar: `Flyway migration failed`
-
-**Causa**: Base de datos ya tiene schema incompatible
-
-**Solución**:
-```bash
-# Opción 1: Limpiar BD (solo dev)
-DROP DATABASE nexoohub;
-CREATE DATABASE nexoohub;
-
-# Opción 2: Baseline Flyway
-spring.flyway.baseline-on-migrate=true
-spring.flyway.baseline-version=0
-```
-
-#### **3. Hibernate Error: "identifier of an instance was altered"**
-
-**Problema**: `HibernateException: identifier of an instance of XYZ was altered`
-
-**Causa**: Intentar modificar el ID de una entidad ya persistida
-
-**Solución**:
-```java
-// ❌ INCORRECTO
-producto.setId(nuevoId);  // Nunca modificar ID
-
-// ✅ CORRECTO
-Producto nuevo = new Producto();
-nuevo.setNombre(producto.getNombre());
-// ... copiar otros campos excepto ID
-productoRepository.save(nuevo);
-```
-
-#### **4. Tests Lentos (> 2 minutos)**
-
-**Problema**: Tests toman mucho tiempo al usar H2
-
-**Causa**: H2 no está en modo PostgreSQL compatible
-
-**Solución**:
-```yaml
-# application-test.yml
-spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
-    #                        ^^^^^^^^^^^^^^^^^ Importante
-```
-
-#### **5. StackOverflowError en JSON Serialization**
-
-**Problema**: Error al retornar entidades con relaciones bidireccionales
-
-**Causa**: Jackson entra en bucle infinito serializando relaciones
-
-**Solución**:
-```java
-// Opción 1: Usar DTOs (RECOMENDADO)
-return mapToDTO(producto);  // DTO no tiene referencias circulares
-
-// Opción 2: Anotaciones Jackson
-@Entity
-public class Producto {
-    @OneToMany(mappedBy = "producto")
-    @JsonManagedReference  // ← En el lado "padre"
-    private List<Inventario> inventarios;
-}
-
-@Entity
-public class Inventario {
-    @ManyToOne
-    @JsonBackReference  // ← En el lado "hijo"
-    private Producto producto;
-}
-
-// Opción 3: Ignorar en serialización
-@JsonIgnore
-private List<Inventario> inventarios;
-```
-
-#### **6. "No suitable driver found" en Production**
-
-**Problema**: Error al conectar a PostgreSQL en producción
-
-**Causa**: Driver de PostgreSQL no está en build
-
-**Solución**:
-```kotlin
-// build.gradle.kts
-dependencies {
-    runtimeOnly("org.postgresql:postgresql")  // ← Asegurar que esté
-}
-```
-
-#### **7. Token JWT Expirado**
-
-**Problema**: API retorna 401 después de 24 horas
-
-**Causa**: Token expiró según configuración
-
-**Solución**:
-```java
-// Cliente debe refrescar token antes de expirar
-// O implementar refresh token endpoint
-
-@PostMapping("/auth/refresh")
-public ResponseEntity<?> refresh(@RequestHeader("Authorization") String oldToken) {
-    String username = jwtUtil.extractUsername(oldToken);
-    String newToken = jwtUtil.generateToken(username);
-    return ResponseEntity.ok(new AuthResponse(newToken, username, ...));
-}
-```
-
-### 🔍 Logs Útiles
-
-**Habilitar logs de Hibernate**:
 ```yaml
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    root: INFO
+    com.nexoohub.almacen: INFO
+    org.hibernate.SQL: DEBUG            # Muestra todas las queries SQL
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Muestra valores bindados
+    org.hibernate.stat: DEBUG           # Estadísticas Hibernate (detecta N+1)
+    org.springframework.orm.jpa: DEBUG  # Transacciones JPA
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
+    # %X{traceId} = UUID inyectado por LogFilter en cada request
 ```
 
-**Ver consultas SQL generadas**:
-```yaml
-spring:
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        use_sql_comments: true
-```
+---
 
-**Logs de Spring Security**:
-```yaml
-logging:
-  level:
-    org.springframework.security: DEBUG
-```
+## 12. Consideraciones y Deuda Técnica
 
-### 📞 Soporte
+### Inconsistencia de Prefijos de URL
 
-**Para issues técnicos**:
-- GitHub Issues: https://github.com/nexoohub/almacen/issues
-- Email: soporte@nexoohub.com
-- Wiki: https://github.com/nexoohub/almacen/wiki
+No todos los módulos usan `/api/v1/`. Los siguientes usan `/api/` sin versión:
+
+| Módulo | Prefijo Real | Causa |
+|---|---|---|
+| Cotizaciones | `/api/cotizaciones` | Migrado antes de estandarizar versioning |
+| Comisiones | `/api/comisiones` | Ídem |
+| Crédito | `/api/credito` | Ídem |
+| Garantías CRM | `/api/crm/garantias` | Módulo CRM creado en dos partes |
+| Métricas ventas-clientes | `/api/metricas/ventas-clientes` | Ídem |
+| Predicciones | `/api/predicciones` | Ídem |
+| Alertas lento movimiento | `/api/alertas/lento-movimiento` | Ídem |
+| Comparador precios SUP | `/api/sup/comparador` | Namespace de proveedor |
+
+**Recomendación:** Estandarizar todo bajo `/api/v1/` en una futura refactorización.
+
+### Controladores V1 Heredados (Duplicados)
+
+| Heredado | Activo | Estado |
+|---|---|---|
+| `MorosidadV1Controller` | `MorosidadController` | Ambos activos — posible conflicto de rutas |
+| `MarketBasketV1Controller` | `MarketBasketController` | Ídem |
+| `RendimientoPersonalV1Controller` | `RendimientoPersonalController` | Ídem |
+| `NpsV1Controller` | `NpsController` | Ídem |
+| `GarantiasV1Controller` | `GarantiaController` | Ídem |
+| `OrdenCompraV1Controller` | `OrdenCompraController` | Ídem |
+
+**Recomendación:** Verificar si los V1 están en uso activo en frontends; si no, eliminar.
+
+### Entidad `Empleado` Duplicada
+
+- `empleados/entity/Empleado.java` — Empleado operativo (sucursal, comisiones)
+- `erp/entity/Empleado.java` — Empleado en nómina ERP (datos salariales)
+
+Ambas mapean a la tabla `empleado` con propósitos distintos. Funciona, pero genera confusión durante el mantenimiento.
+
+### Redis No Habilitado
+
+`RedisConfig.java` existe pero está **completamente comentado** y protegido con `@ConditionalOnProperty`. `CacheConfig` implementa `CachingConfigurer` solo para el error handler de degradación.
+
+Para habilitar Redis en el futuro:
+1. Descomentar `RedisConfig.java`
+2. Agregar a `build.gradle.kts`: `implementation("org.springframework.boot:spring-boot-starter-data-redis")`
+3. Agregar servicio `redis` en `docker-compose.yml`
+4. En `application.yml`: `spring.cache.type: redis`
+
+### Rate Limiting Deshabilitado
+
+`RateLimitingFilter.java.disabled` está renombrado para que no compile. Para activar:
+1. Renombrar a `RateLimitingFilter.java`
+2. Verificar e importar dependencia de Bucket4j o similar
+
+### JWT Expira en 1 Hora
+
+`jwt.expiration: 3600000` ms = 1 hora. Toda sesión de frontend debe manejar el refresh del token antes de expirar para evitar interrupciones en flujos largos.
+
+### `generate_statistics: true` en Producción
+
+`hibernate.generate_statistics: true` en `application.yml` genera overhead de logging en producción. Considerar cambiar a `false` en deploy de alta carga.
 
 ---
 
-## 📚 Referencias
-
-### 📖 Documentación Técnica
-
-- [Spring Boot 3.2 Documentation](https://docs.spring.io/spring-boot/docs/3.2.x/reference/html/)
-- [Spring Data JPA](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
-- [Spring Security 6](https://docs.spring.io/spring-security/reference/)
-- [Flyway Documentation](https://flywaydb.org/documentation/)
-- [JWT (jjwt) GitHub](https://github.com/jwtk/jjwt)
-- [Lombok Features](https://projectlombok.org/features/)
-
-### 🗄️ Base de Datos
-
-- [PostgreSQL 15 Documentation](https://www.postgresql.org/docs/15/)
-- [H2 Database](https://www.h2database.com/html/main.html)
-
-### 🧪 Testing
-
-- [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/)
-- [Mockito Documentation](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html)
-- [Spring Boot Testing](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing)
-
----
-
-## 📄  Licencia
-
-Este proyecto es propiedad de **NexooHub Development Team**.  
-© 2026 NexooHub. Todos los derechos reservados.
-
----
-
-**Última actualización**: Marzo 12, 2026  
-**Versión del documento**: 1.0.0  
-**Responsable**: NexooHub Development Team
-
----
-# Anexo Técnico (V3)
-## Arquitectura Consolidada: Adquisiciones (SUP) & Seguridad (PRO)
-
-### Catálogos y Compras Inteligentes
-1. **Comparador (SUP-01):** \ComparadorPreciosService\ analiza el margen_estimado vs el precio_costo actual. 
-2. **Proceso de CSV/Excel Masivo (SUP-02):** Uso intenso de Apache POI o integradores \List<CompletableFuture>\ para insert mapping en \historial_precio_proveedor\.
-3. **Flujo de Recepción OC (SUP-03):** Se maneja un \enum EstadoOC (BORRADOR, RECIBIDA, ENTREGADA)\. Al transicionar, el sistema liquida y sumerge el inventario en el stock, invocando colateralmente a \CompraService\.
-
-### Motor de Seguridad Avanzada (Role-Based Access Control)
-4. El Login (\JwtAuthenticationFilter\) cruza a CustomUserDetailsService.
-5. Se cargan \List<GrantedAuthority>\ desdoblando las capacidades atómicas guardadas en las tablas ol y permiso. 
-6. Funciones críticas de inventarios y RRHH se decoran con \@PreAuthorize("hasAuthority('ELIMINAR_COMPRAS')")\.
-
-### Módulo de RH y Analíticas 
-- El cálculo en \RendimientoPersonalService\ intercepta los \VentaRepository\ acotado por \echaInicio\ y \sucursal_id\.
-- Para Metas (PRO-02), el cálculo es de escalera o de escalón (*Tiered Commission*). 
-- El sistema de Alertas (PRO-01) maneja Jobs Asíncronos o eventos @EventListener que persisten notificaciones para ser consumidas leida=false visualmente.
+*© 2026 NexooHub Development Team*

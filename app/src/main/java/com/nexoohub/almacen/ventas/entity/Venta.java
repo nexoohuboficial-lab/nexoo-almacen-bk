@@ -1,7 +1,7 @@
 package com.nexoohub.almacen.ventas.entity;
 
 import com.nexoohub.almacen.catalogo.entity.Cliente;
-import com.nexoohub.almacen.empleados.entity.Empleado;
+import com.nexoohub.almacen.common.entity.Usuario;
 import com.nexoohub.almacen.sucursal.entity.Sucursal;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -16,26 +16,30 @@ public class Venta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "cliente_id", insertable = false, updatable = false)
+    @Column(name = "cliente_id")
     private Integer clienteId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_id")
+    @JoinColumn(name = "cliente_id", insertable = false, updatable = false)
     private Cliente cliente;
 
-    @Column(name = "sucursal_id", insertable = false, updatable = false)
+    @Column(name = "sucursal_id")
     private Integer sucursalId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sucursal_id")
+    @JoinColumn(name = "sucursal_id", insertable = false, updatable = false)
     private Sucursal sucursal;
 
-    @Column(name = "vendedor_id", insertable = false, updatable = false)
+    @Column(name = "vendedor_id")
     private Integer vendedorId;
     
+    /**
+     * Vendedor que realizó la venta.
+     * FK referencia usuarios(id) según V1__initial_schema.sql
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vendedor_id")
-    private Empleado vendedor;
+    @JoinColumn(name = "vendedor_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Usuario vendedor;
 
     @Column(name = "metodo_pago")
     private String metodoPago;
@@ -71,8 +75,8 @@ public class Venta {
     
     public Integer getVendedorId() { return vendedorId; }
     public void setVendedorId(Integer vendedorId) { this.vendedorId = vendedorId; }
-    public Empleado getVendedor() { return vendedor; }
-    public void setVendedor(Empleado vendedor) { this.vendedor = vendedor; }
+    public Usuario getVendedor() { return vendedor; }
+    public void setVendedor(Usuario vendedor) { this.vendedor = vendedor; }
     
     public String getMetodoPago() { return metodoPago; }
     public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }

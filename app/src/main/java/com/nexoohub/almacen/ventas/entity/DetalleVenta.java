@@ -13,18 +13,18 @@ public class DetalleVenta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "venta_id", insertable = false, updatable = false)
+    @Column(name = "venta_id")
     private Integer ventaId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "venta_id")
+    @JoinColumn(name = "venta_id", insertable = false, updatable = false)
     private Venta venta;
 
-    @Column(name = "sku_interno", insertable = false, updatable = false)
+    @Column(name = "sku_interno")
     private String skuInterno;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sku_interno")
+    @JoinColumn(name = "sku_interno", insertable = false, updatable = false)
     private ProductoMaestro producto;
 
     @Min(value = 1, message = "La cantidad debe ser al menos 1")

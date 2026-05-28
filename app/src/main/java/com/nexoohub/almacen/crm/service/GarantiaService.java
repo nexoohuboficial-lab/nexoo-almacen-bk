@@ -53,6 +53,18 @@ public class GarantiaService {
     }
 
     @Transactional(readOnly = true)
+    public List<TicketGarantiaResponse> getHistorialVenta(Integer ventaId) {
+        List<TicketGarantia> tickets = ticketGarantiaRepository.findByVentaIdOrderByFechaCreacionDesc(ventaId);
+        return ticketGarantiaMapper.toDtoList(tickets);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TicketGarantiaResponse> listarTodos() {
+        List<TicketGarantia> tickets = ticketGarantiaRepository.findAll();
+        return ticketGarantiaMapper.toDtoList(tickets);
+    }
+
+    @Transactional(readOnly = true)
     public TicketGarantiaResponse getTicketPorId(Integer ticketId) {
         TicketGarantia ticket = ticketGarantiaRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró el ticket de garantía especificado"));

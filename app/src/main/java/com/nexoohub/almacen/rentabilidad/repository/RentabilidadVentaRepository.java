@@ -117,7 +117,7 @@ public interface RentabilidadVentaRepository extends JpaRepository<RentabilidadV
            "WHERE rv.id IN (SELECT rv2.id FROM RentabilidadVenta rv2 " +
            "JOIN rv2.venta v WHERE v.fechaVenta BETWEEN :fechaInicio AND :fechaFin)")
     BigDecimal calcularCostoTotalPeriodo(
-        @Param("fechaInicio") java.time.LocalDate fechaInicio, 
-        @Param("fechaFin") java.time.LocalDate fechaFin
+        @Param("fechaInicio") LocalDateTime fechaInicio, 
+        @Param("fechaFin") LocalDateTime fechaFin
     );
 }

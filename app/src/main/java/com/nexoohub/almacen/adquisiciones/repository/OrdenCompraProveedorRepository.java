@@ -18,7 +18,7 @@ public interface OrdenCompraProveedorRepository extends JpaRepository<OrdenCompr
     @Query("SELECT o FROM OrdenCompraProveedor o WHERE " +
            "(:proveedorId IS NULL OR o.proveedor.id = :proveedorId) AND " +
            "(:estado IS NULL OR o.estado = :estado) AND " +
-           "(:fechaInicio IS NULL OR o.fechaCreacion >= :fechaInicio) " +
+           "(coalesce(:fechaInicio, o.fechaCreacion) <= o.fechaCreacion) " +
            "ORDER BY o.fechaCreacion DESC")
     List<OrdenCompraProveedor> findByFiltros(
             @Param("proveedorId") Integer proveedorId,

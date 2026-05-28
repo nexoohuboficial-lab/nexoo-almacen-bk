@@ -41,6 +41,9 @@ CREATE TABLE proveedor (
     telefono VARCHAR(20),
     email VARCHAR(100),
     direccion TEXT,
+    condiciones_pago VARCHAR(255),
+    dias_entrega_estimado INTEGER,
+    activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_creacion VARCHAR(50),
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -105,7 +108,7 @@ CREATE TABLE empleado (
 );
 
 CREATE TABLE usuarios (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
@@ -126,6 +129,9 @@ CREATE TABLE cliente (
     telefono VARCHAR(20),
     email VARCHAR(100),
     direccion_fiscal TEXT,
+    bloqueado BOOLEAN DEFAULT FALSE,
+    saldo_pendiente NUMERIC(12, 2) DEFAULT 0.00,
+    motivo_bloqueo VARCHAR(500),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_creacion VARCHAR(50),
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -157,6 +163,9 @@ CREATE TABLE historial_precio (
     precio_ponderado NUMERIC(10, 2) NOT NULL,
     precio_final_publico NUMERIC(10, 2) NOT NULL,
     precio_publico_proveedor NUMERIC(10, 2) DEFAULT 0.00,
+    precio_anterior NUMERIC(10, 2),
+    porcentaje_cambio NUMERIC(10, 2),
+    razon_cambio VARCHAR(500),
     fecha_calculo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_creacion VARCHAR(50)
 );
@@ -191,6 +200,8 @@ CREATE TABLE inventario_sucursal (
     stock_minimo_sucursal INTEGER DEFAULT 0,
     costo_promedio_ponderado NUMERIC(10, 2) DEFAULT 0.00,
     ubicacion_pasillo VARCHAR(100),
+    fecha_caducidad DATE,
+    lote VARCHAR(100),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_creacion VARCHAR(50),
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -232,7 +243,9 @@ CREATE TABLE detalle_venta (
     venta_id INTEGER REFERENCES venta(id),
     sku_interno VARCHAR(50) REFERENCES producto_maestro(sku_interno),
     cantidad INTEGER NOT NULL,
-    precio_unitario_venta NUMERIC(10, 2) NOT NULL
+    precio_unitario_venta NUMERIC(10, 2) NOT NULL,
+    descuento_especial NUMERIC(10, 2) DEFAULT 0,
+    porcentaje_descuento NUMERIC(10, 2) DEFAULT 0
 );
 
 -- 5. AUDITORÍA DE MOVIMIENTOS
@@ -245,6 +258,7 @@ CREATE TABLE movimiento_inventario (
     rastreo_id VARCHAR(50),
     comentarios TEXT,
     fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_id INTEGER,
     usuario_creacion VARCHAR(50)
 );
 

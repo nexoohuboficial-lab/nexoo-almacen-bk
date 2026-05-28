@@ -371,7 +371,7 @@ public class MetricaFinancieraService {
         }
 
         // 3. Calcular costo de ventas desde rentabilidad
-        BigDecimal costoVentas = rentabilidadRepository.calcularCostoTotalPeriodo(fechaInicio, fechaFin);
+        BigDecimal costoVentas = rentabilidadRepository.calcularCostoTotalPeriodo(fechaInicioTime, fechaFinTime);
         metrica.setCostoVentas(costoVentas != null ? costoVentas : BigDecimal.ZERO);
 
         // 4. Calcular utilidad bruta

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -325,8 +326,10 @@ public class MetricaInventarioService {
 
         // 3. Métricas de Rotación (basadas en costo de ventas del período)
         LocalDate fechaInicioPeriodo = fechaCorte.minusDays(diasPeriodo);
+        LocalDateTime fechaInicioTime = fechaInicioPeriodo.atStartOfDay();
+        LocalDateTime fechaFinTime = fechaCorte.atTime(23, 59, 59);
         BigDecimal costoVentas = rentabilidadVentaRepository.calcularCostoTotalPeriodo(
-                fechaInicioPeriodo, fechaCorte
+                fechaInicioTime, fechaFinTime
         );
         metrica.setCostoVentasPeriodo(costoVentas != null ? costoVentas : BigDecimal.ZERO);
 

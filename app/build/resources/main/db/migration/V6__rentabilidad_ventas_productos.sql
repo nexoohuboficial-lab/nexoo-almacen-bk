@@ -22,10 +22,10 @@ CREATE TABLE rentabilidad_venta (
     cantidad_items INTEGER,
     
     -- Campos de auditor\u00eda
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(100),
-    updated_by VARCHAR(100),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_creacion VARCHAR(100),
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_actualizacion VARCHAR(100),
     
     -- Foreign Key
     CONSTRAINT fk_rentabilidad_venta_venta FOREIGN KEY (venta_id) 
@@ -73,10 +73,10 @@ CREATE TABLE rentabilidad_producto (
     numero_ventas INTEGER,
     
     -- Campos de auditor\u00eda
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(100),
-    updated_by VARCHAR(100),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_creacion VARCHAR(100),
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_actualizacion VARCHAR(100),
     
     -- Foreign Key
     CONSTRAINT fk_rentabilidad_producto_sku FOREIGN KEY (sku_interno) 

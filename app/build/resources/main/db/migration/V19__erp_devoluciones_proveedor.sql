@@ -5,7 +5,7 @@
 -- 1. Cabecera de la devolución
 CREATE TABLE devolucion_proveedor (
     id                  SERIAL PRIMARY KEY,
-    proveedor_id        INTEGER      NOT NULL REFERENCES proveedor_cxp(id),
+    proveedor_id        INTEGER      NOT NULL REFERENCES proveedor(id),
     sucursal_id         INTEGER      NOT NULL,
     usuario_id          INTEGER      NOT NULL,
     fecha               DATE         NOT NULL DEFAULT CURRENT_DATE,

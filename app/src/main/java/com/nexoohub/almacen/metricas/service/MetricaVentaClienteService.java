@@ -71,7 +71,7 @@ public class MetricaVentaClienteService {
         List<Venta> ventas;
         if (request.getSucursalId() != null) {
             ventas = ventaRepository.findByFechaVentaBetween(inicio, fin).stream()
-                    .filter(v -> v.getSucursalId().equals(request.getSucursalId()))
+                    .filter(v -> v.getSucursalId() != null && v.getSucursalId().equals(request.getSucursalId()))
                     .collect(Collectors.toList());
         } else {
             ventas = ventaRepository.findByFechaVentaBetween(inicio, fin);
@@ -335,7 +335,7 @@ public class MetricaVentaClienteService {
         if (request.getSucursalId() != null) {
             Integer sucursalId = request.getSucursalId();
             ventasAnteriores = ventasAnteriores.stream()
-                    .filter(v -> v.getSucursalId().equals(sucursalId))
+                    .filter(v -> v.getSucursalId() != null && v.getSucursalId().equals(sucursalId))
                     .collect(Collectors.toList());
         }
 

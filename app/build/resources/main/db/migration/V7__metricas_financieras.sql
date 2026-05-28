@@ -39,10 +39,10 @@ CREATE TABLE metrica_financiera (
     margen_neto_porcentaje NUMERIC(5,2) NOT NULL DEFAULT 0.00,
     
     -- Campos de auditoría
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(100),
-    updated_by VARCHAR(100),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_creacion VARCHAR(100),
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_actualizacion VARCHAR(100),
     
     -- Foreign Key
     CONSTRAINT fk_metrica_financiera_sucursal FOREIGN KEY (sucursal_id) 
@@ -166,7 +166,7 @@ INSERT INTO metrica_financiera (
     ventas_efectivo, ventas_credito,
     costo_ventas, utilidad_bruta, margen_bruto_porcentaje,
     gastos_operativos, utilidad_neta, margen_neto_porcentaje,
-    created_by
+    usuario_creacion
 ) VALUES (
     NULL, '2024-01-01', '2024-01-31', 'MENSUAL',
     500000.00, 250, 2000.00, 120,
@@ -183,7 +183,7 @@ INSERT INTO metrica_financiera (
     ventas_efectivo, ventas_credito,
     costo_ventas, utilidad_bruta, margen_bruto_porcentaje,
     gastos_operativos, utilidad_neta, margen_neto_porcentaje,
-    created_by
+    usuario_creacion
 ) VALUES (
     1, '2024-01-01', '2024-01-31', 'MENSUAL',
     250000.00, 150, 1666.67, 75,

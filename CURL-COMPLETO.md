@@ -1,216 +1,237 @@
-# 🔗 COLECCIÓN COMPLETA DE CURLs - NexooHub Almacén
+# Colección Completa de CURLs — NexooHub Almacén
 
-> **Sistema de Gestión de Inventarios Multi-Sucursal**  
-> Versión: 1.0.0  
-> Base URL: `http://localhost:8080/api/v1`  
-> Última actualización: Marzo 12, 2026
+> **Rutas verificadas contra el código fuente**  
+> Base URL: `http://localhost:8080`  
+> Actualización: Mayo 2026
 
 ---
 
-## 📖 Índice
+## Índice
 
-1. [Autenticación y Seguridad](#1-autenticación-y-seguridad)
-2. [Gestión de Usuarios](#2-gestión-de-usuarios)
-3. [Catálogo - Categorías](#3-catálogo---categorías)
-4. [Catálogo - Clientes](#4-catálogo---clientes)
-5. [Catálogo - Tipos de Cliente](#5-catálogo---tipos-de-cliente)
-6. [Catálogo - Proveedores](#6-catálogo---proveedores)
-7. [Catálogo - Motos](#7-catálogo---motos)
-8. [Catálogo - Compatibilidad](#8-catálogo---compatibilidad)
-9. [Catálogo - Precios Especiales](#9-catálogo---precios-especiales)
-10. [Catálogo - Morosidad](#10-catálogo---morosidad)
-11. [Inventario - Productos](#11-inventario---productos)
-12. [Inventario - Gestión](#12-inventario---gestión)
-13. [Inventario - Traspasos](#13-inventario---traspasos)
-14. [Inventario - Caducidad](#14-inventario---caducidad)
-15. [Inventario - Análisis ABC](#15-inventario---análisis-abc)
-16. [Inventario - Alertas Lento Movimiento](#16-inventario---alertas-lento-movimiento)
-17. [Ventas](#17-ventas)
-18. [Ventas - Reservas](#18-ventas---reservas)
-19. [Ventas - Devoluciones](#19-ventas---devoluciones)
+1. [Autenticación y Usuarios](#1-autenticación-y-usuarios)
+2. [Catálogo — Categorías](#2-catálogo--categorías)
+3. [Catálogo — Clientes y Morosidad](#3-catálogo--clientes-y-morosidad)
+4. [Catálogo — Tipos de Cliente](#4-catálogo--tipos-de-cliente)
+5. [Catálogo — Proveedores](#5-catálogo--proveedores)
+6. [Catálogo — Motos](#6-catálogo--motos)
+7. [Catálogo — Compatibilidad](#7-catálogo--compatibilidad)
+8. [Catálogo — Precios Especiales](#8-catálogo--precios-especiales)
+9. [Inventario — Productos](#9-inventario--productos)
+10. [Inventario — Stock y Movimientos](#10-inventario--stock-y-movimientos)
+11. [Inventario — Códigos de Barras](#11-inventario--códigos-de-barras)
+12. [Inventario — Traspasos](#12-inventario--traspasos)
+13. [Inventario — Caducidad](#13-inventario--caducidad)
+14. [Inventario — Análisis ABC](#14-inventario--análisis-abc)
+15. [Inventario — Alertas de Lento Movimiento](#15-inventario--alertas-de-lento-movimiento)
+16. [Ventas](#16-ventas)
+17. [Ventas — Reservas](#17-ventas--reservas)
+18. [Ventas — Devoluciones](#18-ventas--devoluciones)
+19. [Cotizaciones](#19-cotizaciones)
 20. [Compras](#20-compras)
-21. [Cotizaciones](#21-cotizaciones)
-22. [Sucursales](#22-sucursales)
-23. [Empleados](#23-empleados)
-24. [Comisiones](#24-comisiones)
-25. [Finanzas - Configuración](#25-finanzas---configuración)
-26. [Finanzas - Crédito](#26-finanzas---crédito)
-27. [Finanzas - Dashboard](#27-finanzas---dashboard)
-28. [Finanzas - Auditoría de Precios](#28-finanzas---auditoría-de-precios)
-29. [Rentabilidad](#29-rentabilidad)
-30. [Métricas - Financieras](#30-métricas---financieras)
-31. [Métricas - Inventario](#31-métricas---inventario)
-32. [Métricas - Operativas](#32-métricas---operativas)
-33. [Métricas - Venta y Cliente](#33-métricas---venta-y-cliente)
-34. [Programa de Fidelidad](#34-programa-de-fidelidad)
-35. [Predicción de Demanda](#35-predicción-de-demanda)
+21. [Adquisiciones — Comparador](#21-adquisiciones--comparador)
+22. [Adquisiciones — Actualización de Precios](#22-adquisiciones--actualización-de-precios)
+23. [Adquisiciones — Órdenes de Compra](#23-adquisiciones--órdenes-de-compra)
+24. [Caja](#24-caja)
+25. [POS — Facturación CFDI](#25-pos--facturación-cfdi)
+26. [POS — Terminal Bancaria](#26-pos--terminal-bancaria)
+27. [POS — Sincronización Offline](#27-pos--sincronización-offline)
+28. [Sucursales](#28-sucursales)
+29. [Empleados](#29-empleados)
+30. [Comisiones y Reglas](#30-comisiones-y-reglas)
+31. [Metas de Ventas (RH)](#31-metas-de-ventas-rh)
+32. [Finanzas — Dashboard](#32-finanzas--dashboard)
+33. [Finanzas — Configuración](#33-finanzas--configuración)
+34. [Finanzas — Auditoría de Precios](#34-finanzas--auditoría-de-precios)
+35. [Crédito y Cobranza](#35-crédito-y-cobranza)
+36. [ERP — CxP y Gastos](#36-erp--cxp-y-gastos)
+37. [ERP — Contabilidad](#37-erp--contabilidad)
+38. [ERP — Logística](#38-erp--logística)
+39. [ERP — Nómina](#39-erp--nómina)
+40. [ERP — Devoluciones a Proveedor](#40-erp--devoluciones-a-proveedor)
+41. [CRM — Pipeline B2B](#41-crm--pipeline-b2b)
+42. [CRM — Garantías](#42-crm--garantías)
+43. [CRM — NPS](#43-crm--nps)
+44. [CRM — Marketing](#44-crm--marketing)
+45. [Métricas Financieras](#45-métricas-financieras)
+46. [Métricas de Inventario](#46-métricas-de-inventario)
+47. [Métricas Operativas](#47-métricas-operativas)
+48. [Métricas Ventas y Clientes](#48-métricas-ventas-y-clientes)
+49. [Rentabilidad](#49-rentabilidad)
+50. [Analítica — RFM](#50-analítica--rfm)
+51. [Analítica — Churn](#51-analítica--churn)
+52. [Analítica — Market Basket](#52-analítica--market-basket)
+53. [Analítica — Rendimiento Personal](#53-analítica--rendimiento-personal)
+54. [Fidelidad](#54-fidelidad)
+55. [Predicción de Demanda](#55-predicción-de-demanda)
+56. [Alertas del Sistema](#56-alertas-del-sistema)
 
 ---
 
-## 🔐 Variables de Entorno
+## Variables de Entorno
 
 ```bash
-# Base URL
-export BASE_URL="http://localhost:8080/api/v1"
+export BASE="http://localhost:8080"
+export TOKEN=""  # Se llena después del login
 
-# Credenciales por defecto (dev/test)
-export ADMIN_USER="admin"
-export ADMIN_PASS="admin123"
-
-# Token JWT (se obtiene después del login)
-export TOKEN="eyJhbGciOiJI..."
-```
-
----
-
-## 1. Autenticación y Seguridad
-
-### 🔑 Login - Obtener Token JWT
-
-```bash
-curl -X POST "${BASE_URL}/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "admin",
-    "password": "admin123"
-  }'
-```
-
-**Respuesta Exitosa (200):**
-```json
-{
-  "exitoso": true,
-  "mensaje": "Autenticación exitosa",
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiJ9...",
-    "username": "admin",
-    "role": "ROLE_ADMIN",
-    "expiresIn": 86400000
-  }
-}
-```
-
-**Guardar Token:**
-```bash
-export TOKEN=$(curl -s -X POST "${BASE_URL}/auth/login" \
+# Login y guardar token automáticamente
+export TOKEN=$(curl -s -X POST "$BASE/api/v1/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}' \
-  | jq -r '.data.token')
+  | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+echo "Token: ${TOKEN:0:30}..."
 ```
 
 ---
 
-## 2. Gestión de Usuarios
+## 1. Autenticación y Usuarios
 
-### 👤 Crear Usuario
+### Login
 
 ```bash
-curl -X POST "${BASE_URL}/usuarios" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+### Listar Usuarios
+
+```bash
+curl -X GET "$BASE/api/v1/usuarios" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Obtener Usuario por ID
+
+```bash
+curl -X GET "$BASE/api/v1/usuarios/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Usuario
+
+```bash
+curl -X POST "$BASE/api/v1/usuarios" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "vendedor01",
     "password": "pass123",
-    "role": "ROLE_USER"
+    "nombre": "Ana López",
+    "email": "ana@nexoohub.com"
   }'
 ```
 
-### 📋 Listar Usuarios
+### Actualizar Usuario
 
 ```bash
-curl -X GET "${BASE_URL}/usuarios" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Buscar Usuario por ID
-
-```bash
-curl -X GET "${BASE_URL}/usuarios/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Usuario
-
-```bash
-curl -X PUT "${BASE_URL}/usuarios/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X PUT "$BASE/api/v1/usuarios/2" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "vendedor01_updated",
-    "password": "newpass123",
-    "role": "ROLE_ADMIN"
+    "nombre": "Ana López García",
+    "email": "ana.garcia@nexoohub.com"
   }'
 ```
 
-### 🗑️ Eliminar Usuario
+### Cambiar Contraseña
 
 ```bash
-curl -X DELETE "${BASE_URL}/usuarios/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X PUT "$BASE/api/v1/usuarios/2/password" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"passwordActual":"pass123","passwordNuevo":"nuevaPass456"}'
+```
+
+### Eliminar Usuario
+
+```bash
+curl -X DELETE "$BASE/api/v1/usuarios/2" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Rol
+
+```bash
+curl -X POST "$BASE/api/v1/admin/roles" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nombre": "GERENTE_VENTAS",
+    "descripcion": "Acceso a indicadores y aprobaciones",
+    "permisos": ["LEER_VENTAS","CREAR_VENTAS","APROBAR_DEVOLUCION"]
+  }'
+```
+
+### Asignar Rol a Usuario
+
+```bash
+curl -X POST "$BASE/api/v1/admin/usuarios/2/roles" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"rolNombre":"GERENTE_VENTAS"}'
+```
+
+### Ver Permisos de Usuario
+
+```bash
+curl -X GET "$BASE/api/v1/admin/usuarios/1/permisos" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 3. Catálogo - Categorías
+## 2. Catálogo — Categorías
 
-### 📦 Crear Categoría
+> **Ruta base:** `/api/v1/categorias`
+
+### Listar Categorías
 
 ```bash
-curl -X POST "${BASE_URL}/catalogo/categorias" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/v1/categorias" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Categoría
+
+```bash
+curl -X POST "$BASE/api/v1/categorias" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "nombre": "Aceites y Lubricantes",
-    "descripcion": "Aceites para motor, transmisión y lubricantes"
-  }'
+  -d '{"nombre":"Aceites y Lubricantes","descripcion":"Aceites motor 4T, transmisión y lubricantes"}'
 ```
 
-### 📋 Listar Categorías
+### Actualizar Categoría
 
 ```bash
-curl -X GET "${BASE_URL}/catalogo/categorias" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Buscar Categoría por ID
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/categorias/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Categoría
-
-```bash
-curl -X PUT "${BASE_URL}/catalogo/categorias/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X PUT "$BASE/api/v1/categorias/1" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "nombre": "Aceites Premium",
-    "descripcion": "Aceites sintéticos de alta calidad"
-  }'
-```
-
-### 🗑️ Eliminar Categoría
-
-```bash
-curl -X DELETE "${BASE_URL}/catalogo/categorias/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+  -d '{"nombre":"Aceites Premium","descripcion":"Aceites sintéticos de alta calidad"}'
 ```
 
 ---
 
-## 4. Catálogo - Clientes
+## 3. Catálogo — Clientes y Morosidad
 
-### 👥 Crear Cliente
+> **Ruta base:** `/api/v1/clientes`
+
+### Listar Clientes
 
 ```bash
-curl -X POST "${BASE_URL}/catalogo/clientes" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/v1/clientes?page=0&size=20" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Cliente
+
+```bash
+curl -X POST "$BASE/api/v1/clientes" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Juan Pérez García",
-    "email": "juan.perez@email.com",
+    "email": "juan@email.com",
     "telefono": "5512345678",
     "rfc": "PEGJ850315ABC",
     "tipoClienteId": 1,
@@ -218,36 +239,15 @@ curl -X POST "${BASE_URL}/catalogo/clientes" \
   }'
 ```
 
-### 📋 Listar Clientes (con paginación)
+### Actualizar Cliente
 
 ```bash
-curl -X GET "${BASE_URL}/catalogo/clientes?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Buscar Cliente por ID
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/clientes/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Buscar Cliente por RFC
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/clientes/rfc/PEGJ850315ABC" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Cliente
-
-```bash
-curl -X PUT "${BASE_URL}/catalogo/clientes/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X PUT "$BASE/api/v1/clientes/1" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Juan Pérez García",
-    "email": "nuevo.email@email.com",
+    "email": "nuevo@email.com",
     "telefono": "5587654321",
     "rfc": "PEGJ850315ABC",
     "tipoClienteId": 2,
@@ -255,52 +255,68 @@ curl -X PUT "${BASE_URL}/catalogo/clientes/1" \
   }'
 ```
 
-### 🗑️ Eliminar Cliente
+### Listar Clientes Bloqueados
 
 ```bash
-curl -X DELETE "${BASE_URL}/catalogo/clientes/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/clientes/bloqueados" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Listar Clientes Morosos
+
+```bash
+curl -X GET "$BASE/api/v1/clientes/morosos" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Bloquear Cliente
+
+```bash
+curl -X POST "$BASE/api/v1/clientes/1/bloquear?motivo=Facturas+vencidas+60+dias" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Desbloquear Cliente
+
+```bash
+curl -X POST "$BASE/api/v1/clientes/1/desbloquear" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Registrar Pago (desbloquea automáticamente si es suficiente)
+
+```bash
+curl -X POST "$BASE/api/v1/clientes/1/registrar-pago?monto=5000.00" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 5. Catálogo - Tipos de Cliente
-
-### 🏷️ Crear Tipo de Cliente
+## 4. Catálogo — Tipos de Cliente
 
 ```bash
-curl -X POST "${BASE_URL}/catalogo/tipos-cliente" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nombre": "Cliente VIP",
-    "descuento": 15.0
-  }'
-```
-
-### 📋 Listar Tipos de Cliente
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/tipos-cliente" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Buscar Tipo de Cliente por ID
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/tipos-cliente/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/tipos-cliente" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 6. Catálogo - Proveedores
+## 5. Catálogo — Proveedores
 
-### 🏭 Crear Proveedor
+> **Ruta base:** `/api/v1/proveedores`
+
+### Listar Proveedores
 
 ```bash
-curl -X POST "${BASE_URL}/catalogo/proveedores" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/v1/proveedores" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Proveedor
+
+```bash
+curl -X POST "$BASE/api/v1/proveedores" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Refacciones SA de CV",
@@ -311,25 +327,11 @@ curl -X POST "${BASE_URL}/catalogo/proveedores" \
   }'
 ```
 
-### 📋 Listar Proveedores
+### Actualizar Proveedor
 
 ```bash
-curl -X GET "${BASE_URL}/catalogo/proveedores" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Buscar Proveedor por ID
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/proveedores/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Proveedor
-
-```bash
-curl -X PUT "${BASE_URL}/catalogo/proveedores/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X PUT "$BASE/api/v1/proveedores/1" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Refacciones Premium SA",
@@ -340,210 +342,127 @@ curl -X PUT "${BASE_URL}/catalogo/proveedores/1" \
   }'
 ```
 
-### 🗑️ Eliminar Proveedor
-
-```bash
-curl -X DELETE "${BASE_URL}/catalogo/proveedores/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
 ---
 
-## 7. Catálogo - Motos
+## 6. Catálogo — Motos
 
-### 🏍️ Crear Moto
+> **Ruta base:** `/api/v1/motos`
+
+### Listar Motos
 
 ```bash
-curl -X POST "${BASE_URL}/catalogo/motos" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/v1/motos" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Moto
+
+```bash
+curl -X POST "$BASE/api/v1/motos" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "marca": "Honda",
     "modelo": "CBR 600RR",
     "cilindraje": 600,
     "anioInicio": 2013,
-    "anioFin": 2023
+    "anioFin": 2024
   }'
 ```
 
-### 📋 Listar Motos
+### Actualizar Moto
 
 ```bash
-curl -X GET "${BASE_URL}/catalogo/motos" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Buscar Moto por ID
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/motos/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Filtrar por Marca
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/motos?marca=Honda" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Moto
-
-```bash
-curl -X PUT "${BASE_URL}/catalogo/motos/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X PUT "$BASE/api/v1/motos/1" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "marca": "Honda",
-    "modelo": "CBR 600RR Sport",
+    "modelo": "CBR 600RR Sport Edition",
     "cilindraje": 600,
     "anioInicio": 2013,
-    "anioFin": 2024
+    "anioFin": 2025
   }'
 ```
 
 ---
 
-## 8. Catálogo - Compatibilidad
+## 7. Catálogo — Compatibilidad
 
-### 🔗 Registrar Compatibilidad Producto-Moto
+> **Ruta base:** `/api/v1/compatibilidad`
+
+### Compatibilidad por Producto (SKU)
 
 ```bash
-curl -X POST "${BASE_URL}/catalogo/compatibilidad" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/v1/compatibilidad/producto/ACEITE-CASTROL-10W40-1L" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Compatibilidad por Moto
+
+```bash
+curl -X GET "$BASE/api/v1/compatibilidad/moto/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Registrar Compatibilidad
+
+```bash
+curl -X POST "$BASE/api/v1/compatibilidad" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "productoId": 1,
+    "skuInterno": "ACEITE-CASTROL-10W40-1L",
     "motoId": 1,
     "observaciones": "Compatible directo, sin adaptaciones"
   }'
 ```
 
-### 📋 Listar Compatibilidades
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/compatibilidad" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Compatibilidad por Producto
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/compatibilidad/producto/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Compatibilidad por Moto
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/compatibilidad/moto/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🗑️ Eliminar Compatibilidad
-
-```bash
-curl -X DELETE "${BASE_URL}/catalogo/compatibilidad/producto/1/moto/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
 ---
 
-## 9. Catálogo - Precios Especiales
+## 8. Catálogo — Precios Especiales
 
-### 💰 Crear Precio Especial
+> **Ruta base:** `/api/v1/precios-especiales`  
+> ⚠️ Solo acepta POST y DELETE. El método GET no está soportado.
 
-```bash
-curl -X POST "${BASE_URL}/catalogo/precios-especiales" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "productoId": 1,
-    "tipoClienteId": 1,
-    "precioEspecial": 450.00,
-    "fechaInicio": "2026-03-01",
-    "fechaFin": "2026-06-30"
-  }'
-```
-
-### 📋 Listar Precios Especiales
+### Crear Precio Especial
 
 ```bash
-curl -X GET "${BASE_URL}/catalogo/precios-especiales" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Precios por Producto
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/precios-especiales/producto/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Precio Vigente
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/precios-especiales/producto/1/tipo-cliente/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
----
-
-## 10. Catálogo - Morosidad
-
-### 📉 Registrar Cliente Moroso
-
-```bash
-curl -X POST "${BASE_URL}/catalogo/morosidad" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "clienteId": 1,
-    "montoAdeudado": 5000.00,
-    "diasVencidos": 45,
-    "observaciones": "3 facturas vencidas"
-  }'
-```
-
-### 📋 Listar Clientes Morosos
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/morosidad" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Consultar Morosidad de Cliente
-
-```bash
-curl -X GET "${BASE_URL}/catalogo/morosidad/cliente/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✅ Liquidar Deuda
-
-```bash
-curl -X PUT "${BASE_URL}/catalogo/morosidad/1/liquidar" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "montoPagado": 5000.00,
-    "observaciones": "Pago completo"
-  }'
-```
-
----
-
-## 11. Inventario - Productos
-
-### 📦 Crear Producto
-
-```bash
-curl -X POST "${BASE_URL}/productos" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/v1/precios-especiales" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "skuInterno": "ACEITE-CASTROL-10W40-1L",
-    "nombre": "Aceite Castrol GTX 10W-40",
+    "tipoClienteId": 1,
+    "precioEspecial": 450.00,
+    "fechaInicio": "2026-06-01",
+    "fechaFin": "2026-12-31"
+  }'
+```
+
+### Eliminar Precio Especial
+
+```bash
+curl -X DELETE "$BASE/api/v1/precios-especiales/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 9. Inventario — Productos
+
+> **Ruta base:** `/api/v1/productos`  
+> ⚠️ No existe `GET /api/v1/productos`. Usa `/search` o `/{sku}` para consultar.
+
+### Crear Producto
+
+```bash
+curl -X POST "$BASE/api/v1/productos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "skuInterno": "ACEITE-CASTROL-10W40-1L",
+    "nombreComercial": "Aceite Castrol GTX 10W-40",
     "descripcion": "Aceite mineral para motores 4T",
     "categoriaId": 1,
     "proveedorId": 1,
@@ -558,560 +477,421 @@ curl -X POST "${BASE_URL}/productos" \
   }'
 ```
 
-### 📋 Listar Productos (paginado)
+### Buscar Productos (texto libre + filtros opcionales)
 
 ```bash
-curl -X GET "${BASE_URL}/productos?page=0&size=20" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/productos/search?q=aceite&categoriaId=1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Buscar Productos (omnicanal)
+### Obtener Producto por SKU
 
 ```bash
-curl -X GET "${BASE_URL}/productos/search?q=aceite&categoriaId=1&page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/productos/ACEITE-CASTROL-10W40-1L" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Buscar por SKU
+### Actualizar Producto
 
 ```bash
-curl -X GET "${BASE_URL}/productos/sku/ACEITE-CASTROL-10W40-1L" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Buscar por ID
-
-```bash
-curl -X GET "${BASE_URL}/productos/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Producto
-
-```bash
-curl -X PUT "${BASE_URL}/productos/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X PUT "$BASE/api/v1/productos/ACEITE-CASTROL-10W40-1L" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "skuInterno": "ACEITE-CASTROL-10W40-1L",
-    "nombre": "Aceite Castrol GTX 10W-40 Premium",
-    "descripcion": "Aceite mineral de alta calidad para motores 4T",
-    "categoriaId": 1,
-    "proveedorId": 1,
+    "nombreComercial": "Aceite Castrol GTX 10W-40 Premium",
     "precioCompra": 125.00,
-    "precioVenta": 190.00,
+    "precioVenta": 195.00,
     "stockMinimo": 15,
-    "stockMaximo": 120,
-    "unidadMedida": "LITRO",
-    "ubicacionAlmacen": "PASILLO-A-ESTANTE-3",
-    "fechaCaducidad": "2027-12-31",
-    "lote": "LOT2026-002"
+    "stockMaximo": 120
   }'
 ```
 
-### 🗑️ Eliminar Producto
+### Eliminar Producto
 
 ```bash
-curl -X DELETE "${BASE_URL}/productos/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X DELETE "$BASE/api/v1/productos/ACEITE-CASTROL-10W40-1L" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Productos para Mostrador (POS)
+
+```bash
+curl -X GET "$BASE/api/v1/productos/mostrador" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 12. Inventario - Gestión
+## 10. Inventario — Stock y Movimientos
 
-### 📊 Consultar Stock por Sucursal
+> **Ruta base:** `/api/v1/inventario`
 
-```bash
-curl -X GET "${BASE_URL}/inventario/sucursal/1/producto/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📥 Entrada de Inventario
+### Inicializar/Ajustar Stock en Sucursal
 
 ```bash
-curl -X POST "${BASE_URL}/inventario/entrada" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/v1/inventario" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "sucursalId": 1,
-    "productoId": 1,
-    "cantidad": 50,
-    "compraId": 1,
-    "observaciones": "Entrada por compra directa"
+    "skuInterno": "ACEITE-CASTROL-10W40-1L",
+    "stockActual": 50,
+    "costoPromedio": 120.00
   }'
 ```
 
-### 📤 Salida de Inventario (ajuste manual)
+### Consultar Stock de una Sucursal
 
 ```bash
-curl -X POST "${BASE_URL}/inventario/salida" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sucursalId": 1,
-    "productoId": 1,
-    "cantidad": 5,
-    "motivo": "AJUSTE_INVENTARIO",
-    "observaciones": "Merma por producto dañado"
-  }'
+curl -X GET "$BASE/api/v1/inventario/sucursales/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 📋 Historial de Movimientos
+### Alertas Globales de Stock Bajo
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/movimientos/producto/1?page=0&size=20" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/inventario/alertas/stock-bajo" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Movimientos por Sucursal
+### Alertas de Stock Bajo por Sucursal
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/movimientos/sucursal/1?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/inventario/alertas/stock-bajo/sucursales/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 13. Inventario - Traspasos
+## 11. Inventario — Códigos de Barras
 
-### 🔄 Crear Traspaso Entre Sucursales
+### Buscar Producto por Código de Barras
 
 ```bash
-curl -X POST "${BASE_URL}/inventario/traspasos" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/v1/inventario/productos/buscar-por-codigo?codigo=7501234567890" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Escaneo Rápido
+
+```bash
+curl -X POST "$BASE/api/v1/inventario/escaneo" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"codigoBarras":"7501234567890","sucursalId":1}'
+```
+
+### Agregar Código de Barras a Producto
+
+```bash
+curl -X POST "$BASE/api/v1/inventario/productos/ACEITE-CASTROL-10W40-1L/codigos-barras" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"codigo":"7501234567890","descripcion":"EAN-13 principal"}'
+```
+
+### Listar Códigos de Barras de un Producto
+
+```bash
+curl -X GET "$BASE/api/v1/inventario/productos/ACEITE-CASTROL-10W40-1L/codigos-barras" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Eliminar Código de Barras
+
+```bash
+curl -X DELETE "$BASE/api/v1/inventario/codigos-barras/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 12. Inventario — Traspasos
+
+### Crear Traspaso entre Sucursales
+
+```bash
+curl -X POST "$BASE/api/v1/inventario/traspasos" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "sucursalOrigenId": 1,
     "sucursalDestinoId": 2,
-    "productoId": 1,
+    "skuInterno": "ACEITE-CASTROL-10W40-1L",
     "cantidad": 20,
     "motivo": "Reabastecimiento sucursal secundaria",
     "observaciones": "Urgente - stock bajo en sucursal 2"
   }'
 ```
 
-### 📋 Listar Traspasos
+---
+
+## 13. Inventario — Caducidad
+
+### Productos Próximos a Caducar
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/traspasos?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/inventario/caducidad/proximos" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Consultar Traspaso
+### Productos Ya Vencidos
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/traspasos/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✅ Confirmar Recepción de Traspaso
-
-```bash
-curl -X PUT "${BASE_URL}/inventario/traspasos/1/confirmar" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "observaciones": "Recibido en buen estado"
-  }'
-```
-
-### ❌ Cancelar Traspaso
-
-```bash
-curl -X PUT "${BASE_URL}/inventario/traspasos/1/cancelar" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "motivo": "Error en cantidad solicitada"
-  }'
+curl -X GET "$BASE/api/v1/inventario/caducidad/vencidos" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 14. Inventario - Caducidad
+## 14. Inventario — Análisis ABC
 
-### ⚠️ Listar Productos Próximos a Caducar
-
-```bash
-curl -X GET "${BASE_URL}/inventario/caducidad/proximos?diasAnticipacion=30" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🚨 Listar Productos Caducados
+### Generar Análisis ABC
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/caducidad/caducados" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Reporte de Caducidad por Sucursal
-
-```bash
-curl -X GET "${BASE_URL}/inventario/caducidad/sucursal/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🗑️ Registrar Baja por Caducidad
-
-```bash
-curl -X POST "${BASE_URL}/inventario/caducidad/registrar-baja" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sucursalId": 1,
-    "productoId": 1,
-    "cantidad": 5,
-    "observaciones": "Producto caducado - lote LOT2024-001"
-  }'
-```
-
----
-
-## 15. Inventario - Análisis ABC
-
-### 📊 Generar Análisis ABC
-
-```bash
-curl -X POST "${BASE_URL}/inventario/analisis-abc/generar" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/v1/inventario/analisis-abc/generar" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "sucursalId": 1,
     "fechaInicio": "2026-01-01",
-    "fechaFin": "2026-03-31",
-    "porcentajeA": 80.0,
-    "porcentajeB": 15.0
+    "fechaFin": "2026-05-31"
   }'
 ```
 
-### 📋 Listar Análisis ABC
+### Último Análisis de una Sucursal
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/analisis-abc?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/inventario/analisis-abc/sucursal/1/ultimo" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Consultar Análisis ABC
+### Productos de Clase A
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/analisis-abc/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/inventario/analisis-abc/sucursal/1/clasificacion/A" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 📊 Productos por Clasificación
+### Resumen ABC
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/analisis-abc/1/productos/A" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/inventario/analisis-abc/sucursal/1/resumen" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 16. Inventario - Alertas Lento Movimiento
+## 15. Inventario — Alertas de Lento Movimiento
 
-### 🐌 Generar Alerta de Lento Movimiento
+> **Ruta base:** `/api/alertas/lento-movimiento`
+
+### Listar Alertas Activas
 
 ```bash
-curl -X POST "${BASE_URL}/inventario/alertas-lento-movimiento/generar" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/alertas/lento-movimiento" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Generar Alertas de Lento Movimiento
+
+```bash
+curl -X POST "$BASE/api/alertas/lento-movimiento/generar" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "sucursalId": 1,
-    "diasSinMovimiento": 90
-  }'
+  -d '{"sucursalId":1,"diasSinMovimiento":90}'
 ```
 
-### 📋 Listar Alertas Activas
+### Alertas por Sucursal
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/alertas-lento-movimiento?activas=true" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/alertas/lento-movimiento/sucursal/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Alertas por Sucursal
+### Alertas Críticas
 
 ```bash
-curl -X GET "${BASE_URL}/inventario/alertas-lento-movimiento/sucursal/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/alertas/lento-movimiento/criticas" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### ✅ Resolver Alerta
+### Costo Total Inmovilizado
 
 ```bash
-curl -X PUT "${BASE_URL}/inventario/alertas-lento-movimiento/1/resolver" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/alertas/lento-movimiento/costo-inmovilizado" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Resolver Alerta
+
+```bash
+curl -X PUT "$BASE/api/alertas/lento-movimiento/1/resolver" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "accionTomada": "Descuento aplicado - producto vendido",
-    "observaciones": "Se liquidó el stock con promoción 30% OFF"
-  }'
+  -d '{"accionTomada":"Descuento 30% aplicado — stock liquidado","observaciones":"Promociónde fin de temporada"}'
 ```
 
 ---
 
-## 17. Ventas
+## 16. Ventas
 
-### 🛒 Crear Venta
+### Registrar Venta Directa
 
 ```bash
-curl -X POST "${BASE_URL}/ventas" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/v1/ventas" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "sucursalId": 1,
     "clienteId": 1,
     "empleadoId": 1,
-    "metodoPago": "TARJETA_CREDITO",
+    "metodoPago": "EFECTIVO",
     "detalles": [
       {
-        "productoId": 1,
+        "skuInterno": "ACEITE-CASTROL-10W40-1L",
         "cantidad": 2,
         "precioUnitario": 180.00,
         "descuento": 0.0
-      },
-      {
-        "productoId": 2,
-        "cantidad": 1,
-        "precioUnitario": 450.00,
-        "descuento": 10.0
       }
     ],
-    "observaciones": "Cliente preferente - aplicar puntos fidelidad"
-  }'
-```
-
-### 📋 Listar Ventas
-
-```bash
-curl -X GET "${BASE_URL}/ventas?page=0&size=20" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Consultar Venta
-
-```bash
-curl -X GET "${BASE_URL}/ventas/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Ventas por Sucursal
-
-```bash
-curl -X GET "${BASE_URL}/ventas/sucursal/1?fechaInicio=2026-03-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Ventas por Cliente
-
-```bash
-curl -X GET "${BASE_URL}/ventas/cliente/1?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Ventas por Empleado (comisiones)
-
-```bash
-curl -X GET "${BASE_URL}/ventas/empleado/1?fechaInicio=2026-03-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ❌ Cancelar Venta
-
-```bash
-curl -X PUT "${BASE_URL}/ventas/1/cancelar" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "motivo": "Error en pedido - cliente solicitó cancelación"
+    "observaciones": "Venta mostrador"
   }'
 ```
 
 ---
 
-## 18. Ventas - Reservas
+## 17. Ventas — Reservas
 
-### 📝 Crear Reserva
+> **Ruta base:** `/api/v1/reservas`
+
+### Crear Reserva / Apartado
 
 ```bash
-curl -X POST "${BASE_URL}/ventas/reservas" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/v1/reservas" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "sucursalId": 1,
     "clienteId": 1,
-    "productoId": 1,
+    "skuInterno": "ACEITE-CASTROL-10W40-1L",
     "cantidad": 3,
-    "anticipo": 500.00,
+    "anticipo": 200.00,
     "diasVigencia": 7,
-    "observaciones": "Cliente recogerá el viernes"
+    "observaciones": "Cliente pasa a recoger el viernes"
   }'
 ```
 
-### 📋 Listar Reservas
+### Listar Reservas
 
 ```bash
-curl -X GET "${BASE_URL}/ventas/reservas?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/reservas" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Consultar Reserva
+### Consultar Reserva
 
 ```bash
-curl -X GET "${BASE_URL}/ventas/reservas/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/reservas/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### ✅ Confirmar Entrega de Reserva
+### Reservas de un Cliente
 
 ```bash
-curl -X PUT "${BASE_URL}/ventas/reservas/1/entregar" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/v1/reservas/cliente/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Reservas por Estado
+
+```bash
+curl -X GET "$BASE/api/v1/reservas/estado/PENDIENTE" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Próximas a Vencer
+
+```bash
+curl -X GET "$BASE/api/v1/reservas/proximas-vencer" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Completar / Entregar Reserva
+
+```bash
+curl -X PUT "$BASE/api/v1/reservas/1/completar" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "ventaId": 1,
-    "observaciones": "Entrega completada"
-  }'
+  -d '{"observaciones":"Entregado en sucursal centro"}'
 ```
 
-### ❌ Cancelar Reserva
+### Cancelar Reserva
 
 ```bash
-curl -X PUT "${BASE_URL}/ventas/reservas/1/cancelar" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X PUT "$BASE/api/v1/reservas/1/cancelar" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "motivo": "Cliente no recogió en tiempo",
-    "devolucionAnticipo": true
-  }'
+  -d '{"motivo":"Cliente no recogió en tiempo"}'
 ```
 
 ---
 
-## 19. Ventas - Devoluciones
+## 18. Ventas — Devoluciones
 
-### 🔙 Crear Devolución
+> **Ruta base:** `/api/v1/devoluciones`
+
+### Registrar Devolución
 
 ```bash
-curl -X POST "${BASE_URL}/ventas/devoluciones" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/v1/devoluciones" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "ventaId": 1,
+    "motivo": "Producto defectuoso",
     "detalles": [
       {
         "detalleVentaId": 1,
         "cantidadDevuelta": 1,
-        "motivo": "PRODUCTO_DEFECTUOSO",
-        "observaciones": "Empaque dañado"
+        "observaciones": "Empaque dañado al momento de abrir"
       }
     ]
   }'
 ```
 
-### 📋 Listar Devoluciones
+### Consultar Devolución
 
 ```bash
-curl -X GET "${BASE_URL}/ventas/devoluciones?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/devoluciones/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Consultar Devolución
+### Devoluciones de una Venta
 
 ```bash
-curl -X GET "${BASE_URL}/ventas/devoluciones/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✅ Aprobar Devolución
-
-```bash
-curl -X PUT "${BASE_URL}/ventas/devoluciones/1/aprobar" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "montoReembolsado": 180.00,
-    "observaciones": "Reembolso procesado"
-  }'
+curl -X GET "$BASE/api/v1/devoluciones/venta/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 20. Compras
+## 19. Cotizaciones
 
-### 📥 Crear Orden de Compra
+> **Ruta base:** `/api/cotizaciones` *(sin `/v1/`)*
 
-```bash
-curl -X POST "${BASE_URL}/compras" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "proveedorId": 1,
-    "sucursalId": 1,
-    "detalles": [
-      {
-        "productoId": 1,
-        "cantidad": 100,
-        "precioCompra": 120.00
-      },
-      {
-        "productoId": 2,
-        "cantidad": 50,
-        "precioCompra": 400.00
-      }
-    ],
-    "observaciones": "Orden urgente - stock bajo"
-  }'
-```
-
-### 📋 Listar Compras
+### Crear Cotización
 
 ```bash
-curl -X GET "${BASE_URL}/compras?page=0&size=20" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Consultar Compra
-
-```bash
-curl -X GET "${BASE_URL}/compras/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Compras por Proveedor
-
-```bash
-curl -X GET "${BASE_URL}/compras/proveedor/1?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✅ Confirmar Recepción de Compra
-
-```bash
-curl -X PUT "${BASE_URL}/compras/1/recibir" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "observaciones": "Recibido completo y en buen estado"
-  }'
-```
-
----
-
-## 21. Cotizaciones
-
-### 📝 Crear Cotización
-
-```bash
-curl -X POST "${BASE_URL}/cotizaciones" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/cotizaciones" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "clienteId": 1,
     "empleadoId": 1,
     "detalles": [
       {
-        "productoId": 1,
+        "skuInterno": "ACEITE-CASTROL-10W40-1L",
         "cantidad": 10,
         "precioUnitario": 180.00,
         "descuento": 5.0
@@ -1122,41 +902,346 @@ curl -X POST "${BASE_URL}/cotizaciones" \
   }'
 ```
 
-### 📋 Listar Cotizaciones
+### Listar Cotizaciones
 
 ```bash
-curl -X GET "${BASE_URL}/cotizaciones?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/cotizaciones" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Consultar Cotización
+### Consultar Cotización
 
 ```bash
-curl -X GET "${BASE_URL}/cotizaciones/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/cotizaciones/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### ✅ Convertir a Venta
+### Buscar por Folio
 
 ```bash
-curl -X POST "${BASE_URL}/cotizaciones/1/convertir-venta" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/cotizaciones/folio/COT-2026-0001" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Convertir a Venta
+
+```bash
+curl -X POST "$BASE/api/cotizaciones/1/convertir-venta" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"sucursalId":1,"metodoPago":"TRANSFERENCIA"}'
+```
+
+### Cotizaciones Próximas a Vencer
+
+```bash
+curl -X GET "$BASE/api/cotizaciones/vencimiento/proximas" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Estadísticas de Cotizaciones
+
+```bash
+curl -X GET "$BASE/api/cotizaciones/estadisticas" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Marcar Vencidas (Batch)
+
+```bash
+curl -X POST "$BASE/api/cotizaciones/marcar-vencidas" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 20. Compras
+
+### Registrar Ingreso de Mercancía
+
+```bash
+curl -X POST "$BASE/api/v1/compras/ingreso" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
+    "proveedorId": 1,
     "sucursalId": 1,
-    "metodoPago": "TRANSFERENCIA"
+    "esCredito": true,
+    "diasCredito": 30,
+    "detalles": [
+      {
+        "skuInterno": "ACEITE-CASTROL-10W40-1L",
+        "cantidad": 100,
+        "precioUnitario": 120.00
+      }
+    ],
+    "observaciones": "Pedido mensual regular"
   }'
 ```
 
 ---
 
-## 22. Sucursales
+## 21. Adquisiciones — Comparador
 
-### 🏢 Crear Sucursal
+> **Ruta base:** `/api/sup/comparador`
+
+### Comparar Precios de Proveedores para un Producto
 
 ```bash
-curl -X POST "${BASE_URL}/sucursales" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/sup/comparador/producto/ACEITE-CASTROL-10W40-1L" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 22. Adquisiciones — Actualización de Precios
+
+> **Ruta base:** `/api/v1/comparador/catalogo`
+
+### Actualizar Precio de un Ítem del Catálogo
+
+```bash
+curl -X PUT "$BASE/api/v1/comparador/catalogo/5/precio" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nuevoPrecio":118.50,"motivo":"Actualización lista dic-2026"}'
+```
+
+### Actualización Masiva de Precios
+
+```bash
+curl -X POST "$BASE/api/v1/comparador/catalogo/actualizar-masivo" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '[
+    {"skuInterno":"ACEITE-CASTROL-10W40-1L","nuevoPrecio":118.50},
+    {"skuInterno":"FRENO-DISCO-CBR600-F","nuevoPrecio":350.00}
+  ]'
+```
+
+### Historial de Precios de un Ítem
+
+```bash
+curl -X GET "$BASE/api/v1/comparador/catalogo/5/historial" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 23. Adquisiciones — Órdenes de Compra
+
+> **Ruta base:** `/api/v1/oc`
+
+### Listar Órdenes de Compra
+
+```bash
+curl -X GET "$BASE/api/v1/oc" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Agregar Producto al Carrito
+
+```bash
+curl -X POST "$BASE/api/v1/oc/carrito/agregar" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"catalogoId":5,"cantidad":100}'
+```
+
+### Ver Carrito Actual
+
+```bash
+curl -X GET "$BASE/api/v1/oc/carrito" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Quitar Producto del Carrito
+
+```bash
+curl -X DELETE "$BASE/api/v1/oc/carrito/5" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Generar Orden de Compra desde el Carrito
+
+```bash
+curl -X POST "$BASE/api/v1/oc/generar" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"sucursalId":1,"proveedorId":1}'
+```
+
+### Cambiar Estado de OC
+
+```bash
+curl -X PATCH "$BASE/api/v1/oc/1/estado" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"estado":"ENVIADA"}'
+```
+
+### Confirmar Recepción de OC
+
+```bash
+curl -X POST "$BASE/api/v1/oc/1/recibir" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"observaciones":"Recibido completo y en buen estado"}'
+```
+
+### Exportar OC a Excel
+
+```bash
+curl -X GET "$BASE/api/v1/oc/1/exportar-excel" \
+  -H "Authorization: Bearer $TOKEN" \
+  --output "orden-compra-1.xlsx"
+```
+
+---
+
+## 24. Caja
+
+> **Ruta base:** `/api/v1/cajas`
+
+### Abrir Turno de Caja
+
+```bash
+curl -X POST "$BASE/api/v1/cajas/abrir" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"sucursalId":1,"empleadoId":1,"fondoInicial":1000.00}'
+```
+
+### Registrar Movimiento de Caja
+
+```bash
+curl -X POST "$BASE/api/v1/cajas/movimientos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "turnoCajaId": 1,
+    "tipo": "ENTRADA",
+    "monto": 500.00,
+    "concepto": "Fondo adicional",
+    "observaciones": "Refuerzo aprobado por gerente"
+  }'
+```
+
+### Cerrar Turno (Arqueo Z)
+
+```bash
+curl -X POST "$BASE/api/v1/cajas/1/cerrar" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"efectivoContado":8750.00,"observaciones":"Sin diferencias"}'
+```
+
+### Resumen del Turno
+
+```bash
+curl -X GET "$BASE/api/v1/cajas/1/resumen" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 25. POS — Facturación CFDI
+
+> **Ruta base:** `/api/v1/facturacion`
+
+### Timbrar CFDI
+
+```bash
+curl -X POST "$BASE/api/v1/facturacion/timbrar" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ventaId": 1,
+    "rfcReceptor": "PEGJ850315ABC",
+    "usoCfdi": "G01",
+    "metodoPago": "PUE",
+    "formaPago": "01"
+  }'
+```
+
+### Cancelar CFDI
+
+```bash
+curl -X POST "$BASE/api/v1/facturacion/1/cancelar" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"motivo":"01","folioSustitucion":""}'
+```
+
+### Facturas de un Cliente
+
+```bash
+curl -X GET "$BASE/api/v1/facturacion/cliente/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 26. POS — Terminal Bancaria
+
+> **Ruta base:** `/api/v1/pos/pagos`
+
+### Cobrar con Tarjeta
+
+```bash
+curl -X POST "$BASE/api/v1/pos/pagos/tarjeta" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"ventaId":1,"monto":360.00,"tipoTarjeta":"DEBITO"}'
+```
+
+### Estado de Transacción
+
+```bash
+curl -X GET "$BASE/api/v1/pos/pagos/REF-20260527-001/estatus" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 27. POS — Sincronización Offline
+
+> **Ruta base:** `/api/v1/sincronizacion`
+
+### Subir Lote de Ventas Offline
+
+```bash
+curl -X POST "$BASE/api/v1/sincronizacion/lote" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"sucursalId":2,"ventas":[{"ventaLocalId":"OFF-001","...":"..."}]}'
+```
+
+### Ver Lotes Pendientes
+
+```bash
+curl -X GET "$BASE/api/v1/sincronizacion/pendientes" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 28. Sucursales
+
+> **Ruta base:** `/api/v1/sucursales`
+
+### Listar Sucursales
+
+```bash
+curl -X GET "$BASE/api/v1/sucursales" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Sucursal
+
+```bash
+curl -X POST "$BASE/api/v1/sucursales" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Sucursal Centro",
@@ -1167,495 +1252,950 @@ curl -X POST "${BASE_URL}/sucursales" \
   }'
 ```
 
-### 📋 Listar Sucursales
+### Actualizar Sucursal
 
 ```bash
-curl -X GET "${BASE_URL}/sucursales" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Consultar Sucursal
-
-```bash
-curl -X GET "${BASE_URL}/sucursales/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Sucursal
-
-```bash
-curl -X PUT "${BASE_URL}/sucursales/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X PUT "$BASE/api/v1/sucursales/1" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Sucursal Centro Histórico",
-    "direccion": "Av. Reforma 123, CDMX",
     "telefono": "5512345678",
-    "email": "centro.historico@nexoohub.com",
     "responsable": "María González Pérez"
   }'
 ```
 
----
-
-## 23. Empleados
-
-### 👷 Crear Empleado
+### Eliminar Sucursal
 
 ```bash
-curl -X POST "${BASE_URL}/empleados" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X DELETE "$BASE/api/v1/sucursales/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 29. Empleados
+
+> **Ruta base:** `/api/v1/empleados`
+
+### Crear Empleado
+
+```bash
+curl -X POST "$BASE/api/v1/empleados" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Carlos Ramírez",
     "puesto": "Vendedor",
     "sucursalId": 1,
     "telefono": "5523456789",
-    "email": "carlos.ramirez@nexoohub.com",
+    "email": "carlos@nexoohub.com",
     "fechaIngreso": "2026-01-15",
     "salarioBase": 8000.00,
     "comisionVentas": 3.0
   }'
 ```
 
-### 📋 Listar Empleados
+### Empleados de una Sucursal
 
 ```bash
-curl -X GET "${BASE_URL}/empleados?page=0&size=20" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/empleados/sucursal/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Consultar Empleado
+### Eliminar Empleado
 
 ```bash
-curl -X GET "${BASE_URL}/empleados/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Empleados por Sucursal
-
-```bash
-curl -X GET "${BASE_URL}/empleados/sucursal/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Empleado
-
-```bash
-curl -X PUT "${BASE_URL}/empleados/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nombre": "Carlos Ramírez López",
-    "puesto": "Supervisor de Ventas",
-    "sucursalId": 1,
-    "telefono": "5523456789",
-    "email": "carlos.ramirez@nexoohub.com",
-    "fechaIngreso": "2026-01-15",
-    "salarioBase": 12000.00,
-    "comisionVentas": 5.0
-  }'
+curl -X DELETE "$BASE/api/v1/empleados/2" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 24. Comisiones
+## 30. Comisiones y Reglas
 
-### 💵 Calcular Comisiones de Periodo
+> **Ruta base:** `/api/comisiones` *(sin `/v1/`)*
+
+### Listar Reglas de Comisión
 
 ```bash
-curl -X POST "${BASE_URL}/comisiones/calcular" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/comisiones/reglas" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Regla de Comisión
+
+```bash
+curl -X POST "$BASE/api/comisiones/reglas" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nombre": "Comisión Vendedor Estándar",
+    "descripcion": "3% sobre ventas del mes",
+    "tipo": "PORCENTAJE",
+    "porcentaje": 3.0
+  }'
+```
+
+### Calcular Comisiones del Periodo
+
+```bash
+curl -X POST "$BASE/api/comisiones/calcular?anio=2026&mes=5" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Resumen de Comisiones
+
+```bash
+curl -X GET "$BASE/api/comisiones/resumen?anio=2026&mes=5" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Comisiones de un Vendedor
+
+```bash
+curl -X GET "$BASE/api/comisiones/vendedor/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Aprobar Pago de Comisión
+
+```bash
+curl -X PUT "$BASE/api/comisiones/1/aprobar" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"observaciones":"Aprobado para nómina de mayo 2026"}'
+```
+
+---
+
+## 31. Metas de Ventas (RH)
+
+> **Ruta base:** `/api/v1/rh/metas`
+
+### Asignar Meta a Empleado
+
+```bash
+curl -X POST "$BASE/api/v1/rh/metas" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "empleadoId": 1,
-    "fechaInicio": "2026-03-01",
-    "fechaFin": "2026-03-31"
+    "mes": 6,
+    "anio": 2026,
+    "metaMonto": 80000.00
   }'
 ```
 
-### 📋 Listar Comisiones
+### Progreso de Meta
 
 ```bash
-curl -X GET "${BASE_URL}/comisiones?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Comisiones por Empleado
-
-```bash
-curl -X GET "${BASE_URL}/comisiones/empleado/1?periodo=2026-03" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Reporte de Comisiones General
-
-```bash
-curl -X GET "${BASE_URL}/comisiones/reporte?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✅ Aprobar Pago de Comisión
-
-```bash
-curl -X PUT "${BASE_URL}/comisiones/1/aprobar" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "observaciones": "Pago procesado - periodo marzo 2026"
-  }'
+curl -X GET "$BASE/api/v1/rh/metas/1/progreso" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 25. Finanzas - Configuración
-
-### ⚙️ Crear Configuración Financiera
+## 32. Finanzas — Dashboard
 
 ```bash
-curl -X POST "${BASE_URL}/finanzas/configuracion" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/v1/dashboard" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 33. Finanzas — Configuración
+
+> **Ruta base:** `/api/v1/finanzas/parametros`
+
+### Obtener Configuración Vigente
+
+```bash
+curl -X GET "$BASE/api/v1/finanzas/parametros" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Actualizar Configuración
+
+```bash
+curl -X PUT "$BASE/api/v1/finanzas/parametros" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "margenUtilidad": 45.0,
     "descuentoMaximo": 20.0,
     "comisionVendedor": 3.0,
     "iva": 16.0,
-    "diasCreditoDefault": 30,
-    "montoMinimoCredito": 1000.00,
-    "montoMaximoCredito": 50000.00
-  }'
-```
-
-### 📋 Obtener Configuración Vigente
-
-```bash
-curl -X GET "${BASE_URL}/finanzas/configuracion/vigente" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Historial de Configuraciones
-
-```bash
-curl -X GET "${BASE_URL}/finanzas/configuracion/historial" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### ✏️ Actualizar Configuración
-
-```bash
-curl -X PUT "${BASE_URL}/finanzas/configuracion/1" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "margenUtilidad": 50.0,
-    "descuentoMaximo": 25.0,
-    "comisionVendedor": 4.0,
-    "iva": 16.0,
-    "diasCreditoDefault": 45,
-    "montoMinimoCredito": 1500.00,
-    "montoMaximoCredito": 75000.00
+    "diasCreditoDefault": 30
   }'
 ```
 
 ---
 
-## 26. Finanzas - Crédito
+## 34. Finanzas — Auditoría de Precios
 
-### 💳 Consultar Límite de Crédito
+> **Ruta base:** `/api/v1/auditoria/precios`
+
+### Historial de Precios de un Producto
 
 ```bash
-curl -X GET "${BASE_URL}/credito/cliente/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/auditoria/precios/producto/ACEITE-CASTROL-10W40-1L" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 💰 Asignar/Actualizar Límite
+### Cambios en un Periodo
 
 ```bash
-curl -X POST "${BASE_URL}/credito/cliente/1/limite" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "limiteCredito": 50000.00,
-    "diasCredito": 30,
-    "observaciones": "Cliente con buen historial"
-  }'
+curl -X GET "$BASE/api/v1/auditoria/precios/periodo?fechaInicio=2026-01-01T00:00:00&fechaFin=2026-05-31T23:59:59" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 📊 Reporte de Cuentas por Cobrar
+### Cambios Significativos
 
 ```bash
-curl -X GET "${BASE_URL}/credito/cuentas-cobrar" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 🔍 Saldo Actual del Cliente
-
-```bash
-curl -X GET "${BASE_URL}/credito/cliente/1/saldo" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 💵 Registrar Pago
-
-```bash
-curl -X POST "${BASE_URL}/credito/cliente/1/pago" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "monto": 5000.00,
-    "metodoPago": "TRANSFERENCIA",
-    "referencia": "REF-20260312-001",
-    "observaciones": "Pago parcial factura 123"
-  }'
+curl -X GET "$BASE/api/v1/auditoria/precios/significativos" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 27. Finanzas - Dashboard
+## 35. Crédito y Cobranza
 
-### 📊 Dashboard General
+> **Ruta base:** `/api/credito` *(sin `/v1/`)*
 
-```bash
-curl -X GET "${BASE_URL}/finanzas/dashboard" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📈 Métricas del Mes
+### Crear Límite de Crédito
 
 ```bash
-curl -X GET "${BASE_URL}/finanzas/dashboard/mes-actual" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Comparativo Periodos
-
-```bash
-curl -X GET "${BASE_URL}/finanzas/dashboard/comparativo?periodo1=2026-02&periodo2=2026-03" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📉 Indicadores Financieros
-
-```bash
-curl -X GET "${BASE_URL}/finanzas/dashboard/indicadores" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
----
-
-## 28. Finanzas - Auditoría de Precios
-
-### 📝 Registrar Cambio de Precio
-
-```bash
-curl -X POST "${BASE_URL}/finanzas/auditoria-precios" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "productoId": 1,
-    "precioAnterior": 180.00,
-    "precioNuevo": 200.00,
-    "motivo": "Aumento costo proveedor",
-    "autorizadoPor": "Gerente General"
-  }'
-```
-
-### 📋 Historial de Cambios
-
-```bash
-curl -X GET "${BASE_URL}/finanzas/auditoria-precios/producto/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Reporte de Auditoría
-
-```bash
-curl -X GET "${BASE_URL}/finanzas/auditoria-precios/reporte?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
----
-
-## 29. Rentabilidad
-
-### 📊 Calcular Rentabilidad de Producto
-
-```bash
-curl -X GET "${BASE_URL}/rentabilidad/producto/1?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Rentabilidad por Categoría
-
-```bash
-curl -X GET "${BASE_URL}/rentabilidad/categoria/1?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Rentabilidad por Sucursal
-
-```bash
-curl -X GET "${BASE_URL}/rentabilidad/sucursal/1?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Top Productos Más Rentables
-
-```bash
-curl -X GET "${BASE_URL}/rentabilidad/top-productos?top=10&fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Análisis de Márgenes
-
-```bash
-curl -X GET "${BASE_URL}/rentabilidad/analisis-margenes?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
----
-
-## 30. Métricas - Financieras
-
-### 📊 Obtener Métricas Financieras
-
-```bash
-curl -X GET "${BASE_URL}/metricas-financieras?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📈 Resumen Financiero
-
-```bash
-curl -X GET "${BASE_URL}/metricas-financieras/resumen" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Gráfica de Ingresos
-
-```bash
-curl -X GET "${BASE_URL}/metricas-financieras/grafica-ingresos?periodo=2026-03" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
----
-
-## 31. Métricas - Inventario
-
-### 📊 Métricas Generales de Inventario
-
-```bash
-curl -X GET "${BASE_URL}/metricas/inventario" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Rotación de Inventario
-
-```bash
-curl -X GET "${BASE_URL}/metricas/inventario/rotacion?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Stock Crítico
-
-```bash
-curl -X GET "${BASE_URL}/metricas/inventario/stock-critico" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Valor del Inventario
-
-```bash
-curl -X GET "${BASE_URL}/metricas/inventario/valor" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
----
-
-## 32. Métricas - Operativas
-
-### 📊 Métricas Operativas Generales
-
-```bash
-curl -X GET "${BASE_URL}/metricas/operativas?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Eficiencia Operativa
-
-```bash
-curl -X GET "${BASE_URL}/metricas/operativas/eficiencia" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Balance de Transacciones
-
-```bash
-curl -X GET "${BASE_URL}/metricas/operativas/balance?periodo=2026-03" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
----
-
-## 33. Métricas - Venta y Cliente
-
-### 📊 Métricas de Ventas
-
-```bash
-curl -X GET "${BASE_URL}/metricas/ventas?fechaInicio=2026-01-01&fech aFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Métricas de Clientes
-
-```bash
-curl -X GET "${BASE_URL}/metricas/clientes" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Top Clientes
-
-```bash
-curl -X GET "${BASE_URL}/metricas/clientes/top?top=10&fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Análisis de Métodos de Pago
-
-```bash
-curl -X GET "${BASE_URL}/metricas/ventas/metodos-pago?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
----
-
-## 34. Programa de Fidelidad
-
-### 🎁 Crear Programa
-
-```bash
-curl -X POST "${BASE_URL}/fidelidad/programa" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/credito/limites" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "clienteId": 1,
-    "nivel": "BRONCE"
+    "limiteCredito": 50000.00,
+    "diasCredito": 30,
+    "observaciones": "Cliente con buen historial de pago"
   }'
 ```
 
-### 🔍 Consultar Programa por Cliente
+### Consultar Límite de un Cliente
 
 ```bash
-curl -X GET "${BASE_URL}/fidelidad/programa/cliente/1" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/credito/limites/cliente/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### ➕ Acumular Puntos
+### Validar si Cliente Puede Comprar a Crédito
 
 ```bash
-curl -X POST "${BASE_URL}/fidelidad/acumular" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X GET "$BASE/api/credito/validar?clienteId=1&monto=5000.00" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Registrar Abono
+
+```bash
+curl -X POST "$BASE/api/credito/abonos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clienteId": 1,
+    "monto": 10000.00,
+    "metodoPago": "TRANSFERENCIA",
+    "referencia": "TRF-20260527-001",
+    "observaciones": "Abono parcial factura mayo"
+  }'
+```
+
+### Bloquear Crédito de Cliente
+
+```bash
+curl -X PUT "$BASE/api/credito/limites/cliente/1/bloquear" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Historial de Crédito
+
+```bash
+curl -X GET "$BASE/api/credito/historial/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Clientes en Riesgo
+
+```bash
+curl -X GET "$BASE/api/credito/limites/riesgo" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Clientes con Sobregiro
+
+```bash
+curl -X GET "$BASE/api/credito/limites/sobregiro" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 36. ERP — CxP y Gastos
+
+### Listar Cuentas por Pagar
+
+```bash
+curl -X GET "$BASE/api/v1/cxp" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Registrar Pago de CxP
+
+```bash
+curl -X POST "$BASE/api/v1/cxp/1/pagos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"monto":15000.00,"metodoPago":"TRANSFERENCIA","referencia":"TRF-PROV-001"}'
+```
+
+### Registrar Gasto Operativo
+
+```bash
+curl -X POST "$BASE/api/v1/finanzas/gastos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "concepto": "Pago de servicios (luz, agua, internet)",
+    "monto": 3500.00,
+    "categoria": "SERVICIOS",
+    "sucursalId": 1,
+    "fecha": "2026-05-27"
+  }'
+```
+
+### Listar Gastos
+
+```bash
+curl -X GET "$BASE/api/v1/finanzas/gastos" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 37. ERP — Contabilidad
+
+> **Ruta base:** `/api/v1/contabilidad`
+
+### Catálogo de Cuentas
+
+```bash
+curl -X GET "$BASE/api/v1/contabilidad/cuentas" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Póliza Contable
+
+```bash
+curl -X POST "$BASE/api/v1/contabilidad/polizas" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tipo": "INGRESO",
+    "descripcion": "Cierre de ventas mayo 2026",
+    "movimientos": [
+      {"cuentaId":1,"debe":50000.00,"haber":0},
+      {"cuentaId":4,"debe":0,"haber":50000.00}
+    ]
+  }'
+```
+
+### Balanza de Comprobación
+
+```bash
+curl -X GET "$BASE/api/v1/contabilidad/reportes/balanza" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Estado de Resultados
+
+```bash
+curl -X GET "$BASE/api/v1/contabilidad/reportes/estado-resultados" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 38. ERP — Logística
+
+> **Ruta base:** `/api/v1/logistica`
+
+### Listar Flota Vehicular
+
+```bash
+curl -X GET "$BASE/api/v1/logistica/vehiculos" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Listar Choferes
+
+```bash
+curl -X GET "$BASE/api/v1/logistica/choferes" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Crear Ruta de Entrega
+
+```bash
+curl -X POST "$BASE/api/v1/logistica/rutas" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vehiculoId": 1,
+    "choferId": 1,
+    "fecha": "2026-05-28",
+    "observaciones": "Entregas zona norte CDMX"
+  }'
+```
+
+### Asignar Facturas a Ruta
+
+```bash
+curl -X POST "$BASE/api/v1/logistica/rutas/1/facturas" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"facturaIds":[1,2,3]}'
+```
+
+### Actualizar Estatus de Ruta
+
+```bash
+curl -X PATCH "$BASE/api/v1/logistica/rutas/1/estatus" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"estatus":"EN_CAMINO"}'
+```
+
+---
+
+## 39. ERP — Nómina
+
+> **Ruta base:** `/api/v1/nomina`
+
+### Registrar Empleado en Nómina
+
+```bash
+curl -X POST "$BASE/api/v1/nomina/empleados" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "empleadoId": 1,
+    "salarioBruto": 12000.00,
+    "periodicidad": "QUINCENAL",
+    "tipoPago": "TRANSFERENCIA"
+  }'
+```
+
+### Crear Periodo de Nómina
+
+```bash
+curl -X POST "$BASE/api/v1/nomina/periodos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"fechaInicio":"2026-05-16","fechaFin":"2026-05-31","descripcion":"2a quincena mayo 2026"}'
+```
+
+### Generar Recibos del Periodo
+
+```bash
+curl -X POST "$BASE/api/v1/nomina/periodos/1/generar" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Ver Recibo de Nómina
+
+```bash
+curl -X GET "$BASE/api/v1/nomina/recibos/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 40. ERP — Devoluciones a Proveedor
+
+> **Ruta base:** `/api/v1/devoluciones/proveedores`
+
+### Crear Devolución a Proveedor
+
+```bash
+curl -X POST "$BASE/api/v1/devoluciones/proveedores" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "proveedorId": 1,
+    "detalles": [
+      {
+        "skuInterno": "ACEITE-CASTROL-10W40-1L",
+        "cantidad": 5,
+        "motivo": "Producto con defecto de fábrica"
+      }
+    ],
+    "observaciones": "Solicitamos nota de crédito"
+  }'
+```
+
+### Aplicar Devolución (genera movimiento de inventario)
+
+```bash
+curl -X POST "$BASE/api/v1/devoluciones/proveedores/1/aplicar" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 41. CRM — Pipeline B2B
+
+> **Ruta base:** `/api/v1/crm`
+
+### Registrar Prospecto
+
+```bash
+curl -X POST "$BASE/api/v1/crm/prospectos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "empresa": "Taller Moto Express",
+    "contactoPrincipal": "Luis García",
+    "telefono": "5598765432",
+    "email": "luis@motoexpress.com",
+    "rfc": "MOE200101ABC"
+  }'
+```
+
+### Crear Oportunidad de Negocio
+
+```bash
+curl -X POST "$BASE/api/v1/crm/oportunidades" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prospectoId": 1,
+    "titulo": "Suministro mensual de aceites",
+    "valorProyectado": 25000.00,
+    "etapa": "PROPUESTA",
+    "probabilidad": 60
+  }'
+```
+
+### Avanzar Etapa del Pipeline
+
+```bash
+curl -X PATCH "$BASE/api/v1/crm/oportunidades/1/etapa" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nuevaEtapa":"NEGOCIACION","observaciones":"Enviamos propuesta revisada"}'
+```
+
+### Registrar Interacción
+
+```bash
+curl -X POST "$BASE/api/v1/crm/interacciones" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prospectoId": 1,
+    "tipoInteraccion": "LLAMADA",
+    "resumen": "Cliente interesado en descuento por volumen"
+  }'
+```
+
+---
+
+## 42. CRM — Garantías
+
+> **Ruta base:** `/api/crm/garantias` *(sin `/v1/`)*
+
+### Crear Ticket de Garantía
+
+```bash
+curl -X POST "$BASE/api/crm/garantias" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clienteId": 1,
+    "ventaId": 1,
+    "skuInterno": "ACEITE-CASTROL-10W40-1L",
+    "descripcionProblema": "Aceite con partículas extrañas"
+  }'
+```
+
+### Listar Tickets de Garantía
+
+```bash
+curl -X GET "$BASE/api/crm/garantias" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Resolver Garantía
+
+```bash
+curl -X PUT "$BASE/api/crm/garantias/1/resolver" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"resolucion":"Reemplazo de producto","observaciones":"Lote con defecto, reemplazado sin costo"}'
+```
+
+---
+
+## 43. CRM — NPS
+
+> **Ruta base:** `/api/v1/crm/nps`
+
+### Crear Encuesta NPS
+
+```bash
+curl -X POST "$BASE/api/v1/crm/nps/encuestas" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"clienteId":1,"ventaId":1}'
+```
+
+### Registrar Respuesta NPS
+
+```bash
+curl -X POST "$BASE/api/v1/crm/nps/respuestas" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"encuestaId":1,"puntuacion":9,"comentario":"Excelente atención y precios competitivos"}'
+```
+
+### Dashboard NPS
+
+```bash
+curl -X GET "$BASE/api/v1/crm/nps/dashboard" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 44. CRM — Marketing
+
+> **Ruta base:** `/api/v1/marketing/campanas`
+
+### Crear Campaña
+
+```bash
+curl -X POST "$BASE/api/v1/marketing/campanas" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nombre": "Promoción Fin de Temporada",
+    "tipo": "EMAIL",
+    "segmento": "CLIENTES_VIP",
+    "mensaje": "Descuento exclusivo del 20% este fin de semana"
+  }'
+```
+
+### Ejecutar Campaña
+
+```bash
+curl -X POST "$BASE/api/v1/marketing/campanas/1/ejecutar" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Métricas de la Campaña
+
+```bash
+curl -X GET "$BASE/api/v1/marketing/campanas/1/metricas" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 45. Métricas Financieras
+
+> **Ruta base:** `/api/v1/metricas-financieras`
+
+### Dashboard Ejecutivo Financiero
+
+```bash
+curl -X GET "$BASE/api/v1/metricas-financieras/dashboard-ejecutivo" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Generar Análisis Financiero
+
+```bash
+curl -X POST "$BASE/api/v1/metricas-financieras/analisis" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"sucursalId":1,"fechaInicio":"2026-05-01","fechaFin":"2026-05-31"}'
+```
+
+### Top Productos por Ingreso
+
+```bash
+curl -X GET "$BASE/api/v1/metricas-financieras/top-productos" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Health Check
+
+```bash
+curl -X GET "$BASE/api/v1/metricas-financieras/health" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 46. Métricas de Inventario
+
+> **Ruta base:** `/api/v1/metricas/inventario`
+
+### Valor Actual del Inventario
+
+```bash
+curl -X GET "$BASE/api/v1/metricas/inventario/valor-actual" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Productos en Stock Bajo
+
+```bash
+curl -X GET "$BASE/api/v1/metricas/inventario/productos/bajo-stock" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Productos Sin Stock
+
+```bash
+curl -X GET "$BASE/api/v1/metricas/inventario/productos/sin-stock" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 47. Métricas Operativas
+
+> **Ruta base:** `/api/v1/metricas/operativas`
+
+### Métricas del Mes Actual
+
+```bash
+curl -X GET "$BASE/api/v1/metricas/operativas/mes-actual" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Comparativo Mes Anterior
+
+```bash
+curl -X GET "$BASE/api/v1/metricas/operativas/mes-anterior" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Últimos 7 Días
+
+```bash
+curl -X GET "$BASE/api/v1/metricas/operativas/ultimos-7-dias" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Consolidado General
+
+```bash
+curl -X GET "$BASE/api/v1/metricas/operativas/consolidado" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 48. Métricas Ventas y Clientes
+
+> **Ruta base:** `/api/metricas/ventas-clientes` *(sin `/v1/`)*
+
+### Mes Actual
+
+```bash
+curl -X GET "$BASE/api/metricas/ventas-clientes/mes-actual" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Consolidado
+
+```bash
+curl -X GET "$BASE/api/metricas/ventas-clientes/consolidado" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Análisis Personalizado
+
+```bash
+curl -X POST "$BASE/api/metricas/ventas-clientes/analisis" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"sucursalId":1,"fechaInicio":"2026-05-01","fechaFin":"2026-05-31"}'
+```
+
+---
+
+## 49. Rentabilidad
+
+> **Ruta base:** `/api/v1/rentabilidad`
+
+### Calcular Rentabilidad de Productos
+
+```bash
+curl -X POST "$BASE/api/v1/rentabilidad/productos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"sucursalId":1,"fechaInicio":"2026-05-01","fechaFin":"2026-05-31"}'
+```
+
+### Top Productos Más Rentables
+
+```bash
+curl -X GET "$BASE/api/v1/rentabilidad/productos/mas-rentables?top=10&sucursalId=1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Productos con Margen Bajo
+
+```bash
+curl -X GET "$BASE/api/v1/rentabilidad/productos/menos-rentables?top=10&sucursalId=1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Ventas con Bajo Costo
+
+```bash
+curl -X GET "$BASE/api/v1/rentabilidad/ventas/bajo-costo" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Estadísticas Generales
+
+```bash
+curl -X GET "$BASE/api/v1/rentabilidad/estadisticas?sucursalId=1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 50. Analítica — RFM
+
+> **Ruta base:** `/api/v1/analitica/rfm`
+
+### Calcular RFM Masivo
+
+```bash
+curl -X POST "$BASE/api/v1/analitica/rfm/calcular" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Ver Segmentos RFM
+
+```bash
+curl -X GET "$BASE/api/v1/analitica/rfm/segmentos" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### RFM de un Cliente
+
+```bash
+curl -X GET "$BASE/api/v1/analitica/rfm/cliente/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 51. Analítica — Churn
+
+> **Ruta base:** `/api/v1/analitica/churn`
+
+### Calcular Riesgo de Abandono
+
+```bash
+curl -X POST "$BASE/api/v1/analitica/churn/calcular" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Clientes en Riesgo de Abandono
+
+```bash
+curl -X GET "$BASE/api/v1/analitica/churn/en-riesgo" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 52. Analítica — Market Basket
+
+> **Ruta base:** `/api/v1/analitica/canasta`
+
+### Calcular Reglas de Asociación
+
+```bash
+curl -X POST "$BASE/api/v1/analitica/canasta/calcular" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Sugerencias para un SKU
+
+```bash
+curl -X GET "$BASE/api/v1/analitica/canasta/ACEITE-CASTROL-10W40-1L" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 53. Analítica — Rendimiento Personal
+
+> **Ruta base:** `/api/v1/analitica/personal`
+
+### Calcular Rendimiento
+
+```bash
+curl -X POST "$BASE/api/v1/analitica/personal/calcular" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Ranking General
+
+```bash
+curl -X GET "$BASE/api/v1/analitica/personal/rendimiento" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Tendencia de un Empleado
+
+```bash
+curl -X GET "$BASE/api/v1/analitica/personal/1/tendencia" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 54. Fidelidad
+
+> **Ruta base:** `/api/v1/fidelidad`
+
+### Crear Programa de Fidelidad para Cliente
+
+```bash
+curl -X POST "$BASE/api/v1/fidelidad/programa" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"clienteId":1,"nivel":"BRONCE"}'
+```
+
+### Consultar Programa del Cliente
+
+```bash
+curl -X GET "$BASE/api/v1/fidelidad/programa/cliente/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Acumular Puntos
+
+```bash
+curl -X POST "$BASE/api/v1/fidelidad/acumular" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "clienteId": 1,
@@ -1665,11 +2205,11 @@ curl -X POST "${BASE_URL}/fidelidad/acumular" \
   }'
 ```
 
-### 🎁 Canjear Puntos
+### Canjear Puntos
 
 ```bash
-curl -X POST "${BASE_URL}/fidelidad/canjear" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/v1/fidelidad/canjear" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "clienteId": 1,
@@ -1679,277 +2219,148 @@ curl -X POST "${BASE_URL}/fidelidad/canjear" \
   }'
 ```
 
-### 📊 Historial de Movimientos
+### Historial de Movimientos
 
 ```bash
-curl -X GET "${BASE_URL}/fidelidad/programa/cliente/1/historial" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/fidelidad/historial/cliente/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 📊 Estadísticas del Sistema
+### Estadísticas del Programa
 
 ```bash
-curl -X GET "${BASE_URL}/fidelidad/estadisticas" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/v1/fidelidad/estadisticas" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 35. Predicción de Demand a
+## 55. Predicción de Demanda
 
-### 🔮 Generar Predicción
+> **Ruta base:** `/api/predicciones` *(sin `/v1/`)*
+
+### Generar Predicción
 
 ```bash
-curl -X POST "${BASE_URL}/prediccion-demanda/generar" \
-  -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST "$BASE/api/predicciones/generar" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "productoId": 1,
+    "skuProducto": "ACEITE-CASTROL-10W40-1L",
     "sucursalId": 1,
-    "periodos": 12,
+    "periodos": 3,
     "algoritmo": "PROMEDIO_MOVIL"
   }'
 ```
 
-### 📋 Listar Predicciones
+### Predicción por Producto
 
 ```bash
-curl -X GET "${BASE_URL}/prediccion-demanda?page=0&size=10" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/predicciones/producto/ACEITE-CASTROL-10W40-1L" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 🔍 Predicción por Producto
+### Recomendaciones de Reorden
 
 ```bash
-curl -X GET "${BASE_URL}/prediccion-demanda/producto/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Recomendación de Reorden
-
-```bash
-curl -X GET "${BASE_URL}/prediccion-demanda/recomendacion/producto/1/sucursal/1" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
-
-### 📊 Precisión del Modelo
-
-```bash
-curl -X GET "${BASE_URL}/prediccion-demanda/precision?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
-  -H "Authorization: Bearer ${TOKEN}"
+curl -X GET "$BASE/api/predicciones/recomendaciones" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
 
-## 🔧 Utilidades y Scripts
+## 56. Alertas del Sistema
 
-### Script para Pruebas Completas
+> **Ruta base:** `/api/v1/alertas`
 
-```bash
-#!/bin/bash
-# test-api-complete.sh
-
-# 1. Login y obtener token
-echo "=== 1. LOGIN ==="
-TOKEN=$(curl -s -X POST "${BASE_URL}/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}' \
-  | jq -r '.data.token')
-
-echo "Token: ${TOKEN:0:20}..."
-
-# 2. Crear categoría
-echo -e "\n=== 2. CREAR CATEGORÍA ==="
-CATEGORIA_ID=$(curl -s -X POST "${BASE_URL}/catalogo/categorias" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Test Aceites","descripcion":"Categoría de prueba"}' \
-  | jq -r '.data.id')
-
-echo "Categoría creada: ID ${CATEGORIA_ID}"
-
-# 3. Crear proveedor
-echo -e "\n=== 3. CREAR PROVEEDOR ==="
-PROVEEDOR_ID=$(curl -s -X POST "${BASE_URL}/catalogo/proveedores" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Test Proveedor","contacto":"Juan Test","telefono":"5555555555","email":"test@test.com","rfc":"TEST990101ABC"}' \
-  | jq -r '.data.id')
-
-echo "Proveedor creado: ID ${PROVEEDOR_ID}"
-
-# 4. Crear producto
-echo -e "\n=== 4. CREAR PRODUCTO ==="
-PRODUCTO_ID=$(curl -s -X POST "${BASE_URL}/productos" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d "{\"skuInterno\":\"TEST-001\",\"nombre\":\"Producto Test\",\"categoriaId\":${CATEGORIA_ID},\"proveedorId\":${PROVEEDOR_ID},\"precioCompra\":100.00,\"precioVenta\":150.00,\"stockMinimo\":10,\"stockMaximo\":100,\"unidadMedida\":\"UNIDAD\"}" \
-  | jq -r '.data.id')
-
-echo "Producto creado: ID ${PRODUCTO_ID}"
-
-# 5. Listar productos
-echo -e "\n=== 5. LISTAR PRODUCTOS ==="
-curl -s -X GET "${BASE_URL}/productos?page=0&size=5" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  | jq '.data.content[] | {id, nombre, precioVenta}'
-
-echo -e "\n✅ Test completado exitosamente"
-```
-
-### Limpiar Datos de Prueba
+### Mis Alertas (por usuario)
 
 ```bash
-#!/bin/bash
-# clean-test-data.sh
-
-TOKEN=$(curl -s -X POST "${BASE_URL}/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}' \
-  | jq -r '.data.token')
-
-# Eliminar recursos de prueba (ajustar IDs según necesidad)
-echo "Limpiando datos de prueba..."
-
-curl -X DELETE "${BASE_URL}/productos/999" -H "Authorization: Bearer ${TOKEN}"
-curl -X DELETE "${BASE_URL}/catalogo/categorias/999" -H "Authorization: Bearer ${TOKEN}"
-curl -X DELETE "${BASE_URL}/catalogo/proveedores/999" -H "Authorization: Bearer ${TOKEN}"
-
-echo "✅ Limpieza completada"
+curl -X GET "$BASE/api/v1/alertas/mis-alertas/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
----
+### Alertas de una Sucursal
 
-## 📝 Notas Importantes
-
-### Autenticación
-- Todos los endpoints (excepto `/auth/login`) requieren token JWT
-- El token expira en 24 horas por defecto
-- Header requerido: `Authorization: Bearer {TOKEN}`
-
-### Códigos de Respuesta HTTP
-- **200 OK**: Operación exitosa
-- **201 Created**: Recurso creado exitosamente
-- **400 Bad Request**: Datos inválidos o faltantes
-- **401 Unauthorized**: Token inválido o expirado
-- **403 Forbidden**: Sin permisos para la operación
-- **404 Not Found**: Recurso no encontrado
-- **409 Conflict**: Conflicto (ej. duplicado, stock insuficiente)
-- **500 Internal Server Error**: Error del servidor
-
-### Formato de Respuesta Estándar
-
-```json
-{
-  "exitoso": true,
-  "mensaje": "Operación exitosa",
-  "data": { },
-  "traceId": "abc123...",
-  "timestamp": "2026-03-12T10:30:00"
-}
-```
-
-### Paginación
-- Parámetros: `?page=0&size=20`
-- Por defecto: `page=0, size=10`
-- Máximo: `size=100`
-
----
-
-## 📚 Documentación Adicional
-
-- **API Docs Interactiva**: http://localhost:8080/swagger-ui.html
-- **OpenAPI JSON**: http://localhost:8080/v3/api-docs
-- **Repositorio GitHub**: https://github.com/nexoohub/almacen
-- **Wiki**: https://github.com/nexoohub/almacen/wiki
-
----
-
-**© 2026 NexooHub Development Team**
-
----
-
-## Módulos de Proveedores y Compras (SUP)
-
-### Comparación de Precios de Proveedores (SUP-01)
-``bash
-curl -X GET 'http://localhost:8080/api/v1/adquisiciones/comparador?skuInterno=MOT-001&sucursalId=1' \
-  -H 'Authorization: Bearer <TOKEN>'
-``
-
-### Actualización Masiva de Precios (SUP-02)
-``bash
-curl -X PATCH 'http://localhost:8080/api/v1/adquisiciones/precios/masivo/excel' \
-  -H 'Authorization: Bearer <TOKEN>' \
-  -H 'Content-Type: multipart/form-data' \
-  -F 'file=@"/ruta/al/catalogo_proveedor.xlsx"'
-``
-
-### Carrito de Compras de Proveedor y Generar OC Excel (SUP-03)
-``bash
-curl -X POST 'http://localhost:8080/api/v1/adquisiciones/carrito/agregar' \
-  -H 'Authorization: Bearer <TOKEN>' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "catalogoId": 5,
-    "cantidad": 100
-  }'
-
-curl -X POST 'http://localhost:8080/api/v1/adquisiciones/ordenes-compra/generar?sucursalId=1&proveedorId=2' \
-  -H 'Authorization: Bearer <TOKEN>'
-``
-
-## Módulos RH y Seguridad (PRO)
-
-### Asignar Regla de Comisión y Metas (PRO-02)
-``bash
-curl -X POST 'http://localhost:8080/api/v1/rh/metas' \
-  -H 'Authorization: Bearer <TOKEN>' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "empleadoId": 12,
-    "mes": 3,
-    "anio": 2026,
-    "metaMonto": 50000.00
-  }'
-``
-
-### Roles de Seguridad RBAC - Crear Rol (PRO-03)
-``bash
-curl -X POST 'http://localhost:8080/api/v1/admin/roles' \
-  -H 'Authorization: Bearer <TOKEN>' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "nombre": "GERENTE_VENTAS",
-    "descripcion": "Acceso a indicadores",
-    "permisos": ["LEER_VENTAS", "CREAR_VENTAS", "APROBAR_DEVOLUCION"]
-  }'
-``
-
-## Módulo Analítico y Rendimiento (ANA-01)
 ```bash
-curl -X GET 'http://localhost:8080/api/v1/rh/metricas/ranking?fechaInicio=2026-03-01' \
-  -H 'Authorization: Bearer <TOKEN>'
+curl -X GET "$BASE/api/v1/alertas/sucursal/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-## Módulo de Centro de Notificaciones y Alertas (PRO-01)
+### Contador de Alertas No Leídas (badge)
 
-### Suscribirse al Canal de Alertas (SSE / WebSockets)
 ```bash
-curl -N -H "Accept: text/event-stream" \
-  -H "Authorization: Bearer <TOKEN>" \
-  http://localhost:8080/api/v1/alertas/stream/SSE
-```
-
-### Consultar Alertas No Leídas del Empleado
-```bash
-curl -X GET 'http://localhost:8080/api/v1/alertas/mis-alertas/1' \
-  -H 'Authorization: Bearer <TOKEN>'
+curl -X GET "$BASE/api/v1/alertas/badge/1" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Marcar Alerta como Leída
+
 ```bash
-curl -X PUT 'http://localhost:8080/api/v1/alertas/1/leida' \
-  -H 'Authorization: Bearer <TOKEN>'
+curl -X PUT "$BASE/api/v1/alertas/1/leer" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
+### Resolver Alerta
+
+```bash
+curl -X PUT "$BASE/api/v1/alertas/1/resolver" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Suscribirse al Stream SSE (Alertas en Tiempo Real)
+
+```bash
+curl -N \
+  -H "Accept: text/event-stream" \
+  -H "Authorization: Bearer $TOKEN" \
+  "$BASE/api/v1/alertas/stream/SSE"
+```
+
+---
+
+## Notas Importantes
+
+### Prefijos de Rutas
+
+Algunos módulos usan prefijos distintos. Aquí el mapa de referencia:
+
+| Módulo | Prefijo |
+|---|---|
+| La mayoría | `/api/v1/` |
+| Cotizaciones | `/api/cotizaciones` |
+| Comisiones | `/api/comisiones` |
+| Crédito | `/api/credito` |
+| Garantías CRM | `/api/crm/garantias` |
+| Métricas ventas-clientes | `/api/metricas/ventas-clientes` |
+| Predicciones | `/api/predicciones` |
+| Alertas lento movimiento | `/api/alertas/lento-movimiento` |
+| Comparador precios SUP | `/api/sup/comparador` |
+
+### Códigos de Respuesta HTTP
+
+| Código | Significado |
+|---|---|
+| 200 | Operación exitosa |
+| 201 | Recurso creado correctamente |
+| 400 | Datos inválidos o regla de negocio no cumplida |
+| 401 | Token ausente o expirado |
+| 403 | Sin permisos |
+| 404 | Recurso no encontrado |
+| 405 | Método HTTP no soportado en ese endpoint |
+| 409 | Conflicto (duplicado, stock insuficiente, crédito insuficiente) |
+| 500 | Error interno del servidor (0 registrados en producción) |
+
+### Paginación
+
+Los endpoints con listas soportan paginación con `?page=0&size=20`. Por defecto se devuelven los primeros 20 registros.
+
+### Links Útiles
+
+- **Swagger UI:** http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON:** http://localhost:8080/v3/api-docs
+- **Actuator Health:** http://localhost:8080/actuator/health
+
+---
+
+*© 2026 NexooHub Development Team*

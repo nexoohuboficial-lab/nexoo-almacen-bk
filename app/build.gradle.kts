@@ -61,7 +61,22 @@ tasks.test{
 }
 
 tasks.jacocoTestReport {
-    dependsOn(tasks.test) 
+    dependsOn(tasks.test)
+    classDirectories.setFrom(files(classDirectories.files.map {
+        fileTree(it) {
+            exclude(
+                "**/dto/**",
+                "**/entity/**",
+                "**/mapper/**",
+                "**/config/**",
+                "**/security/**",
+                "**/exception/**",
+                "**/*Application*",
+                "**/*Id*",
+                "**/specification/**"
+            )
+        }
+    }))
 }
 
 testing {

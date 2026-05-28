@@ -52,6 +52,18 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "No encontrado", ex.getMessage(), null);
     }
 
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> handleMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException ex) {
+        log.warn("Método HTTP no soportado: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, "Metodo No Soportado", ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        log.warn("Ruta estática o recurso no encontrado: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Ruta Inexistente", ex.getMessage(), null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleAll(Exception ex) {
         // 2. ERROR CRÍTICO: Aquí sí mandamos el STACKTRACE completo al log 
@@ -187,6 +199,21 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST, 
             ex.getErrorCode(), 
             ex.getMessage(), 
+            null
+        );
+    }
+
+    /**
+     * Maneja excepciones de estado ilegal (IllegalStateException).
+     * HTTP 409 CONFLICT - La operación no se puede completar por el estado del sistema.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalState(IllegalStateException ex) {
+        log.warn("Estado inválido en operación: {}", ex.getMessage());
+        return buildErrorResponse(
+            HttpStatus.CONFLICT,
+            "ESTADO_INVALIDO",
+            ex.getMessage(),
             null
         );
     }

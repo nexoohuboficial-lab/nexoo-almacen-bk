@@ -72,40 +72,96 @@ public class ComisionControllerIntegrationTest {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
+
     private String token;
     private Integer vendedorId;
 
     @BeforeEach
     void setUp() {
-        // Crear usuario para autenticación
-        Usuario usuario = new Usuario();
-        usuario.setUsername("admin@nexoo.com");
-        usuario.setPassword("$2a$10$test");
-        usuario.setRole("ROLE_ADMIN");
-        usuarioRepository.save(usuario);
+        transactionTemplate.setPropagationBehavior(org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRED);
+        transactionTemplate.executeWithoutResult(status -> {
+            // Natively insert admin user with ID 999 to avoid ID conflicts with vendedor (ID 1)
+            Number adminCount = (Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM usuarios WHERE username = 'admin@nexoo.com'")
+                    .getSingleResult();
+            if (adminCount.intValue() == 0) {
+                entityManager.createNativeQuery("INSERT INTO usuarios (id, username, password, role) VALUES (999, 'admin@nexoo.com', '$2a$10$test', 'ROLE_ADMIN')")
+                        .executeUpdate();
+            }
+            
+            // Generar token
+            token = jwtUtil.generateToken("admin@nexoo.com");
 
-        // Generar token
-        token = jwtUtil.generateToken("admin@nexoo.com");
+            // Crear configuración financiera si no existe
+            if (configuracionRepository.count() == 0) {
+                ConfiguracionFinanciera config = new ConfiguracionFinanciera();
+                config.setIva(new BigDecimal("0.16"));
+                config.setMargenGananciaBase(new BigDecimal("0.30"));
+                config.setComisionTarjeta(new BigDecimal("0.03"));
+                configuracionRepository.save(config);
+            }
 
-        // Crear configuración financiera si no existe
-        if (configuracionRepository.count() == 0) {
-            ConfiguracionFinanciera config = new ConfiguracionFinanciera();
-            config.setIva(new BigDecimal("0.16"));
-            config.setMargenGananciaBase(new BigDecimal("0.30"));
-            config.setComisionTarjeta(new BigDecimal("0.03"));
-            configuracionRepository.save(config);
-        }
+            // Natively insert default sucursal with ID 1 to satisfy Venta.sucursal_id FK if not exists
+            Number sucursalCount = (Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM sucursal WHERE id = 1")
+                    .getSingleResult();
+            if (sucursalCount.intValue() == 0) {
+                entityManager.createNativeQuery("INSERT INTO sucursal (id, nombre, activo) VALUES (1, 'Sucursal Matriz', true)")
+                        .executeUpdate();
+            }
 
-        // Crear un vendedor de prueba
-        Empleado vendedor = new Empleado();
-        vendedor.setNombre("Juan");
-        vendedor.setApellidos("Pérez");
-        vendedor.setPuesto("Vendedor");
-        vendedor.setSucursalId(1);
-        vendedor.setFechaContratacion(LocalDate.now().minusYears(1));
-        vendedor.setActivo(true);
-        vendedor = empleadoRepository.save(vendedor);
-        vendedorId = vendedor.getId();
+            // Natively insert default tipo_cliente with ID 1 to satisfy Cliente.tipo_cliente_id FK if not exists
+            Number tipoCount = (Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM tipo_cliente WHERE id = 1")
+                    .getSingleResult();
+            if (tipoCount.intValue() == 0) {
+                entityManager.createNativeQuery("INSERT INTO tipo_cliente (id, nombre) VALUES (1, 'Público General')")
+                        .executeUpdate();
+            }
+
+            // Natively insert default cliente with ID 1 to satisfy Venta.cliente_id FK if not exists
+            Number clienteCount = (Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM cliente WHERE id = 1")
+                    .getSingleResult();
+            if (clienteCount.intValue() == 0) {
+                entityManager.createNativeQuery("INSERT INTO cliente (id, tipo_cliente_id, nombre, rfc) VALUES (1, 1, 'Cliente Generico', 'XAXX010101000')")
+                        .executeUpdate();
+            }
+
+            // Crear un vendedor de prueba
+            Empleado vendedor = new Empleado();
+            vendedor.setNombre("Juan");
+            vendedor.setApellidos("Pérez");
+            vendedor.setPuesto("Vendedor");
+            vendedor.setSucursalId(1);
+            vendedor.setFechaContratacion(LocalDate.now().minusYears(1));
+            vendedor.setActivo(true);
+            vendedor = empleadoRepository.save(vendedor);
+            vendedorId = vendedor.getId();
+
+            // Natively insert matching vendedor user in H2 to satisfy Venta.vendedor_id -> usuarios.id FK
+            // First check if there's already a user with this ID to prevent Primary Key violation
+            Number userCount = (Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM usuarios WHERE id = :id")
+                    .setParameter("id", vendedorId)
+                    .getSingleResult();
+            
+            if (userCount.intValue() == 0) {
+                entityManager.createNativeQuery("INSERT INTO usuarios (id, username, password, role, empleado_id) VALUES (:id, :username, :password, :role, :empleadoId)")
+                        .setParameter("id", vendedorId)
+                        .setParameter("username", "vendedor" + vendedorId + "@nexoo.com")
+                        .setParameter("password", "$2a$10$test")
+                        .setParameter("role", "ROLE_USER")
+                        .setParameter("empleadoId", vendedorId)
+                        .executeUpdate();
+            } else {
+                entityManager.createNativeQuery("UPDATE usuarios SET username = :username, role = :role, empleado_id = :empleadoId WHERE id = :id")
+                        .setParameter("id", vendedorId)
+                        .setParameter("username", "vendedor" + vendedorId + "@nexoo.com")
+                        .setParameter("role", "ROLE_USER")
+                        .setParameter("empleadoId", vendedorId)
+                        .executeUpdate();
+            }
+            
+            entityManager.flush();
+        });
     }
 
     @Test
@@ -166,7 +222,6 @@ public class ComisionControllerIntegrationTest {
     @Test
     @Order(3)
     @DisplayName("Test 3: POST /api/comisiones/calcular - Debe calcular comisiones del periodo")
-    @Transactional
     void testCalcularComisionesPeriodo() throws Exception {
         // Given - Crear regla y venta
         ReglaComisionRequestDTO regla = new ReglaComisionRequestDTO();
@@ -194,12 +249,11 @@ public class ComisionControllerIntegrationTest {
             .orElseThrow(() -> new RuntimeException("Vendedor no encontrado"));
         
         Venta venta = new Venta();
-        venta.setVendedor(vendedor); // Establecer relación en lugar de  ID directamente
+        venta.setVendedorId(vendedorId);
         venta.setMetodoPago("EFECTIVO");
         venta.setTotal(new BigDecimal("10000.00")); // $10,000 de venta
         venta.setFechaVenta(ahora.atDay(15).atTime(10, 0)); // Fecha en mitad del mes
         ventaRepository.save(venta);
-        entityManager.flush(); // Forzar persistencia inmediata
 
         // When & Then - Calcular comisiones
         mockMvc.perform(post("/api/comisiones/calcular")
@@ -218,7 +272,6 @@ public class ComisionControllerIntegrationTest {
     @Test
     @Order(4)
     @DisplayName("Test 4: GET /api/comisiones/vendedor/{id} - Debe obtener comisiones del vendedor")
-    @Transactional
     void testObtenerComisionesPorVendedor() throws Exception {
         // Given - Crear regla y calcular comisión
         ReglaComisionRequestDTO regla = new ReglaComisionRequestDTO();
@@ -263,7 +316,6 @@ public class ComisionControllerIntegrationTest {
     @Test
     @Order(5)
     @DisplayName("Test 5: GET /api/comisiones/resumen - Debe obtener resumen del periodo")
-    @Transactional
     void testObtenerResumenPeriodo() throws Exception {
         // Given - Setup inicial
         ReglaComisionRequestDTO regla = new ReglaComisionRequestDTO();
@@ -312,7 +364,6 @@ public class ComisionControllerIntegrationTest {
     @Test
     @Order(6)
     @DisplayName("Test 6: PUT /api/comisiones/{id}/aprobar - Debe aprobar comisión")
-    @Transactional
     void testAprobarComision() throws Exception {
         // Given - Calcular comisión primero
         ReglaComisionRequestDTO regla = new ReglaComisionRequestDTO();
